@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" sessionStart", "timeout": 2}],
+    "afterAgentThought": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" afterAgentThought", "timeout": 2}],
+    "afterAgentResponse": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" afterAgentResponse", "timeout": 2}],
+    "postToolUse": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" postToolUse", "timeout": 2}],
+    "postToolUseFailure": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" postToolUseFailure", "timeout": 2}],
+    "preCompact": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" preCompact", "timeout": 2}],
+    "stop": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" stop", "timeout": 2}],
+    "sessionEnd": [{"command": "python3 \"${CURSOR_PLUGIN_ROOT}/scripts/cursor_hook.py\" sessionEnd", "timeout": 2}]
+  }
+}

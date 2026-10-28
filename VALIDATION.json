@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0",
+  "format": "Cursor Plugin, .cursor-plugin/plugin.json with hooks/hooks.json",
+  "host_tests": 9,
+  "host_tests_status": "passed",
+  "tests_cover": ["authenticated HTTP to an isolated bundled Hub", "per-session lifecycle", "late and reordered generations", "denial and tool failure semantics", "no synthetic waiting", "local privacy boundary", "failed delivery is not replayed", "hook manifest and fail-open malformed input"],
+  "local_hub_health": "authenticated read-only doctor passed",
+  "cursor_app": "not found on this computer; native plugin discovery and real Agent events not yet tested",
+  "device": "existing Snowball Hub/bridge integration reused; this Cursor plugin was not tested end-to-end on the physical display",
+  "platform": "Linux host tests only; macOS not tested, native Windows unsupported",
+  "hardware_firmware_changes": false,
+  "public_marketplace_published": false
+}
