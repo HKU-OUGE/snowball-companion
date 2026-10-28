@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-28",
+  "plugin": "snowball-companion",
+  "version": "0.1.0",
+  "platform_tested": "Linux x86_64 / Python3.12.3",
+  "host_validator": "Claude Code2.1.312, official npm package, isolated CLAUDE_CONFIG_DIR",
+  "checks": {
+    "marketplace-validation": "passed",
+    "plugin-validation": "passed",
+    "installed-plugins": "passed",
+    "component-inventory": "passed"
+  },
+  "unit_and_isolated_HTTP_tests": 24,
+  "components": {
+    "commands": [
+      "setup",
+      "status",
+      "pet"
+    ],
+    "hook_events": 11
+  },
+  "existing_hub_read_only_check": true,
+  "existing_hub_changed": false,
+  "real_device_test_events_sent": false,
+  "real_firmware_changes": false,
+  "real_Claude_user_configuration_changed": false,
+  "actual_authenticated_Claude_Desktop_session_tested": false,
+  "actual_authenticated_Claude_CLI_session_tested": false,
+  "publicly_published": false,
+  "directory_submission_ready": false,
+  "directory_note": "Standard plugin validation passed. Official directory profile separately requests a distribution license; none has been chosen for public publication.",
+  "known_boundaries": [
+    "Python3.10+ Linux/macOS; macOS Desktop not physically tested; native Windows unsupported",
+    "Local Code sessions only; remote/SSH/cloud/Cowork/Chat forwarding not implemented",
+    "No direct Claude answer/permission/voice/new-task submission",
+    "No native Claude floating Pet API integration",
+    "Normal activity expires after300s without genuine hook evidence; no fabricated heartbeat",
+    "Session labels are project basename plus opaque short ID, not private sidebar lookup"
+  ],
+  "note": "Historical isolated validation; source QA logs are not included in this repository."
+}

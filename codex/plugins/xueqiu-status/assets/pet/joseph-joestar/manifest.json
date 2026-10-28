@@ -1,0 +1,24 @@
+{
+  "name": "老年乔瑟夫",
+  "english_name": "Joseph Joestar",
+  "asset_key": "joseph-joestar-v2-85527846e67d",
+  "description": "ELDERLY Joseph Joestar from Stardust Crusaders, grey-white beard, tan brimmed fedora with dark band, beige travel vest and shirt, brown belt and trousers, cheerful expressive face. NOT young Joseph. [Snowball Companion: 85527846e67d]",
+  "file": "atlas.png",
+  "sha256": "85527846e67d1fb436b7560377158cd2040b9422eb79cbd62690eeade8527683",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

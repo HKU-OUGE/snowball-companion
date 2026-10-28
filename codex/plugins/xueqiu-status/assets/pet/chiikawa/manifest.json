@@ -1,0 +1,24 @@
+{
+  "name": "吉伊",
+  "english_name": "Chiikawa",
+  "asset_key": "chiikawa-v2-287f7a0b74e7",
+  "description": "Chiikawa, the small round white bear-like character, pink cheeks, tiny round ears, endearing shy face. [Snowball Companion: 287f7a0b74e7]",
+  "file": "atlas.png",
+  "sha256": "287f7a0b74e79f24240305603b9c560c1c817f685754a4c0007c748bcb032f68",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

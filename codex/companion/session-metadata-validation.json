@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-13",
+  "version": "0.2.0",
+  "tests": {
+    "hub_bridge_protocol_native_validator": 42,
+    "codex_adapter": 15,
+    "failures": 0
+  },
+  "local_metadata_schema": {
+    "database": "state_5.sqlite",
+    "table": "threads",
+    "primary_key": "id",
+    "column": "title",
+    "inspection": "read_only_schema_only"
+  },
+  "wire": {
+    "version": 2,
+    "max_packet_bytes": 256,
+    "legacy_v1": true,
+    "max_title_scalars": 64,
+    "max_title_utf8": 192
+  },
+  "not_performed": [
+    "device operation",
+    "service restart",
+    "installed plugin modification",
+    "real hook title callback"
+  ],
+  "source": "https://learn.chatgpt.com/docs/hooks"
+}

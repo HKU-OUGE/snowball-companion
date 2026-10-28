@@ -1,0 +1,24 @@
+{
+  "name": "边牧",
+  "english_name": "Border Collie",
+  "asset_key": "border-collie-v2-1c2751c75736",
+  "description": "A round adorable black and white border collie puppy, fluffy white chest, white facial blaze, semi-pricked ears, gentle shiny black eyes. [Snowball Companion: 1c2751c75736]",
+  "file": "atlas.png",
+  "sha256": "1c2751c757365e53c6722ebf22b6afd3848f7c1d9d9fac722c75bf5bf8f6f018",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

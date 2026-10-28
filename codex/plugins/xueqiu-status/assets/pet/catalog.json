@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "default_character": "snowball",
+  "characters": [
+    {
+      "id": "snowball",
+      "name": "雪球",
+      "english_name": "Snowball",
+      "status": "ready",
+      "manifest": "manifest.json",
+      "description": "奶白色圆润像素小狗"
+    },
+    {
+      "id": "border-collie",
+      "name": "边牧",
+      "english_name": "Border Collie",
+      "status": "ready",
+      "manifest": "border-collie/manifest.json",
+      "description": "黑白毛色的活泼边牧"
+    },
+    {
+      "id": "orange-cat",
+      "name": "橘猫",
+      "english_name": "Orange Cat",
+      "status": "ready",
+      "manifest": "orange-cat/manifest.json",
+      "description": "圆脸橘猫"
+    },
+    {
+      "id": "ragdoll",
+      "name": "布偶猫",
+      "english_name": "Ragdoll",
+      "status": "ready",
+      "manifest": "ragdoll/manifest.json",
+      "description": "蓝眼布偶猫"
+    },
+    {
+      "id": "chiikawa",
+      "name": "吉伊",
+      "english_name": "Chiikawa",
+      "status": "ready",
+      "manifest": "chiikawa/manifest.json",
+      "description": "吉伊卡哇三人组"
+    },
+    {
+      "id": "hachiware",
+      "name": "小八",
+      "english_name": "Hachiware",
+      "status": "ready",
+      "manifest": "hachiware/manifest.json",
+      "description": "吉伊卡哇三人组"
+    },
+    {
+      "id": "usagi",
+      "name": "乌萨奇",
+      "english_name": "Usagi",
+      "status": "ready",
+      "manifest": "usagi/manifest.json",
+      "description": "吉伊卡哇三人组"
+    },
+    {
+      "id": "my-melody",
+      "name": "美乐蒂",
+      "english_name": "My Melody",
+      "status": "ready",
+      "manifest": "my-melody/manifest.json",
+      "description": "粉色帽子的美乐蒂"
+    },
+    {
+      "id": "kuromi",
+      "name": "酷洛米",
+      "english_name": "Kuromi",
+      "status": "ready",
+      "manifest": "kuromi/manifest.json",
+      "description": "黑色帽子的酷洛米"
+    },
+    {
+      "id": "homelander",
+      "name": "祖国人",
+      "english_name": "Homelander",
+      "status": "ready",
+      "manifest": "homelander/manifest.json",
+      "description": "像素卡通祖国人"
+    },
+    {
+      "id": "joseph-joestar",
+      "name": "老年乔瑟夫",
+      "english_name": "Joseph Joestar",
+      "status": "ready",
+      "manifest": "joseph-joestar/manifest.json",
+      "description": "星尘斗士中的老年乔瑟夫，灰白胡须与帽子"
+    },
+    {
+      "id": "stellalou",
+      "name": "星黛露",
+      "english_name": "StellaLou",
+      "status": "ready",
+      "manifest": "stellalou/manifest.json",
+      "description": "紫色长耳兔星黛露"
+    },
+    {
+      "id": "frank-underwood",
+      "name": "弗兰克",
+      "english_name": "Frank Underwood",
+      "status": "ready",
+      "manifest": "frank-underwood/manifest.json",
+      "description": "纸牌屋中的弗兰克"
+    },
+    {
+      "id": "heisenberg",
+      "name": "海森堡",
+      "english_name": "Heisenberg",
+      "status": "ready",
+      "manifest": "heisenberg/manifest.json",
+      "description": "戴帽子与墨镜的海森堡"
+    }
+  ]
+}

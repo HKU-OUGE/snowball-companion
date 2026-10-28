@@ -1,0 +1,6 @@
+{
+  "name": "xueqiu-status",
+  "version": "0.2.0",
+  "description": "同步 Codex 工作状态和会话名称到雪球手表，不采集对话或工具正文。",
+  "hooks": "./hooks/hooks.json"
+}

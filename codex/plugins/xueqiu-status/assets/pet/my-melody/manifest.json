@@ -1,0 +1,24 @@
+{
+  "name": "美乐蒂",
+  "english_name": "My Melody",
+  "asset_key": "my-melody-v2-e194a54937db",
+  "description": "My Melody, small white rabbit in pink hood with long rabbit ears and a small white flower, round cute face. [Snowball Companion: e194a54937db]",
+  "file": "atlas.png",
+  "sha256": "e194a54937dbb16e4b1c2afcb00a2e8afcf5a217f92ec7f65499f355115d3462",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

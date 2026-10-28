@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:xueqiu:status-event:1",
+  "title": "Snowball status and authorized posted-question event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "provider",
+    "source",
+    "session_id",
+    "event_id",
+    "seq",
+    "timestamp",
+    "kind"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "provider": {
+      "enum": [
+        "Codex",
+        "Claude",
+        "Cursor"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 96,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "timestamp": {
+      "type": "number",
+      "description": "UTC Unix seconds. Runtime rejects events over 120 seconds old or more than 5 seconds ahead."
+    },
+    "kind": {
+      "enum": [
+        "task",
+        "heartbeat"
+      ]
+    },
+    "phase": {
+      "enum": [
+        "idle",
+        "thinking",
+        "running",
+        "waiting",
+        "completed",
+        "failed"
+      ]
+    },
+    "ttl_seconds": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 300,
+      "default": 30
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Optional authorized session display name only, at most 192 UTF-8 bytes; control, formatting and surrogate characters rejected. Empty explicitly clears. Never prompt/tool content."
+    },
+    "pending_input": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4096,
+      "description": "Unresolved posted question item count, independent of activity TTL. Reminder preferences never answer a question."
+    },
+    "activity_phase": {
+      "enum": [
+        "idle",
+        "thinking",
+        "running",
+        "waiting",
+        "completed",
+        "failed"
+      ]
+    },
+    "questions": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "description": "Posted question title only; runtime enforces 768 UTF-8 bytes and rejects controls."
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "task"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "phase"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "phase"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "pending_input"
+        ]
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "task"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "pending_input"
+        ],
+        "properties": {
+          "pending_input": {
+            "minimum": 1
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "phase": {
+            "const": "waiting"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "FocusRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "auto"
+          ],
+          "properties": {
+            "auto": {
+              "const": true
+            },
+            "provider": {
+              "enum": [
+                "Codex",
+                "Claude",
+                "Cursor"
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source",
+            "session_id"
+          ],
+          "properties": {
+            "source": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "session_id": {
+              "type": "string",
+              "maxLength": 96,
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            }
+          }
+        }
+      ]
+    },
+    "AttentionAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "session",
+        "question",
+        "action"
+      ],
+      "properties": {
+        "session": {
+          "type": "string"
+        },
+        "question": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "action": {
+          "enum": [
+            "snooze",
+            "ignore",
+            "restore"
+          ]
+        }
+      }
+    }
+  }
+}

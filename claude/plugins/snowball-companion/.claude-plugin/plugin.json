@@ -1,0 +1,15 @@
+{
+  "name": "snowball-companion",
+  "version": "0.1.0",
+  "description": "Snowball Companion for local Claude Code Desktop and CLI: observational status, pending-question reminders, and the existing companion display.",
+  "author": {
+    "name": "Snowball Companion"
+  },
+  "homepage": "https://snowball.pet",
+  "keywords": [
+    "snowball",
+    "companion",
+    "status",
+    "esp32"
+  ]
+}

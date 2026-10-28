@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "origin": "Original procedural Snowball v1 synthesis, preserved for history; not active playback",
+  "sha256": {
+    "complete": "352f938b656d7d71ad6ea1143c7ca33d30b8e04cf1d5b013eefdf2cbe275d47c",
+    "waiting": "2dd959f19071a356c14337bee36af17cfe5e9b3cbf73bbbb57b87f4c4087e124",
+    "error": "baac7e8149bd3d9318aac79d971becf18b87553588b8d19d0254c33f53991307"
+  }
+}

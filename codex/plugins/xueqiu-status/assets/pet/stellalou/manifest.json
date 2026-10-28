@@ -1,0 +1,24 @@
+{
+  "name": "星黛露",
+  "english_name": "StellaLou",
+  "asset_key": "stellalou-v2-b534fa91e0d8",
+  "description": "StellaLou, cute lavender rabbit with long ears, blue flower by ear, blue bow and light blue ballet tutu, rounded little paws. [Snowball Companion: b534fa91e0d8]",
+  "file": "atlas.png",
+  "sha256": "b534fa91e0d8ee29abd8e3857502cc88e3c85aca3eb809fd6dabd473e771add3",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

@@ -1,0 +1,5 @@
+bleak==3.0.2
+pyserial>=3.5,<4
+
+# Authenticated BLE network provisioning and local gateway certificate.
+cryptography==50.0.2

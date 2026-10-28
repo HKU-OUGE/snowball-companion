@@ -1,0 +1,24 @@
+{
+  "name": "乌萨奇",
+  "english_name": "Usagi",
+  "asset_key": "usagi-v2-0534c039a9b1",
+  "description": "Usagi from Chiikawa, round cream yellow rabbit with tall ears, pink inner ears and mischievous smile. [Snowball Companion: 0534c039a9b1]",
+  "file": "atlas.png",
+  "sha256": "0534c039a9b1454134ea24b2868227ac5eea6a9a462926ba349c75cc44ca0f2b",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

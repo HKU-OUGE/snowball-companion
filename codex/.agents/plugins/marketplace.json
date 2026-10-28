@@ -1,0 +1,20 @@
+{
+  "name": "xueqiu-local",
+  "interface": {
+    "displayName": "Snowball Companion"
+  },
+  "plugins": [
+    {
+      "name": "xueqiu-status",
+      "source": {
+        "source": "local",
+        "path": "./plugins/xueqiu-status"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

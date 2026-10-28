@@ -1,0 +1,1910 @@
+{
+  "schema_version": 1,
+  "status": "draft_text_only_no_generated_audio",
+  "on_screen_language": "zh",
+  "selection": "touch_replies_and_status_voices",
+  "audio_format": {
+    "sample_rate": 16000,
+    "channels": 1,
+    "bits": 16,
+    "max_seconds": 6
+  },
+  "characters": {
+    "snowball": {
+      "name": "雪球",
+      "voice_reference_required": true,
+      "clips": {
+        "snowball-01": {
+          "display_text": "雪球爱你呀 ♡",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-01.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-02": {
+          "display_text": "抱抱你 (≧▽≦)",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-02.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-03": {
+          "display_text": "摸摸收到啦 ♡",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "snowball-03.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-04": {
+          "display_text": "小爪爪击掌！ 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "snowball-04.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-05": {
+          "display_text": "雪球在这儿～",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-05.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-06": {
+          "display_text": "再摸一下嘛 ♡",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "snowball-06.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-07": {
+          "display_text": "尾巴摇给你看",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-07.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-08": {
+          "display_text": "陪你发会儿呆 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-08.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-09": {
+          "display_text": "今天也要开心",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "snowball-09.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-10": {
+          "display_text": "蹭蹭你的手心",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "snowball-10.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-11": {
+          "display_text": "小心心给你 ♡",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-11.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "snowball-12": {
+          "display_text": "困啦，靠一会儿 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "snowball-12.wav",
+          "vocal_direction": "soft puppy woof/whine; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "complete": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "border-collie": {
+      "name": "边牧",
+      "voice_reference_required": true,
+      "clips": {
+        "border-collie-01": {
+          "display_text": "暗号收到！ 🎾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-01.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-02": {
+          "display_text": "这题我会！",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-02.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-03": {
+          "display_text": "球呢？球呢？",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-03.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-04": {
+          "display_text": "再来一个挑战 🎾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-04.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-05": {
+          "display_text": "击掌，合作愉快",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-05.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-06": {
+          "display_text": "我来帮你盯着",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-06.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-07": {
+          "display_text": "任务安排上了",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-07.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-08": {
+          "display_text": "先玩再想办法 🎾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-08.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-09": {
+          "display_text": "夸我，快夸我",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-09.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-10": {
+          "display_text": "你一动我就懂",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-10.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-11": {
+          "display_text": "巡逻结束，贴贴",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-11.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "border-collie-12": {
+          "display_text": "休息也是计划 🎾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "border-collie-12.wav",
+          "vocal_direction": "bright short dog bark; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "complete": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "orange-cat": {
+      "name": "圆脸橘猫",
+      "voice_reference_required": true,
+      "clips": {
+        "orange-cat-01": {
+          "display_text": "摸一下，一条鱼 🐟",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-01.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-02": {
+          "display_text": "饭点到了没？",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-02.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-03": {
+          "display_text": "这个纸箱归我",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-03.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-04": {
+          "display_text": "先睡五分钟 🐟",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-04.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-05": {
+          "display_text": "肚肚不许偷摸",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-05.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-06": {
+          "display_text": "有零食再商量",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-06.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-07": {
+          "display_text": "喵，今天不加班",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-07.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-08": {
+          "display_text": "再摸两下就好 🐟",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-08.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-09": {
+          "display_text": "太阳分你一半",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-09.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-10": {
+          "display_text": "本喵批准休息",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-10.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-11": {
+          "display_text": "刚才是肚子叫",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-11.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "orange-cat-12": {
+          "display_text": "小鱼干，成交！ 🐟",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "orange-cat-12.wav",
+          "vocal_direction": "playful short meow; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "complete": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "ragdoll": {
+      "name": "蓝眼布偶猫",
+      "voice_reference_required": true,
+      "clips": {
+        "ragdoll-01": {
+          "display_text": "喵～可以靠近呀 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-01.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-02": {
+          "display_text": "手心借我枕枕",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-02.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-03": {
+          "display_text": "慢一点也没关系",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-03.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-04": {
+          "display_text": "蓝眼睛看着你 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-04.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-05": {
+          "display_text": "抱着就不冷啦",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-05.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-06": {
+          "display_text": "今天也想贴贴",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-06.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-07": {
+          "display_text": "轻轻摸，呼噜～",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-07.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-08": {
+          "display_text": "给你留了软垫 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-08.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-09": {
+          "display_text": "爪爪放你手里",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-09.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-10": {
+          "display_text": "陪你等一小会",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-10.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-11": {
+          "display_text": "你在就很安心",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-11.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "ragdoll-12": {
+          "display_text": "喵，别忘了休息 🐾",
+          "spoken_text": "",
+          "language": "nonverbal",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "ragdoll-12.wav",
+          "vocal_direction": "gentle meow/purr; react to displayed meaning, do not read Chinese or emoji aloud"
+        },
+        "complete": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "",
+          "language": "nonverbal",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "chiikawa": {
+      "name": "吉伊",
+      "voice_reference_required": true,
+      "clips": {
+        "chiikawa-01": {
+          "display_text": "呜…摸摸？ 🌷",
+          "spoken_text": "う…なでなで？",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-01.wav"
+        },
+        "chiikawa-02": {
+          "display_text": "哇…是你呀 ♡",
+          "spoken_text": "わぁ…来てくれた！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-02.wav"
+        },
+        "chiikawa-03": {
+          "display_text": "嗯！再试一次",
+          "spoken_text": "うん！もう一回！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-03.wav"
+        },
+        "chiikawa-04": {
+          "display_text": "有一点点紧张 🌷",
+          "spoken_text": "ちょっと…どきどき。",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-04.wav"
+        },
+        "chiikawa-05": {
+          "display_text": "可以牵着手吗",
+          "spoken_text": "手、つないでもいい？",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-05.wav"
+        },
+        "chiikawa-06": {
+          "display_text": "小点心，分你",
+          "spoken_text": "おやつ、半分こ。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-06.wav"
+        },
+        "chiikawa-07": {
+          "display_text": "呼…终于好啦",
+          "spoken_text": "ふぅ…できた。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-07.wav"
+        },
+        "chiikawa-08": {
+          "display_text": "我、我也来帮忙 🌷",
+          "spoken_text": "ぼ、ぼくも手伝う！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-08.wav"
+        },
+        "chiikawa-09": {
+          "display_text": "呀！吓一小跳",
+          "spoken_text": "わっ！びっくりした。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-09.wav"
+        },
+        "chiikawa-10": {
+          "display_text": "谢谢你陪着我",
+          "spoken_text": "そばにいてくれて、ありがとう。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-10.wav"
+        },
+        "chiikawa-11": {
+          "display_text": "今天也很努力",
+          "spoken_text": "今日もがんばったね。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-11.wav"
+        },
+        "chiikawa-12": {
+          "display_text": "呜哇 ♡",
+          "spoken_text": "わぁ…！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "chiikawa-12.wav"
+        },
+        "complete": {
+          "spoken_text": "わぁ…！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "え…？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "うぅ…",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "hachiware": {
+      "name": "小八",
+      "voice_reference_required": true,
+      "clips": {
+        "hachiware-01": {
+          "display_text": "想到好办法啦 🎵",
+          "spoken_text": "いいこと思いついた！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-01.wav"
+        },
+        "hachiware-02": {
+          "display_text": "我们一起试试",
+          "spoken_text": "いっしょにやってみよう！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-02.wav"
+        },
+        "hachiware-03": {
+          "display_text": "没关系，有我呢",
+          "spoken_text": "大丈夫、ぼくがいるよ。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-03.wav"
+        },
+        "hachiware-04": {
+          "display_text": "把开心拍下来 🎵",
+          "spoken_text": "この笑顔、撮っておこう！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-04.wav"
+        },
+        "hachiware-05": {
+          "display_text": "这首歌送给你",
+          "spoken_text": "この歌、きみに。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-05.wav"
+        },
+        "hachiware-06": {
+          "display_text": "今天也有好事",
+          "spoken_text": "今日もいいことあるよ。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-06.wav"
+        },
+        "hachiware-07": {
+          "display_text": "先吃点再出发",
+          "spoken_text": "何か食べてから出発しよう！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-07.wav"
+        },
+        "hachiware-08": {
+          "display_text": "你已经很棒啦 🎵",
+          "spoken_text": "もう十分がんばってるよ。",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-08.wav"
+        },
+        "hachiware-09": {
+          "display_text": "原来是这样呀",
+          "spoken_text": "そういうことだったんだ！",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-09.wav"
+        },
+        "hachiware-10": {
+          "display_text": "下次一定可以",
+          "spoken_text": "次はきっとできるよ。",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-10.wav"
+        },
+        "hachiware-11": {
+          "display_text": "朋友就要靠近",
+          "spoken_text": "もっとこっちにおいで。",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-11.wav"
+        },
+        "hachiware-12": {
+          "display_text": "来，给你打气！ 🎵",
+          "spoken_text": "応援してるよ！",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "hachiware-12.wav"
+        },
+        "complete": {
+          "spoken_text": "できたよ！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "どうしよう？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "あれ？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "usagi": {
+      "name": "乌萨奇",
+      "voice_reference_required": true,
+      "clips": {
+        "usagi-01": {
+          "display_text": "呀哈！ ✨",
+          "spoken_text": "ヤハ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-01.wav"
+        },
+        "usagi-02": {
+          "display_text": "乌拉！",
+          "spoken_text": "ウラ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-02.wav"
+        },
+        "usagi-03": {
+          "display_text": "普噜噜～",
+          "spoken_text": "プルルル！",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-03.wav"
+        },
+        "usagi-04": {
+          "display_text": "哈？ ✨",
+          "spoken_text": "ハァ？",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "usagi-04.wav"
+        },
+        "usagi-05": {
+          "display_text": "咻——到你这！",
+          "spoken_text": "シュッ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-05.wav"
+        },
+        "usagi-06": {
+          "display_text": "哼哼哼～",
+          "spoken_text": "フッフッフ！",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "usagi-06.wav"
+        },
+        "usagi-07": {
+          "display_text": "嘿！发现点心",
+          "spoken_text": "ヤハッ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-07.wav"
+        },
+        "usagi-08": {
+          "display_text": "突袭！击掌！ ✨",
+          "spoken_text": "ハァーッ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-08.wav"
+        },
+        "usagi-09": {
+          "display_text": "蹦！再蹦一下",
+          "spoken_text": "ピョン！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "usagi-09.wav"
+        },
+        "usagi-10": {
+          "display_text": "嗯？嗯嗯？",
+          "spoken_text": "ハァ？ハァ？",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "usagi-10.wav"
+        },
+        "usagi-11": {
+          "display_text": "呼呀！精神啦",
+          "spoken_text": "ウラァ！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "usagi-11.wav"
+        },
+        "usagi-12": {
+          "display_text": "嘿嘿，轮到你！ ✨",
+          "spoken_text": "ヘヘッ！",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "usagi-12.wav"
+        },
+        "complete": {
+          "spoken_text": "ヤハ！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "ハァ？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "ウラッ！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "my-melody": {
+      "name": "美乐蒂",
+      "voice_reference_required": true,
+      "clips": {
+        "my-melody-01": {
+          "display_text": "点心留给你啦 🎀",
+          "spoken_text": "おやつ、とっておいたよ。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-01.wav"
+        },
+        "my-melody-02": {
+          "display_text": "蝴蝶结好看吗",
+          "spoken_text": "このリボン、かわいい？",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-02.wav"
+        },
+        "my-melody-03": {
+          "display_text": "来喝一口热茶",
+          "spoken_text": "温かいお茶、どうぞ。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-03.wav"
+        },
+        "my-melody-04": {
+          "display_text": "今天是甜甜的 🎀",
+          "spoken_text": "今日はあまい気分。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-04.wav"
+        },
+        "my-melody-05": {
+          "display_text": "悄悄送你一朵花",
+          "spoken_text": "お花、こっそりあげるね。",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-05.wav"
+        },
+        "my-melody-06": {
+          "display_text": "抱抱，心情变软",
+          "spoken_text": "ぎゅってしてもいい？",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-06.wav"
+        },
+        "my-melody-07": {
+          "display_text": "一起做小饼干",
+          "spoken_text": "いっしょにクッキーを作ろう。",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-07.wav"
+        },
+        "my-melody-08": {
+          "display_text": "愿望写在这里 🎀",
+          "spoken_text": "お願いごと、ここに書いてね。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-08.wav"
+        },
+        "my-melody-09": {
+          "display_text": "别急，我等你呀",
+          "spoken_text": "ゆっくりでいいよ。待ってるね。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-09.wav"
+        },
+        "my-melody-10": {
+          "display_text": "你也是小可爱",
+          "spoken_text": "きみもとってもかわいい。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-10.wav"
+        },
+        "my-melody-11": {
+          "display_text": "粉色好运给你",
+          "spoken_text": "ピンクの幸せ、おすそわけ。",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-11.wav"
+        },
+        "my-melody-12": {
+          "display_text": "喜欢这份礼物吗 🎀",
+          "spoken_text": "このプレゼント、気に入った？",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "my-melody-12.wav"
+        },
+        "complete": {
+          "spoken_text": "できたよ。",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "どうする？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "あら？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "kuromi": {
+      "name": "酷洛米",
+      "voice_reference_required": true,
+      "clips": {
+        "kuromi-01": {
+          "display_text": "哼，准你摸一下 💜",
+          "spoken_text": "ふん、ちょっとだけね。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-01.wav"
+        },
+        "kuromi-02": {
+          "display_text": "可不是在等你哦",
+          "spoken_text": "待ってたわけじゃないから！",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-02.wav"
+        },
+        "kuromi-03": {
+          "display_text": "酷一点，再酷点",
+          "spoken_text": "もっとクールにいこう！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-03.wav"
+        },
+        "kuromi-04": {
+          "display_text": "秘密写进日记 💜",
+          "spoken_text": "秘密は日記に書いとく。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-04.wav"
+        },
+        "kuromi-05": {
+          "display_text": "今天由我来罩你",
+          "spoken_text": "今日はあたいに任せな。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-05.wav"
+        },
+        "kuromi-06": {
+          "display_text": "这个蝴蝶结很酷",
+          "spoken_text": "このリボン、イケてるだろ？",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-06.wav"
+        },
+        "kuromi-07": {
+          "display_text": "才没有害羞呢",
+          "spoken_text": "照れてなんかないし！",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-07.wav"
+        },
+        "kuromi-08": {
+          "display_text": "烦恼统统踢开 💜",
+          "spoken_text": "悩みなんて蹴っ飛ばせ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-08.wav"
+        },
+        "kuromi-09": {
+          "display_text": "甜点留了一份",
+          "spoken_text": "スイーツ、とっといたよ。",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-09.wav"
+        },
+        "kuromi-10": {
+          "display_text": "就陪你一小会",
+          "spoken_text": "少しだけ付き合ってやるよ。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-10.wav"
+        },
+        "kuromi-11": {
+          "display_text": "别小看我的可爱",
+          "spoken_text": "あたいのかわいさ、なめんなよ。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-11.wav"
+        },
+        "kuromi-12": {
+          "display_text": "表现不错嘛！ 💜",
+          "spoken_text": "なかなかやるじゃん！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "kuromi-12.wav"
+        },
+        "complete": {
+          "spoken_text": "やったね！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "どうするの？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "ちょっと！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "homelander": {
+      "name": "祖国人",
+      "voice_reference_required": true,
+      "clips": {
+        "homelander-01": {
+          "display_text": "掌声可以再响点 ⭐",
+          "spoken_text": "A little more applause.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-01.wav"
+        },
+        "homelander-02": {
+          "display_text": "镜头准备好了吗",
+          "spoken_text": "Are the cameras ready?",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-02.wav"
+        },
+        "homelander-03": {
+          "display_text": "今天也很完美",
+          "spoken_text": "Perfect, as always.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-03.wav"
+        },
+        "homelander-04": {
+          "display_text": "我来就是好消息 ⭐",
+          "spoken_text": "My arrival is good news.",
+          "language": "en",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "homelander-04.wav"
+        },
+        "homelander-05": {
+          "display_text": "披风可别弄皱了",
+          "spoken_text": "Careful with the cape.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-05.wav"
+        },
+        "homelander-06": {
+          "display_text": "当然，我看见了",
+          "spoken_text": "Of course I noticed.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-06.wav"
+        },
+        "homelander-07": {
+          "display_text": "再说一遍夸奖",
+          "spoken_text": "Say that compliment again.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-07.wav"
+        },
+        "homelander-08": {
+          "display_text": "这个角度更好看 ⭐",
+          "spoken_text": "This is my better angle.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-08.wav"
+        },
+        "homelander-09": {
+          "display_text": "保持微笑，朋友",
+          "spoken_text": "Keep smiling, my friend.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-09.wav"
+        },
+        "homelander-10": {
+          "display_text": "英雄也需要休息",
+          "spoken_text": "Even heroes need a break.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-10.wav"
+        },
+        "homelander-11": {
+          "display_text": "关注点放在这里",
+          "spoken_text": "Eyes right here.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-11.wav"
+        },
+        "homelander-12": {
+          "display_text": "好吧，给你合影 ⭐",
+          "spoken_text": "Fine. One photo.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "homelander-12.wav"
+        },
+        "complete": {
+          "spoken_text": "Perfect.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "Your call.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "Hold on.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "joseph-joestar": {
+      "name": "老年乔瑟夫",
+      "voice_reference_required": true,
+      "clips": {
+        "joseph-joestar-01": {
+          "display_text": "我的天啊！ 🧭",
+          "spoken_text": "なんてこった！",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-01.wav"
+        },
+        "joseph-joestar-02": {
+          "display_text": "你下一句是…",
+          "spoken_text": "おまえの次の言葉は…",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-02.wav"
+        },
+        "joseph-joestar-03": {
+          "display_text": "这事我有经验",
+          "spoken_text": "こういうのは経験がある。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-03.wav"
+        },
+        "joseph-joestar-04": {
+          "display_text": "先看看地图！ 🧭",
+          "spoken_text": "まずは地図を見るぞ！",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-04.wav"
+        },
+        "joseph-joestar-05": {
+          "display_text": "老伙计，击个掌",
+          "spoken_text": "相棒、ハイタッチじゃ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-05.wav"
+        },
+        "joseph-joestar-06": {
+          "display_text": "别急，让我想想",
+          "spoken_text": "待て、少し考えさせろ。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-06.wav"
+        },
+        "joseph-joestar-07": {
+          "display_text": "这点小事难不倒",
+          "spoken_text": "この程度、わけないわい。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-07.wav"
+        },
+        "joseph-joestar-08": {
+          "display_text": "紫色荆棘，出发 🧭",
+          "spoken_text": "紫の茨、行くぞ！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-08.wav"
+        },
+        "joseph-joestar-09": {
+          "display_text": "又是意外的一天",
+          "spoken_text": "今日も予想外ばかりじゃ。",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-09.wav"
+        },
+        "joseph-joestar-10": {
+          "display_text": "哈哈，被我猜中",
+          "spoken_text": "はっはっは、当たったな！",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-10.wav"
+        },
+        "joseph-joestar-11": {
+          "display_text": "冒险可没有退休",
+          "spoken_text": "冒険に引退はないぞ。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-11.wav"
+        },
+        "joseph-joestar-12": {
+          "display_text": "先喝口水再走 🧭",
+          "spoken_text": "ひと口飲んでから行こう。",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "joseph-joestar-12.wav"
+        },
+        "complete": {
+          "spoken_text": "できたぞ！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "さて、どうする？",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "なんてことだ！",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "stellalou": {
+      "name": "星黛露",
+      "voice_reference_required": true,
+      "clips": {
+        "stellalou-01": {
+          "display_text": "一起踮起脚尖 🩰",
+          "spoken_text": "いっしょにつま先立ち！",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-01.wav"
+        },
+        "stellalou-02": {
+          "display_text": "转个圈送给你",
+          "spoken_text": "くるっと回って、きみに。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-02.wav"
+        },
+        "stellalou-03": {
+          "display_text": "今天也练习一点",
+          "spoken_text": "今日も少し練習しよう。",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-03.wav"
+        },
+        "stellalou-04": {
+          "display_text": "掌声我收到啦 🩰",
+          "spoken_text": "拍手、ありがとう。",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-04.wav"
+        },
+        "stellalou-05": {
+          "display_text": "给梦想留束光",
+          "spoken_text": "夢に光をあげよう。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-05.wav"
+        },
+        "stellalou-06": {
+          "display_text": "跳错也可以重来",
+          "spoken_text": "間違えても、もう一度。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-06.wav"
+        },
+        "stellalou-07": {
+          "display_text": "舞台在等着我们",
+          "spoken_text": "ステージが待ってるよ。",
+          "language": "ja",
+          "expression": "smile",
+          "action": "hop",
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-07.wav"
+        },
+        "stellalou-08": {
+          "display_text": "丝带系好，出发 🩰",
+          "spoken_text": "リボンを結んで、出発！",
+          "language": "ja",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-08.wav"
+        },
+        "stellalou-09": {
+          "display_text": "休息一拍就好",
+          "spoken_text": "ひと呼吸、休もう。",
+          "language": "ja",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-09.wav"
+        },
+        "stellalou-10": {
+          "display_text": "这支舞送给你",
+          "spoken_text": "このダンス、きみに。",
+          "language": "ja",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-10.wav"
+        },
+        "stellalou-11": {
+          "display_text": "跟着节拍轻轻摇",
+          "spoken_text": "リズムに合わせて、ゆらゆら。",
+          "language": "ja",
+          "expression": "happy",
+          "action": "nuzzle",
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-11.wav"
+        },
+        "stellalou-12": {
+          "display_text": "星光落在你手心 🩰",
+          "spoken_text": "手のひらに、星の光。",
+          "language": "ja",
+          "expression": "wink",
+          "action": "shy",
+          "status": "needs_reference_and_listening",
+          "file": "stellalou-12.wav"
+        },
+        "complete": {
+          "spoken_text": "",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "",
+          "language": "ja",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "frank-underwood": {
+      "name": "弗兰克",
+      "voice_reference_required": true,
+      "clips": {
+        "frank-underwood-01": {
+          "display_text": "下一步，想清楚 ♟️",
+          "spoken_text": "Think carefully about your next move.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-01.wav"
+        },
+        "frank-underwood-02": {
+          "display_text": "先把节奏放慢",
+          "spoken_text": "Slow the pace.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-02.wav"
+        },
+        "frank-underwood-03": {
+          "display_text": "这张牌先留着",
+          "spoken_text": "Keep that card for later.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-03.wav"
+        },
+        "frank-underwood-04": {
+          "display_text": "别急着亮底牌 ♟️",
+          "spoken_text": "No need to show your hand yet.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-04.wav"
+        },
+        "frank-underwood-05": {
+          "display_text": "耐心也是筹码",
+          "spoken_text": "Patience is a bargaining chip.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-05.wav"
+        },
+        "frank-underwood-06": {
+          "display_text": "坐下，我们聊聊",
+          "spoken_text": "Sit down. Let us talk.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-06.wav"
+        },
+        "frank-underwood-07": {
+          "display_text": "每一步都有分量",
+          "spoken_text": "Every step carries weight.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-07.wav"
+        },
+        "frank-underwood-08": {
+          "display_text": "这局还没有结束 ♟️",
+          "spoken_text": "This game is not over.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-08.wav"
+        },
+        "frank-underwood-09": {
+          "display_text": "咖啡，还是计划",
+          "spoken_text": "Coffee, or a plan?",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-09.wav"
+        },
+        "frank-underwood-10": {
+          "display_text": "先听完再决定",
+          "spoken_text": "Listen before you decide.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-10.wav"
+        },
+        "frank-underwood-11": {
+          "display_text": "时机比声量重要",
+          "spoken_text": "Timing matters more than volume.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-11.wav"
+        },
+        "frank-underwood-12": {
+          "display_text": "休息，明天再走 ♟️",
+          "spoken_text": "Rest. We move tomorrow.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "frank-underwood-12.wav"
+        },
+        "complete": {
+          "spoken_text": "Well done.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "Your move.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "A setback.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    },
+    "heisenberg": {
+      "name": "海森堡",
+      "voice_reference_required": true,
+      "clips": {
+        "heisenberg-01": {
+          "display_text": "先把变量分清 ⚗️",
+          "spoken_text": "Separate the variables first.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-01.wav"
+        },
+        "heisenberg-02": {
+          "display_text": "结果，要准确",
+          "spoken_text": "The result must be precise.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-02.wav"
+        },
+        "heisenberg-03": {
+          "display_text": "帽子别碰歪了",
+          "spoken_text": "Mind the hat.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-03.wav"
+        },
+        "heisenberg-04": {
+          "display_text": "步骤一个都别省 ⚗️",
+          "spoken_text": "Do not skip a step.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-04.wav"
+        },
+        "heisenberg-05": {
+          "display_text": "这次计算没错",
+          "spoken_text": "That calculation is correct.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-05.wav"
+        },
+        "heisenberg-06": {
+          "display_text": "给我一点安静",
+          "spoken_text": "Give me a little quiet.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-06.wav"
+        },
+        "heisenberg-07": {
+          "display_text": "先检查，再下结论",
+          "spoken_text": "Check first. Conclude later.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-07.wav"
+        },
+        "heisenberg-08": {
+          "display_text": "细节决定结果 ⚗️",
+          "spoken_text": "Details determine the result.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-08.wav"
+        },
+        "heisenberg-09": {
+          "display_text": "你观察得不错",
+          "spoken_text": "Good observation.",
+          "language": "en",
+          "expression": "happy",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-09.wav"
+        },
+        "heisenberg-10": {
+          "display_text": "别急，等反应结束",
+          "spoken_text": "Wait for the reaction to finish.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-10.wav"
+        },
+        "heisenberg-11": {
+          "display_text": "清理好，再继续",
+          "spoken_text": "Clean up. Then continue.",
+          "language": "en",
+          "expression": "wink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-11.wav"
+        },
+        "heisenberg-12": {
+          "display_text": "今天就到这里 ⚗️",
+          "spoken_text": "That is enough for today.",
+          "language": "en",
+          "expression": "blink",
+          "action": null,
+          "status": "needs_reference_and_listening",
+          "file": "heisenberg-12.wav"
+        },
+        "complete": {
+          "spoken_text": "Correct.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "complete.wav"
+        },
+        "waiting": {
+          "spoken_text": "Your decision.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "waiting.wav"
+        },
+        "error": {
+          "spoken_text": "Check it again.",
+          "language": "en",
+          "status": "needs_reference_and_listening",
+          "file": "error.wav"
+        }
+      }
+    }
+  }
+}

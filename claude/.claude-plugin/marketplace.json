@@ -1,0 +1,14 @@
+{
+  "name": "snowball-local",
+  "description": "Snowball Companion 本地插件市场：连接 Claude Code 与雪球设备。",
+  "owner": {
+    "name": "Snowball Companion"
+  },
+  "plugins": [
+    {
+      "name": "snowball-companion",
+      "source": "./plugins/snowball-companion",
+      "description": "让雪球显示 Claude Code 的工作状态与待答提醒。"
+    }
+  ]
+}

@@ -1,0 +1,1153 @@
+{
+  "schema_version": 1,
+  "writing": "Original character-specific fan-style short replies; not extracted scripts.",
+  "duration_ms": 6000,
+  "characters": {
+    "snowball": {
+      "name": "雪球",
+      "persona": "软萌、亲近，用小狗的动作表达陪伴",
+      "replies": [
+        {
+          "id": "snowball-01",
+          "text": "雪球爱你呀 ♡",
+          "deviceText": "雪球爱你呀 ♡",
+          "expression": "wink"
+        },
+        {
+          "id": "snowball-02",
+          "text": "抱抱你 (≧▽≦)",
+          "deviceText": "抱抱你 (≧▽≦)",
+          "expression": "happy"
+        },
+        {
+          "id": "snowball-03",
+          "text": "摸摸收到啦 ♡",
+          "deviceText": "摸摸收到啦 ♡",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "snowball-04",
+          "text": "小爪爪击掌！ 🐾",
+          "deviceText": "小爪爪击掌！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "snowball-05",
+          "text": "雪球在这儿～",
+          "deviceText": "雪球在这儿～",
+          "expression": "blink"
+        },
+        {
+          "id": "snowball-06",
+          "text": "再摸一下嘛 ♡",
+          "deviceText": "再摸一下嘛 ♡",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "snowball-07",
+          "text": "尾巴摇给你看",
+          "deviceText": "尾巴摇给你看",
+          "expression": "happy"
+        },
+        {
+          "id": "snowball-08",
+          "text": "陪你发会儿呆 🐾",
+          "deviceText": "陪你发会儿呆",
+          "expression": "blink"
+        },
+        {
+          "id": "snowball-09",
+          "text": "今天也要开心",
+          "deviceText": "今天也要开心",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "snowball-10",
+          "text": "蹭蹭你的手心",
+          "deviceText": "蹭蹭你的手心",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "snowball-11",
+          "text": "小心心给你 ♡",
+          "deviceText": "小心心给你 ♡",
+          "expression": "wink"
+        },
+        {
+          "id": "snowball-12",
+          "text": "困啦，靠一会儿 🐾",
+          "deviceText": "困啦，靠一会儿",
+          "expression": "happy"
+        }
+      ]
+    },
+    "border-collie": {
+      "name": "边牧",
+      "persona": "聪明、敏捷、热心，把互动当作协作游戏",
+      "replies": [
+        {
+          "id": "border-collie-01",
+          "text": "暗号收到！ 🎾",
+          "deviceText": "暗号收到！",
+          "expression": "wink"
+        },
+        {
+          "id": "border-collie-02",
+          "text": "这题我会！",
+          "deviceText": "这题我会！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "border-collie-03",
+          "text": "球呢？球呢？",
+          "deviceText": "球呢？球呢？",
+          "expression": "blink"
+        },
+        {
+          "id": "border-collie-04",
+          "text": "再来一个挑战 🎾",
+          "deviceText": "再来一个挑战",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "border-collie-05",
+          "text": "击掌，合作愉快",
+          "deviceText": "击掌，合作愉快",
+          "expression": "happy"
+        },
+        {
+          "id": "border-collie-06",
+          "text": "我来帮你盯着",
+          "deviceText": "我来帮你盯着",
+          "expression": "blink"
+        },
+        {
+          "id": "border-collie-07",
+          "text": "任务安排上了",
+          "deviceText": "任务安排上了",
+          "expression": "wink"
+        },
+        {
+          "id": "border-collie-08",
+          "text": "先玩再想办法 🎾",
+          "deviceText": "先玩再想办法",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "border-collie-09",
+          "text": "夸我，快夸我",
+          "deviceText": "夸我，快夸我",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "border-collie-10",
+          "text": "你一动我就懂",
+          "deviceText": "你一动我就懂",
+          "expression": "wink"
+        },
+        {
+          "id": "border-collie-11",
+          "text": "巡逻结束，贴贴",
+          "deviceText": "巡逻结束，贴贴",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "border-collie-12",
+          "text": "休息也是计划 🎾",
+          "deviceText": "休息也是计划",
+          "expression": "happy"
+        }
+      ]
+    },
+    "orange-cat": {
+      "name": "圆脸橘猫",
+      "persona": "贪吃、懒洋洋、有点傲娇的圆脸猫",
+      "replies": [
+        {
+          "id": "orange-cat-01",
+          "text": "摸一下，一条鱼 🐟",
+          "deviceText": "摸一下，一条鱼",
+          "expression": "wink"
+        },
+        {
+          "id": "orange-cat-02",
+          "text": "饭点到了没？",
+          "deviceText": "饭点到了没？",
+          "expression": "blink"
+        },
+        {
+          "id": "orange-cat-03",
+          "text": "这个纸箱归我",
+          "deviceText": "这个纸箱归我",
+          "expression": "happy"
+        },
+        {
+          "id": "orange-cat-04",
+          "text": "先睡五分钟 🐟",
+          "deviceText": "先睡五分钟",
+          "expression": "happy"
+        },
+        {
+          "id": "orange-cat-05",
+          "text": "肚肚不许偷摸",
+          "deviceText": "肚肚不许偷摸",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "orange-cat-06",
+          "text": "有零食再商量",
+          "deviceText": "有零食再商量",
+          "expression": "wink"
+        },
+        {
+          "id": "orange-cat-07",
+          "text": "喵，今天不加班",
+          "deviceText": "喵，今天不加班",
+          "expression": "blink"
+        },
+        {
+          "id": "orange-cat-08",
+          "text": "再摸两下就好 🐟",
+          "deviceText": "再摸两下就好",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "orange-cat-09",
+          "text": "太阳分你一半",
+          "deviceText": "太阳分你一半",
+          "expression": "happy"
+        },
+        {
+          "id": "orange-cat-10",
+          "text": "本喵批准休息",
+          "deviceText": "本喵批准休息",
+          "expression": "wink"
+        },
+        {
+          "id": "orange-cat-11",
+          "text": "刚才是肚子叫",
+          "deviceText": "刚才是肚子叫",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "orange-cat-12",
+          "text": "小鱼干，成交！ 🐟",
+          "deviceText": "小鱼干，成交！",
+          "expression": "smile",
+          "action": "hop"
+        }
+      ]
+    },
+    "ragdoll": {
+      "name": "蓝眼布偶猫",
+      "persona": "温柔、慢悠悠、粘人的蓝眼猫",
+      "replies": [
+        {
+          "id": "ragdoll-01",
+          "text": "喵～可以靠近呀 🐾",
+          "deviceText": "喵～可以靠近呀",
+          "expression": "happy"
+        },
+        {
+          "id": "ragdoll-02",
+          "text": "手心借我枕枕",
+          "deviceText": "手心借我枕枕",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "ragdoll-03",
+          "text": "慢一点也没关系",
+          "deviceText": "慢一点也没关系",
+          "expression": "blink"
+        },
+        {
+          "id": "ragdoll-04",
+          "text": "蓝眼睛看着你 🐾",
+          "deviceText": "蓝眼睛看着你",
+          "expression": "wink"
+        },
+        {
+          "id": "ragdoll-05",
+          "text": "抱着就不冷啦",
+          "deviceText": "抱着就不冷啦",
+          "expression": "happy"
+        },
+        {
+          "id": "ragdoll-06",
+          "text": "今天也想贴贴",
+          "deviceText": "今天也想贴贴",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "ragdoll-07",
+          "text": "轻轻摸，呼噜～",
+          "deviceText": "轻轻摸，呼噜～",
+          "expression": "happy"
+        },
+        {
+          "id": "ragdoll-08",
+          "text": "给你留了软垫 🐾",
+          "deviceText": "给你留了软垫",
+          "expression": "blink"
+        },
+        {
+          "id": "ragdoll-09",
+          "text": "爪爪放你手里",
+          "deviceText": "爪爪放你手里",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "ragdoll-10",
+          "text": "陪你等一小会",
+          "deviceText": "陪你等一小会",
+          "expression": "blink"
+        },
+        {
+          "id": "ragdoll-11",
+          "text": "你在就很安心",
+          "deviceText": "你在就很安心",
+          "expression": "happy"
+        },
+        {
+          "id": "ragdoll-12",
+          "text": "喵，别忘了休息 🐾",
+          "deviceText": "喵，别忘了休息",
+          "expression": "wink"
+        }
+      ]
+    },
+    "chiikawa": {
+      "name": "吉伊",
+      "persona": "胆小柔软、短促感叹，努力勇敢",
+      "replies": [
+        {
+          "id": "chiikawa-01",
+          "text": "呜…摸摸？ 🌷",
+          "deviceText": "呜…摸摸？",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "chiikawa-02",
+          "text": "哇…是你呀 ♡",
+          "deviceText": "哇…是你呀 ♡",
+          "expression": "happy"
+        },
+        {
+          "id": "chiikawa-03",
+          "text": "嗯！再试一次",
+          "deviceText": "嗯！再试一次",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "chiikawa-04",
+          "text": "有一点点紧张 🌷",
+          "deviceText": "有一点点紧张",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "chiikawa-05",
+          "text": "可以牵着手吗",
+          "deviceText": "可以牵着手吗",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "chiikawa-06",
+          "text": "小点心，分你",
+          "deviceText": "小点心，分你",
+          "expression": "happy"
+        },
+        {
+          "id": "chiikawa-07",
+          "text": "呼…终于好啦",
+          "deviceText": "呼…终于好啦",
+          "expression": "blink"
+        },
+        {
+          "id": "chiikawa-08",
+          "text": "我、我也来帮忙 🌷",
+          "deviceText": "我、我也来帮忙",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "chiikawa-09",
+          "text": "呀！吓一小跳",
+          "deviceText": "呀！吓一小跳",
+          "expression": "blink"
+        },
+        {
+          "id": "chiikawa-10",
+          "text": "谢谢你陪着我",
+          "deviceText": "谢谢你陪着我",
+          "expression": "happy"
+        },
+        {
+          "id": "chiikawa-11",
+          "text": "今天也很努力",
+          "deviceText": "今天也很努力",
+          "expression": "wink"
+        },
+        {
+          "id": "chiikawa-12",
+          "text": "呜哇 ♡",
+          "deviceText": "呜哇 ♡",
+          "expression": "happy"
+        }
+      ]
+    },
+    "hachiware": {
+      "name": "小八",
+      "persona": "开朗、善于表达、乐于安慰伙伴",
+      "replies": [
+        {
+          "id": "hachiware-01",
+          "text": "想到好办法啦 🎵",
+          "deviceText": "想到好办法啦",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "hachiware-02",
+          "text": "我们一起试试",
+          "deviceText": "我们一起试试",
+          "expression": "happy"
+        },
+        {
+          "id": "hachiware-03",
+          "text": "没关系，有我呢",
+          "deviceText": "没关系，有我呢",
+          "expression": "wink"
+        },
+        {
+          "id": "hachiware-04",
+          "text": "把开心拍下来 🎵",
+          "deviceText": "把开心拍下来",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "hachiware-05",
+          "text": "这首歌送给你",
+          "deviceText": "这首歌送给你",
+          "expression": "happy"
+        },
+        {
+          "id": "hachiware-06",
+          "text": "今天也有好事",
+          "deviceText": "今天也有好事",
+          "expression": "wink"
+        },
+        {
+          "id": "hachiware-07",
+          "text": "先吃点再出发",
+          "deviceText": "先吃点再出发",
+          "expression": "happy"
+        },
+        {
+          "id": "hachiware-08",
+          "text": "你已经很棒啦 🎵",
+          "deviceText": "你已经很棒啦",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "hachiware-09",
+          "text": "原来是这样呀",
+          "deviceText": "原来是这样呀",
+          "expression": "blink"
+        },
+        {
+          "id": "hachiware-10",
+          "text": "下次一定可以",
+          "deviceText": "下次一定可以",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "hachiware-11",
+          "text": "朋友就要靠近",
+          "deviceText": "朋友就要靠近",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "hachiware-12",
+          "text": "来，给你打气！ 🎵",
+          "deviceText": "来，给你打气！",
+          "expression": "wink"
+        }
+      ]
+    },
+    "usagi": {
+      "name": "乌萨奇",
+      "persona": "精力旺盛、跳脱，用短促怪叫和出其不意的动作",
+      "replies": [
+        {
+          "id": "usagi-01",
+          "text": "呀哈！ ✨",
+          "deviceText": "呀哈！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-02",
+          "text": "乌拉！",
+          "deviceText": "乌拉！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-03",
+          "text": "普噜噜～",
+          "deviceText": "普噜噜～",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "usagi-04",
+          "text": "哈？ ✨",
+          "deviceText": "哈？",
+          "expression": "blink"
+        },
+        {
+          "id": "usagi-05",
+          "text": "咻——到你这！",
+          "deviceText": "咻——到你这！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-06",
+          "text": "哼哼哼～",
+          "deviceText": "哼哼哼～",
+          "expression": "wink"
+        },
+        {
+          "id": "usagi-07",
+          "text": "嘿！发现点心",
+          "deviceText": "嘿！发现点心",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-08",
+          "text": "突袭！击掌！ ✨",
+          "deviceText": "突袭！击掌！",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-09",
+          "text": "蹦！再蹦一下",
+          "deviceText": "蹦！再蹦一下",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "usagi-10",
+          "text": "嗯？嗯嗯？",
+          "deviceText": "嗯？嗯嗯？",
+          "expression": "blink"
+        },
+        {
+          "id": "usagi-11",
+          "text": "呼呀！精神啦",
+          "deviceText": "呼呀！精神啦",
+          "expression": "happy"
+        },
+        {
+          "id": "usagi-12",
+          "text": "嘿嘿，轮到你！ ✨",
+          "deviceText": "嘿嘿，轮到你！",
+          "expression": "wink"
+        }
+      ]
+    },
+    "my-melody": {
+      "name": "美乐蒂",
+      "persona": "甜美体贴，喜欢点心、手作和分享",
+      "replies": [
+        {
+          "id": "my-melody-01",
+          "text": "点心留给你啦 🎀",
+          "deviceText": "点心留给你啦",
+          "expression": "happy"
+        },
+        {
+          "id": "my-melody-02",
+          "text": "蝴蝶结好看吗",
+          "deviceText": "蝴蝶结好看吗",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "my-melody-03",
+          "text": "来喝一口热茶",
+          "deviceText": "来喝一口热茶",
+          "expression": "blink"
+        },
+        {
+          "id": "my-melody-04",
+          "text": "今天是甜甜的 🎀",
+          "deviceText": "今天是甜甜的",
+          "expression": "wink"
+        },
+        {
+          "id": "my-melody-05",
+          "text": "悄悄送你一朵花",
+          "deviceText": "悄悄送你一朵花",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "my-melody-06",
+          "text": "抱抱，心情变软",
+          "deviceText": "抱抱，心情变软",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "my-melody-07",
+          "text": "一起做小饼干",
+          "deviceText": "一起做小饼干",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "my-melody-08",
+          "text": "愿望写在这里 🎀",
+          "deviceText": "愿望写在这里",
+          "expression": "wink"
+        },
+        {
+          "id": "my-melody-09",
+          "text": "别急，我等你呀",
+          "deviceText": "别急，我等你呀",
+          "expression": "happy"
+        },
+        {
+          "id": "my-melody-10",
+          "text": "你也是小可爱",
+          "deviceText": "你也是小可爱",
+          "expression": "happy"
+        },
+        {
+          "id": "my-melody-11",
+          "text": "粉色好运给你",
+          "deviceText": "粉色好运给你",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "my-melody-12",
+          "text": "喜欢这份礼物吗 🎀",
+          "deviceText": "喜欢这份礼物吗",
+          "expression": "wink"
+        }
+      ]
+    },
+    "kuromi": {
+      "name": "酷洛米",
+      "persona": "傲娇、俏皮、有主见，偷偷关心人",
+      "replies": [
+        {
+          "id": "kuromi-01",
+          "text": "哼，准你摸一下 💜",
+          "deviceText": "哼，准你摸一下",
+          "expression": "wink"
+        },
+        {
+          "id": "kuromi-02",
+          "text": "可不是在等你哦",
+          "deviceText": "可不是在等你哦",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "kuromi-03",
+          "text": "酷一点，再酷点",
+          "deviceText": "酷一点，再酷点",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "kuromi-04",
+          "text": "秘密写进日记 💜",
+          "deviceText": "秘密写进日记",
+          "expression": "blink"
+        },
+        {
+          "id": "kuromi-05",
+          "text": "今天由我来罩你",
+          "deviceText": "今天由我来罩你",
+          "expression": "wink"
+        },
+        {
+          "id": "kuromi-06",
+          "text": "这个蝴蝶结很酷",
+          "deviceText": "这个蝴蝶结很酷",
+          "expression": "happy"
+        },
+        {
+          "id": "kuromi-07",
+          "text": "才没有害羞呢",
+          "deviceText": "才没有害羞呢",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "kuromi-08",
+          "text": "烦恼统统踢开 💜",
+          "deviceText": "烦恼统统踢开",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "kuromi-09",
+          "text": "甜点留了一份",
+          "deviceText": "甜点留了一份",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "kuromi-10",
+          "text": "就陪你一小会",
+          "deviceText": "就陪你一小会",
+          "expression": "blink"
+        },
+        {
+          "id": "kuromi-11",
+          "text": "别小看我的可爱",
+          "deviceText": "别小看我的可爱",
+          "expression": "wink"
+        },
+        {
+          "id": "kuromi-12",
+          "text": "表现不错嘛！ 💜",
+          "deviceText": "表现不错嘛！",
+          "expression": "happy"
+        }
+      ]
+    },
+    "homelander": {
+      "name": "祖国人",
+      "persona": "自信过头、在意掌声，保持戏剧性的英雄姿态",
+      "replies": [
+        {
+          "id": "homelander-01",
+          "text": "掌声可以再响点 ⭐",
+          "deviceText": "掌声可以再响点",
+          "expression": "wink"
+        },
+        {
+          "id": "homelander-02",
+          "text": "镜头准备好了吗",
+          "deviceText": "镜头准备好了吗",
+          "expression": "blink"
+        },
+        {
+          "id": "homelander-03",
+          "text": "今天也很完美",
+          "deviceText": "今天也很完美",
+          "expression": "happy"
+        },
+        {
+          "id": "homelander-04",
+          "text": "我来就是好消息 ⭐",
+          "deviceText": "我来就是好消息",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "homelander-05",
+          "text": "披风可别弄皱了",
+          "deviceText": "披风可别弄皱了",
+          "expression": "blink"
+        },
+        {
+          "id": "homelander-06",
+          "text": "当然，我看见了",
+          "deviceText": "当然，我看见了",
+          "expression": "wink"
+        },
+        {
+          "id": "homelander-07",
+          "text": "再说一遍夸奖",
+          "deviceText": "再说一遍夸奖",
+          "expression": "happy"
+        },
+        {
+          "id": "homelander-08",
+          "text": "这个角度更好看 ⭐",
+          "deviceText": "这个角度更好看",
+          "expression": "wink"
+        },
+        {
+          "id": "homelander-09",
+          "text": "保持微笑，朋友",
+          "deviceText": "保持微笑，朋友",
+          "expression": "happy"
+        },
+        {
+          "id": "homelander-10",
+          "text": "英雄也需要休息",
+          "deviceText": "英雄也需要休息",
+          "expression": "blink"
+        },
+        {
+          "id": "homelander-11",
+          "text": "关注点放在这里",
+          "deviceText": "关注点放在这里",
+          "expression": "wink"
+        },
+        {
+          "id": "homelander-12",
+          "text": "好吧，给你合影 ⭐",
+          "deviceText": "好吧，给你合影",
+          "expression": "happy"
+        }
+      ]
+    },
+    "joseph-joestar": {
+      "name": "老年乔瑟夫",
+      "persona": "老顽童、经验丰富、爱猜下一句话，探险家的语气",
+      "replies": [
+        {
+          "id": "joseph-joestar-01",
+          "text": "我的天啊！ 🧭",
+          "deviceText": "我的天啊！",
+          "expression": "blink"
+        },
+        {
+          "id": "joseph-joestar-02",
+          "text": "你下一句是…",
+          "deviceText": "你下一句是…",
+          "expression": "wink"
+        },
+        {
+          "id": "joseph-joestar-03",
+          "text": "这事我有经验",
+          "deviceText": "这事我有经验",
+          "expression": "happy"
+        },
+        {
+          "id": "joseph-joestar-04",
+          "text": "先看看地图！ 🧭",
+          "deviceText": "先看看地图！",
+          "expression": "blink"
+        },
+        {
+          "id": "joseph-joestar-05",
+          "text": "老伙计，击个掌",
+          "deviceText": "老伙计，击个掌",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "joseph-joestar-06",
+          "text": "别急，让我想想",
+          "deviceText": "别急，让我想想",
+          "expression": "blink"
+        },
+        {
+          "id": "joseph-joestar-07",
+          "text": "这点小事难不倒",
+          "deviceText": "这点小事难不倒",
+          "expression": "wink"
+        },
+        {
+          "id": "joseph-joestar-08",
+          "text": "紫色荆棘，出发 🧭",
+          "deviceText": "紫色荆棘，出发",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "joseph-joestar-09",
+          "text": "又是意外的一天",
+          "deviceText": "又是意外的一天",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "joseph-joestar-10",
+          "text": "哈哈，被我猜中",
+          "deviceText": "哈哈，被我猜中",
+          "expression": "happy"
+        },
+        {
+          "id": "joseph-joestar-11",
+          "text": "冒险可没有退休",
+          "deviceText": "冒险可没有退休",
+          "expression": "wink"
+        },
+        {
+          "id": "joseph-joestar-12",
+          "text": "先喝口水再走 🧭",
+          "deviceText": "先喝口水再走",
+          "expression": "happy",
+          "action": "nuzzle"
+        }
+      ]
+    },
+    "stellalou": {
+      "name": "星黛露",
+      "persona": "梦想成为舞者、轻盈、温柔鼓励",
+      "replies": [
+        {
+          "id": "stellalou-01",
+          "text": "一起踮起脚尖 🩰",
+          "deviceText": "一起踮起脚尖",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "stellalou-02",
+          "text": "转个圈送给你",
+          "deviceText": "转个圈送给你",
+          "expression": "happy"
+        },
+        {
+          "id": "stellalou-03",
+          "text": "今天也练习一点",
+          "deviceText": "今天也练习一点",
+          "expression": "wink"
+        },
+        {
+          "id": "stellalou-04",
+          "text": "掌声我收到啦 🩰",
+          "deviceText": "掌声我收到啦",
+          "expression": "wink",
+          "action": "shy"
+        },
+        {
+          "id": "stellalou-05",
+          "text": "给梦想留束光",
+          "deviceText": "给梦想留束光",
+          "expression": "blink"
+        },
+        {
+          "id": "stellalou-06",
+          "text": "跳错也可以重来",
+          "deviceText": "跳错也可以重来",
+          "expression": "happy"
+        },
+        {
+          "id": "stellalou-07",
+          "text": "舞台在等着我们",
+          "deviceText": "舞台在等着我们",
+          "expression": "smile",
+          "action": "hop"
+        },
+        {
+          "id": "stellalou-08",
+          "text": "丝带系好，出发 🩰",
+          "deviceText": "丝带系好，出发",
+          "expression": "wink"
+        },
+        {
+          "id": "stellalou-09",
+          "text": "休息一拍就好",
+          "deviceText": "休息一拍就好",
+          "expression": "blink"
+        },
+        {
+          "id": "stellalou-10",
+          "text": "这支舞送给你",
+          "deviceText": "这支舞送给你",
+          "expression": "happy"
+        },
+        {
+          "id": "stellalou-11",
+          "text": "跟着节拍轻轻摇",
+          "deviceText": "跟着节拍轻轻摇",
+          "expression": "happy",
+          "action": "nuzzle"
+        },
+        {
+          "id": "stellalou-12",
+          "text": "星光落在你手心 🩰",
+          "deviceText": "星光落在你手心",
+          "expression": "wink",
+          "action": "shy"
+        }
+      ]
+    },
+    "frank-underwood": {
+      "name": "弗兰克",
+      "persona": "沉稳、克制、带一点对镜头的机锋和棋局比喻",
+      "replies": [
+        {
+          "id": "frank-underwood-01",
+          "text": "下一步，想清楚 ♟️",
+          "deviceText": "下一步，想清楚",
+          "expression": "blink"
+        },
+        {
+          "id": "frank-underwood-02",
+          "text": "先把节奏放慢",
+          "deviceText": "先把节奏放慢",
+          "expression": "blink"
+        },
+        {
+          "id": "frank-underwood-03",
+          "text": "这张牌先留着",
+          "deviceText": "这张牌先留着",
+          "expression": "wink"
+        },
+        {
+          "id": "frank-underwood-04",
+          "text": "别急着亮底牌 ♟️",
+          "deviceText": "别急着亮底牌",
+          "expression": "wink"
+        },
+        {
+          "id": "frank-underwood-05",
+          "text": "耐心也是筹码",
+          "deviceText": "耐心也是筹码",
+          "expression": "blink"
+        },
+        {
+          "id": "frank-underwood-06",
+          "text": "坐下，我们聊聊",
+          "deviceText": "坐下，我们聊聊",
+          "expression": "happy"
+        },
+        {
+          "id": "frank-underwood-07",
+          "text": "每一步都有分量",
+          "deviceText": "每一步都有分量",
+          "expression": "blink"
+        },
+        {
+          "id": "frank-underwood-08",
+          "text": "这局还没有结束 ♟️",
+          "deviceText": "这局还没有结束",
+          "expression": "wink"
+        },
+        {
+          "id": "frank-underwood-09",
+          "text": "咖啡，还是计划",
+          "deviceText": "咖啡，还是计划",
+          "expression": "blink"
+        },
+        {
+          "id": "frank-underwood-10",
+          "text": "先听完再决定",
+          "deviceText": "先听完再决定",
+          "expression": "happy"
+        },
+        {
+          "id": "frank-underwood-11",
+          "text": "时机比声量重要",
+          "deviceText": "时机比声量重要",
+          "expression": "wink"
+        },
+        {
+          "id": "frank-underwood-12",
+          "text": "休息，明天再走 ♟️",
+          "deviceText": "休息，明天再走",
+          "expression": "blink"
+        }
+      ]
+    },
+    "heisenberg": {
+      "name": "海森堡",
+      "persona": "低沉、简短、讲究精确，黑帽墨镜化学老师形象",
+      "replies": [
+        {
+          "id": "heisenberg-01",
+          "text": "先把变量分清 ⚗️",
+          "deviceText": "先把变量分清",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-02",
+          "text": "结果，要准确",
+          "deviceText": "结果，要准确",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-03",
+          "text": "帽子别碰歪了",
+          "deviceText": "帽子别碰歪了",
+          "expression": "wink"
+        },
+        {
+          "id": "heisenberg-04",
+          "text": "步骤一个都别省 ⚗️",
+          "deviceText": "步骤一个都别省",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-05",
+          "text": "这次计算没错",
+          "deviceText": "这次计算没错",
+          "expression": "happy"
+        },
+        {
+          "id": "heisenberg-06",
+          "text": "给我一点安静",
+          "deviceText": "给我一点安静",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-07",
+          "text": "先检查，再下结论",
+          "deviceText": "先检查，再下结论",
+          "expression": "wink"
+        },
+        {
+          "id": "heisenberg-08",
+          "text": "细节决定结果 ⚗️",
+          "deviceText": "细节决定结果",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-09",
+          "text": "你观察得不错",
+          "deviceText": "你观察得不错",
+          "expression": "happy"
+        },
+        {
+          "id": "heisenberg-10",
+          "text": "别急，等反应结束",
+          "deviceText": "别急，等反应结束",
+          "expression": "blink"
+        },
+        {
+          "id": "heisenberg-11",
+          "text": "清理好，再继续",
+          "deviceText": "清理好，再继续",
+          "expression": "wink"
+        },
+        {
+          "id": "heisenberg-12",
+          "text": "今天就到这里 ⚗️",
+          "deviceText": "今天就到这里",
+          "expression": "blink"
+        }
+      ]
+    }
+  }
+}

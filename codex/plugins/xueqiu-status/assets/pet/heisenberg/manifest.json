@@ -1,0 +1,24 @@
+{
+  "name": "海森堡",
+  "english_name": "Heisenberg",
+  "asset_key": "heisenberg-v2-d39ddaecc2c0",
+  "description": "Walter White as Heisenberg from Breaking Bad, black pork-pie hat, dark sunglasses, brown goatee, dark jacket over muted green shirt, beige trousers, cute chibi proportions, closed confident mouth. [Snowball Companion: d39ddaecc2c0]",
+  "file": "atlas.png",
+  "sha256": "d39ddaecc2c0ff4a16a820583cb6dff2fb1332f9012471d7620e4e300fda52f1",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

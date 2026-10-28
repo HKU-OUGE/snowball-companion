@@ -1,0 +1,33 @@
+{
+  "name": "xueqiu-status",
+  "version": "0.4.1",
+  "description": "Snowball Companion — a switchable pixel Pet library with optional local AI status and Bluetooth companion display.",
+  "hooks": "./hooks/hooks.json",
+  "interface": {
+    "displayName": "Snowball Companion",
+    "shortDescription": "选择像素伙伴，随时看见 AI 工作状态",
+    "longDescription": "A little company while AI works. Includes a character library with validated Pet installation and switching, plus optional private AI status sync to a Bluetooth companion display. Only complete validated atlases can be installed.",
+    "developerName": "Snowball Companion",
+    "category": "Productivity",
+    "brandColor": "#9DEBB1",
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Set up Snowball Companion and activate my Snowball Pet.",
+      "查看可用的宠物形象，切换我的桌宠。",
+      "检查 Snowball Companion 的桌宠和设备连接。"
+    ]
+  },
+  "skills": "./skills/",
+  "apps": "./.app.json",
+  "extensions": {
+    "com.openai": {
+      "onboardingSkill": "./skills/setup/SKILL.md"
+    }
+  }
+}

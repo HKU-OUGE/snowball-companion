@@ -1,0 +1,24 @@
+{
+  "name": "弗兰克",
+  "english_name": "Frank Underwood",
+  "asset_key": "frank-underwood-v2-73cdd974bcd2",
+  "description": "Frank Underwood from House of Cards, older man with short grey hair, distinctive broad forehead and heavy-lidded eyes, navy suit, white shirt, blue tie, calm knowing smile, cute rounded chibi proportions. [Snowball Companion: 73cdd974bcd2]",
+  "file": "atlas.png",
+  "sha256": "73cdd974bcd28d9031ccc9290d240eff06d64825481bc180bae9a4d93ab79063",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

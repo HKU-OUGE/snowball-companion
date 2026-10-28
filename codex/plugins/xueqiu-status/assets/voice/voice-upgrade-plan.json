@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "status": "reference_and_listening_pending",
+  "user_preference": "Original-version voice and language: Japanese animation, English live-action; Chinese on-screen text.",
+  "generation_location": "computer_offline",
+  "device_storage": "/snowball/pets/<id>/voice/<reply.id|complete|waiting|error>.wav; legacy audio.xqa retained",
+  "candidate_models": [
+    {
+      "name": "GPT-SoVITS",
+      "official": "https://github.com/RVC-Boss/GPT-SoVITS",
+      "purpose": "reference-conditioned Japanese/English character voice audition"
+    },
+    {
+      "name": "Qwen3-TTS Base",
+      "official": "https://github.com/QwenLM/Qwen3-TTS",
+      "purpose": "same-reference A/B audition"
+    }
+  ],
+  "reference_rule": "Clean single-character original-version audio with accurate transcript; compare naturalness, timbre and emotion by listening. No voice match is currently claimed.",
+  "characters": {
+    "snowball": {
+      "name": "雪球",
+      "language": "nonverbal",
+      "method": "animal_vocal_sample",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": null,
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "border-collie": {
+      "name": "边牧",
+      "language": "nonverbal",
+      "method": "animal_vocal_sample",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": null,
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "orange-cat": {
+      "name": "圆脸橘猫",
+      "language": "nonverbal",
+      "method": "animal_vocal_sample",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": null,
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "ragdoll": {
+      "name": "蓝眼布偶猫",
+      "language": "nonverbal",
+      "method": "animal_vocal_sample",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": null,
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "chiikawa": {
+      "name": "吉伊",
+      "language": "ja",
+      "method": "expressive_vocal_sample_or_reference_generation",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "わぁ…！",
+        "waiting": "え…？",
+        "error": "うぅ…"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "hachiware": {
+      "name": "小八",
+      "language": "ja",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "できたよ！",
+        "waiting": "どうしよう？",
+        "error": "あれ？"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "usagi": {
+      "name": "乌萨奇",
+      "language": "ja-nonverbal",
+      "method": "expressive_nonverbal_sample_or_reference_generation",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "ヤハ！",
+        "waiting": "ハァ？",
+        "error": "ウラッ！"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "my-melody": {
+      "name": "美乐蒂",
+      "language": "ja",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "できたよ。",
+        "waiting": "どうする？",
+        "error": "あら？"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "kuromi": {
+      "name": "酷洛米",
+      "language": "ja",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "やったね！",
+        "waiting": "どうするの？",
+        "error": "ちょっと！"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "homelander": {
+      "name": "祖国人",
+      "language": "en",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "Perfect.",
+        "waiting": "Your call.",
+        "error": "Hold on."
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "joseph-joestar": {
+      "name": "老年乔瑟夫",
+      "language": "ja",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "できたぞ！",
+        "waiting": "さて、どうする？",
+        "error": "なんてことだ！"
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "stellalou": {
+      "name": "星黛露",
+      "language": "undetermined",
+      "method": "reference_version_required_or_original_designed_voice",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": null,
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "frank-underwood": {
+      "name": "弗兰克",
+      "language": "en",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "Well done.",
+        "waiting": "Your move.",
+        "error": "A setback."
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    },
+    "heisenberg": {
+      "name": "海森堡",
+      "language": "en",
+      "method": "reference_tts",
+      "reference_files": [],
+      "approved_audio": false,
+      "draft_status_utterances": {
+        "complete": "Correct.",
+        "waiting": "Your decision.",
+        "error": "Check it again."
+      },
+      "note": "Draft audition text only. No voice is generated or approved. Target WAV <=6 seconds; never silently truncate speech."
+    }
+  },
+  "playback_scope": "touch_replies_and_status_voices",
+  "voice_requests": "voice-requests.json",
+  "legacy_format": {
+    "sample_rate": 16000,
+    "channels": 1,
+    "bits": 16,
+    "max_seconds_per_cue": 1.5,
+    "cues": [
+      "complete",
+      "waiting",
+      "error"
+    ],
+    "touch_dialogue_voice_playback": false
+  },
+  "current_format": {
+    "path": "/snowball/pets/<id>/voice/<key>.wav",
+    "sample_rate": 16000,
+    "channels": 1,
+    "bits": 16,
+    "max_seconds": 6,
+    "loading": "one clip at a time on audio worker",
+    "implementation": "implemented_in_web_and_native_0.10.7; no original-voice assets installed",
+    "touch_dialogue_voice_playback": true
+  },
+  "selected_scope": "touch_replies_and_status_voices"
+}

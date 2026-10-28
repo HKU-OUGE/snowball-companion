@@ -1,0 +1,24 @@
+{
+  "name": "小八",
+  "english_name": "Hachiware",
+  "asset_key": "hachiware-v2-37c414d479cb",
+  "description": "Hachiware from Chiikawa, white round cat with blue split cap on head and blue ears, cheerful mouth. [Snowball Companion: 37c414d479cb]",
+  "file": "atlas.png",
+  "sha256": "37c414d479cb0a1fcff33abb373fdba195bb7c6be8bc981b3942eb3b0c7dbd6a",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

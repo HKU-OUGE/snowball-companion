@@ -1,0 +1,24 @@
+{
+  "name": "布偶猫",
+  "english_name": "Ragdoll",
+  "asset_key": "ragdoll-v2-b4a5707f71f5",
+  "description": "A fluffy cream ragdoll cat with blue eyes, soft seal-point ears and mask, white inverted-V face and white paws. [Snowball Companion: b4a5707f71f5]",
+  "file": "atlas.png",
+  "sha256": "b4a5707f71f52c187a5a4a3ce90cde75ff75c8d949a7a48fec7854ca4ce7838c",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}

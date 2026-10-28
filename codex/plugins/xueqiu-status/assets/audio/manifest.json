@@ -1,0 +1,547 @@
+{
+  "version": 2,
+  "origin": "Original procedural character-inspired vocal cues. No actor recordings, voice cloning, film audio, or sampled copyrighted soundtracks.",
+  "sample_rate": 16000,
+  "channels": 1,
+  "bits_per_sample": 16,
+  "aural_review": "not performed; technical signal checks only",
+  "characters": {
+    "snowball": {
+      "name": "雪球",
+      "style": "软萌轻短 wu/woof：开心轻双叫、上扬哼唧、疑惑短叫接软呜",
+      "revision": 2,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 9760,
+          "duration_seconds": 0.61,
+          "pcm_bytes": 19520,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -2.42e-06,
+          "rms_dbfs": -14.745,
+          "sha256": "a575fae898bb4f161a3fb6a1b308c1ac8b951bb34213824b099ca72e0eb44751"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 8800,
+          "duration_seconds": 0.55,
+          "pcm_bytes": 17600,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 7.5e-07,
+          "rms_dbfs": -13.597,
+          "sha256": "e12966b28eddcc423cd2b7897ea485a556c07fdaafe15d2c555236d60a97ec73"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 11280,
+          "duration_seconds": 0.705,
+          "pcm_bytes": 22560,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -4.8e-07,
+          "rms_dbfs": -15.589,
+          "sha256": "931598ae8c664706fb3f09711c1d364797702d76a2d2f7fa586dec0fec49423b"
+        }
+      }
+    },
+    "border-collie": {
+      "name": "边牧",
+      "style": "清脆短双吠，带轻气息起音",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 8240,
+          "duration_seconds": 0.515,
+          "pcm_bytes": 16480,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 3e-08,
+          "rms_dbfs": -15.934,
+          "sha256": "cb497c81947ea6a77299957123e4563fd7c981be7615d984a121ba4a693a3076"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 10640,
+          "duration_seconds": 0.665,
+          "pcm_bytes": 21280,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.02e-06,
+          "rms_dbfs": -15.344,
+          "sha256": "61ed3ed01807302c8e420dccf58db2e5c845de0b7576c7277b7004ade1d66fe3"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 2.9e-07,
+          "rms_dbfs": -16.01,
+          "sha256": "34dd5ff73b45dbae0f25c48e679293eb4d8b795bda70552279eb12fb9538d89c"
+        }
+      }
+    },
+    "orange-cat": {
+      "name": "圆脸橘猫",
+      "style": "俏皮短喵，明亮收尾",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 7680,
+          "duration_seconds": 0.48,
+          "pcm_bytes": 15360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -3.2e-07,
+          "rms_dbfs": -13.518,
+          "sha256": "703f4325486127790eb8a9e3463e9f97b0097e1a7f9f2df43a61854a67ca23d0"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 11760,
+          "duration_seconds": 0.735,
+          "pcm_bytes": 23520,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 7e-08,
+          "rms_dbfs": -12.688,
+          "sha256": "d06467000e4432f528105c5c1c866ec164c53228c86a530e08e996fc7bd0cb4a"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -3.1e-07,
+          "rms_dbfs": -14.573,
+          "sha256": "8b62d4106906c99d96f1133894562302ea27df4c3a25da0fadc0ec481d21afd4"
+        }
+      }
+    },
+    "ragdoll": {
+      "name": "蓝眼布偶",
+      "style": "柔软绵长喵，平滑滑音",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 12640,
+          "duration_seconds": 0.79,
+          "pcm_bytes": 25280,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 0.0,
+          "rms_dbfs": -12.324,
+          "sha256": "ef3d3648d61cbd59a7907d5204e6e891ef6a25c65ab755b074a7131bced041c9"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 11760,
+          "duration_seconds": 0.735,
+          "pcm_bytes": 23520,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 1e-08,
+          "rms_dbfs": -12.257,
+          "sha256": "1ef9b7612d778b78b2d728e23a24fdab33823f88fe7d55e319e85fe3b4814450"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -1.01e-06,
+          "rms_dbfs": -13.861,
+          "sha256": "17668a718fa5eecc0fb84aba465e7af6565c74c672e2fcf2c60941a994d6f2e9"
+        }
+      }
+    },
+    "chiikawa": {
+      "name": "吉伊",
+      "style": "轻柔小唧，短小羞怯停顿",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 7680,
+          "duration_seconds": 0.48,
+          "pcm_bytes": 15360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.96e-06,
+          "rms_dbfs": -14.021,
+          "sha256": "ab0792da8e589be55c14321b8e9f1016ac1e0c38d95676f8a0e1cf3056818eaa"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 10640,
+          "duration_seconds": 0.665,
+          "pcm_bytes": 21280,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.7e-07,
+          "rms_dbfs": -12.904,
+          "sha256": "7054d3aa48322a690e7d0fc2ecd1a65249c414cc94c27a6869e142a7a87ac6bf"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -1.3e-07,
+          "rms_dbfs": -13.49,
+          "sha256": "f86d1b5efe4b8b8bb05bdfe8bca47f2c4d15fad33a6b655576a563bc98553d15"
+        }
+      }
+    },
+    "hachiware": {
+      "name": "小八",
+      "style": "明亮鼻音哼，轻快上行",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 11280,
+          "duration_seconds": 0.705,
+          "pcm_bytes": 22560,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 3e-07,
+          "rms_dbfs": -12.291,
+          "sha256": "96397fe78990af7219e5f30fe9a186fa5fe5eba672e778b38c44a8981ddedb25"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -3.2e-07,
+          "rms_dbfs": -11.77,
+          "sha256": "3df8db94f407aee8e2f143b79acb3c83f46dc7e3f5e4582226d89a5688136d71"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 6.5e-07,
+          "rms_dbfs": -12.723,
+          "sha256": "7d3878815f22b85d8650ca729ce860fb4217ec935465a9254dc83dc1fa3b4601"
+        }
+      }
+    },
+    "usagi": {
+      "name": "乌萨奇",
+      "style": "跳跃高低呀感，错落三段",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 11600,
+          "duration_seconds": 0.725,
+          "pcm_bytes": 23200,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -2.6e-07,
+          "rms_dbfs": -16.219,
+          "sha256": "b5f031ebfbd648c689108872f7b73ef9bb064c70d75e3eaa339d7da3fcab5b29"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 10640,
+          "duration_seconds": 0.665,
+          "pcm_bytes": 21280,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.17e-06,
+          "rms_dbfs": -15.649,
+          "sha256": "4fe669d05ae3ccb10b7c184fc84fbb259f380929ccd367153e388d38f6c374cb"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -1e-07,
+          "rms_dbfs": -16.028,
+          "sha256": "4d43efeedf319a37432389ef7f1a1049b9859a0a9168cba5950f32eed32e845c"
+        }
+      }
+    },
+    "my-melody": {
+      "name": "美乐蒂",
+      "style": "甜柔气声哼，舒缓双音",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 11280,
+          "duration_seconds": 0.705,
+          "pcm_bytes": 22560,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 3.5e-07,
+          "rms_dbfs": -12.5,
+          "sha256": "23a163fc56f1dd02987ab090709d8e0bf8514b6eb2f88ccc92482121cd86114f"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -7e-08,
+          "rms_dbfs": -12.008,
+          "sha256": "d0d312db7bc59d802887be7fa177b25b620fc90beefe8a914143ce45ed7e6272"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -5.2e-07,
+          "rms_dbfs": -13.204,
+          "sha256": "6f29d61a78cd8f730a03c6da80e3b74c06406eda152e565908a59f3a1aa82444"
+        }
+      }
+    },
+    "kuromi": {
+      "name": "酷洛米",
+      "style": "调皮偏低咯笑，断续轻颤",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 10160,
+          "duration_seconds": 0.635,
+          "pcm_bytes": 20320,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.1e-06,
+          "rms_dbfs": -19.884,
+          "sha256": "214fae8d409c47f6968f49426d8055a1a2ede95f61eb2ee69d6d5248c5ebbe23"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 10640,
+          "duration_seconds": 0.665,
+          "pcm_bytes": 21280,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -7.6e-07,
+          "rms_dbfs": -17.538,
+          "sha256": "89215dd4d81eeb1090b1b60e594ae3da833ff5ca8a20b7b9d88f99636ad39d2e"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -6.2e-07,
+          "rms_dbfs": -18.242,
+          "sha256": "5aa82bbd77b4454f845cc3e131b86bbc4db0148dee17b4ff871345c05d4983d1"
+        }
+      }
+    },
+    "stellalou": {
+      "name": "星黛露",
+      "style": "轻芭蕾叮声与柔哼，短铃尾音",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 13040,
+          "duration_seconds": 0.815,
+          "pcm_bytes": 26080,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 3.6e-07,
+          "rms_dbfs": -12.527,
+          "sha256": "b69f8cd634a816c84b1aeb0e239bbfe2a71c349a5cec8aff32d96c93594f2982"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -5e-08,
+          "rms_dbfs": -11.95,
+          "sha256": "33269c6df2f87a86cea80e63aec93d2214aa91d8f9f58962906c5f82dc4b26fd"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 2.2e-07,
+          "rms_dbfs": -13.706,
+          "sha256": "f4d45bc03cd054c3cd5fe9aae573ff375986915afb47ae3946be95f7c1dcbbf3"
+        }
+      }
+    },
+    "homelander": {
+      "name": "祖国人",
+      "style": "自信短低嗯，柔和铜管谐波",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 9840,
+          "duration_seconds": 0.615,
+          "pcm_bytes": 19680,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.73e-06,
+          "rms_dbfs": -15.361,
+          "sha256": "0d9bcba9aa9bfe6cd65579316db5aeb0f4b46c64e6909418ad8d925913ed3bd5"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.2e-06,
+          "rms_dbfs": -14.228,
+          "sha256": "2d07fe5485ab96ef6391fcd5bfb39e921fe0ec33c6d4f5fc9b6a0bf13b8b5d01"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": -1.59e-06,
+          "rms_dbfs": -15.633,
+          "sha256": "5e1230a183552e4cbaf840ca862ccfe0c4c8d94b034c13fbefdd0108220f6a2a"
+        }
+      }
+    },
+    "joseph-joestar": {
+      "name": "老年乔瑟夫",
+      "style": "苍老惊讶哦呼感，轻颤音与气尾",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 11920,
+          "duration_seconds": 0.745,
+          "pcm_bytes": 23840,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -9.6e-07,
+          "rms_dbfs": -15.633,
+          "sha256": "2c08ba8c55ff8bbc81d9a5a3fc28e2af9b41aaf3c3e82ba51de5fb01c69057c6"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 11760,
+          "duration_seconds": 0.735,
+          "pcm_bytes": 23520,
+          "peak_dbfs": -6.936,
+          "dc_normalized": 5.3e-07,
+          "rms_dbfs": -14.602,
+          "sha256": "ec023db494c303f6bbe6a6d6c9bab5f0300801372f776902a4765c40ed528244"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 9.9e-07,
+          "rms_dbfs": -16.15,
+          "sha256": "ef35e3c245e42f3ff44f3dbb714f5482b15d464029d014371789852b775556c5"
+        }
+      }
+    },
+    "frank-underwood": {
+      "name": "弗兰克",
+      "style": "克制低沉嗯，平稳短句",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 8560,
+          "duration_seconds": 0.535,
+          "pcm_bytes": 17120,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -2.35e-06,
+          "rms_dbfs": -12.675,
+          "sha256": "32078c2411e3d4926cd98dd092dae6ce964365b8554144f6d5caa87528b7edfc"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -2.34e-06,
+          "rms_dbfs": -12.532,
+          "sha256": "4d5f6302036662671e46b205bd39efc63ebc4dab0ede71f924890c9fb0385bed"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 1.49e-06,
+          "rms_dbfs": -13.432,
+          "sha256": "8c4c287ab48012f19290fd3993cae90e3c83c2b332d585fcd7e79cce07424b4e"
+        }
+      }
+    },
+    "heisenberg": {
+      "name": "海森堡",
+      "style": "低沙哑哼，柔和颗粒气息",
+      "revision": 1,
+      "clips": {
+        "complete": {
+          "file": "complete.wav",
+          "samples": 10320,
+          "duration_seconds": 0.645,
+          "pcm_bytes": 20640,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -4.6e-07,
+          "rms_dbfs": -15.525,
+          "sha256": "ee7d3cdb979bc0de381b251b328e64e652f7fb05c0d88b616b66025e93d3b4ff"
+        },
+        "waiting": {
+          "file": "waiting.wav",
+          "samples": 9680,
+          "duration_seconds": 0.605,
+          "pcm_bytes": 19360,
+          "peak_dbfs": -6.936,
+          "dc_normalized": -1.14e-06,
+          "rms_dbfs": -14.116,
+          "sha256": "36cb9d74c75ec6faaf676060f46fba3dbb2ae32c19452d4b6607c65a9f9eb0e7"
+        },
+        "error": {
+          "file": "error.wav",
+          "samples": 12400,
+          "duration_seconds": 0.775,
+          "pcm_bytes": 24800,
+          "peak_dbfs": -7.132,
+          "dc_normalized": 1.4e-07,
+          "rms_dbfs": -15.355,
+          "sha256": "eb6c9d7652e53d80144027c2b97443ac151a474ca6e4ff46c5695680dd1483eb"
+        }
+      }
+    }
+  },
+  "qa": {
+    "clip_count": 42,
+    "distinct_file_hashes": 42,
+    "snowball_revision": 2,
+    "snowball_v1_history_preserved": true,
+    "snowball_v2_differs_from_v1": true,
+    "signal_checks_passed": true
+  },
+  "source_history": {
+    "snowball-v1": {
+      "path": "source-history/snowball-v1",
+      "sha256": {
+        "complete": "352f938b656d7d71ad6ea1143c7ca33d30b8e04cf1d5b013eefdf2cbe275d47c",
+        "waiting": "2dd959f19071a356c14337bee36af17cfe5e9b3cbf73bbbb57b87f4c4087e124",
+        "error": "baac7e8149bd3d9318aac79d971becf18b87553588b8d19d0254c33f53991307"
+      }
+    }
+  },
+  "host_playback": "Reusable WAV assets only; the desktop Pets API has no supported audio extension and does not automatically play these files."
+}

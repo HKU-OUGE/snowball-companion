@@ -1,0 +1,24 @@
+{
+  "name": "酷洛米",
+  "english_name": "Kuromi",
+  "asset_key": "kuromi-v2-8db7d23a0942",
+  "description": "Kuromi, white face inside black jester rabbit-eared hood with pink skull emblem, tiny pink nose, impish smile. [Snowball Companion: 8db7d23a0942]",
+  "file": "atlas.png",
+  "sha256": "8db7d23a0942a9030a7806ad34428089f97bc83804c7523758cfb11e5bffc463",
+  "width": 1536,
+  "height": 2288,
+  "version": 2,
+  "frames_per_row": [
+    6,
+    8,
+    8,
+    4,
+    5,
+    8,
+    6,
+    6,
+    6,
+    8,
+    8
+  ]
+}
