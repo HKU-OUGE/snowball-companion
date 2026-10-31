@@ -1,6 +1,6 @@
 {
   "name": "xueqiu-status",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Snowball Companion — a switchable pixel Pet library with optional local AI status and Bluetooth companion display.",
   "hooks": "./hooks/hooks.json",
   "interface": {

@@ -570,6 +570,9 @@ class StatusHub:
             directory=getattr(self.desktop,'directory',None)
             directory_rows=directory.rows if isinstance(getattr(directory,'rows',None),dict) and directory.fresh() is True else None
             result['directory_available']=directory_rows is not None
+            activity=getattr(self.desktop,'activity',None)
+            if isinstance(getattr(activity,'value',None),dict):
+                result['activity_coverage']=dict(activity.value)
             result['can_create']=bool(directory_rows and self.desktop.available() and self.desktop.app_tools.available())
             for key, record in self.records.items():
                 if record['source']=='codex-hooks' and directory_rows is not None and key not in directory_rows:continue
@@ -745,6 +748,14 @@ def main():
             hub.publish()
     worker = threading.Thread(target=ticker, daemon=True)
     worker.start()
+    # Read-only IPC can time out. Never block state publication or unanswered
+    # question updates behind a slow Desktop inventory request.
+    def activity_ticker():
+        while not stop.wait(1):
+            with hub.lock: records={k:dict(v) for k,v in hub.records.items()}
+            desktop.activity.refresh(desktop.directory,records)
+    activity_worker=threading.Thread(target=activity_ticker,daemon=True)
+    activity_worker.start()
     print(f'Snowball status hub listening on 127.0.0.1:{server.server_port}', flush=True)
     print(f'Private snapshot: {hub.snapshot_path}', flush=True)
     def terminate(*_):

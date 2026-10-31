@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from attention_relay import question_packets
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / 'main/xueqiu_ble.c').is_file(), "Private firmware parity test; firmware is not part of the plugin distribution")
 class NativeAttentionTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):

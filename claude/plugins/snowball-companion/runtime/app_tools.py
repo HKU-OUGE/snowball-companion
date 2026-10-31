@@ -11,7 +11,8 @@ import stat
 import struct
 import uuid
 
-ALLOWED={'list_projects','send_message_to_thread','create_thread'}
+READ_ONLY={'list_projects','list_threads','read_thread'}
+ALLOWED=READ_ONLY|{'send_message_to_thread','create_thread'}
 class AppToolError(ValueError):
     def __init__(self,code,uncertain=False):self.code=code;self.uncertain=uncertain;super().__init__(code)
 
@@ -84,11 +85,11 @@ class AppTools:
         if not spec:raise AppToolError('desktop_action_unavailable')
         value=self.rpc('tools/call',{'arguments':args,'callerSource':'codex','hostId':'local',
             'namespace':'codex_app','threadId':caller,'tool':tool,
-            'turnId':'snowball-device-'+request_id,'callId':'snowball-device-'+request_id},write=tool!='list_projects')
-        if not isinstance(value,dict) or value.get('success') is not True:raise AppToolError('delivery_unconfirmed',tool!='list_projects')
+            'turnId':'snowball-device-'+request_id,'callId':'snowball-device-'+request_id},write=tool not in READ_ONLY)
+        if not isinstance(value,dict) or value.get('success') is not True:raise AppToolError('delivery_unconfirmed',tool not in READ_ONLY)
         for item in value.get('contentItems',[]):
             if item.get('type')=='inputText':
                 try:result=json.loads(item['text'])
                 except (ValueError,KeyError,TypeError):continue
                 if isinstance(result,dict):return result
-        raise AppToolError('delivery_unconfirmed',tool!='list_projects')
+        raise AppToolError('delivery_unconfirmed',tool not in READ_ONLY)

@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / 'main/xueqiu_ble.c').is_file(), "Private firmware parity test; firmware is not part of the plugin distribution")
 class NativeCatalog(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

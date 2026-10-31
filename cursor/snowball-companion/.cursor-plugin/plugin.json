@@ -1,8 +1,15 @@
 {
   "name": "snowball-companion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Local observational Cursor Agent status for Snowball Companion.",
-  "author": { "name": "Snowball Companion" },
+  "author": {
+    "name": "Snowball Companion"
+  },
   "homepage": "https://snowball.pet",
-  "keywords": ["snowball", "companion", "status", "esp32"]
+  "keywords": [
+    "snowball",
+    "companion",
+    "status",
+    "esp32"
+  ]
 }

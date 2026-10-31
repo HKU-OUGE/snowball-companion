@@ -1,4 +1,4 @@
-# Snowball Companion for Claude Code · 0.1.0
+# Snowball Companion for Claude Code · 0.2.0
 
 让雪球显示 Claude Code 的会话状态。适用于 **Claude Code Desktop 的本地 Code 会话与本机 CLI**，复用现有 Snowball Hub → 蓝牙／Wi-Fi → ESP32 通道。不会烧录固件，也不会改动 Codex 插件或设备上的角色资源。
 

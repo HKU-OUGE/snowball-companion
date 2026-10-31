@@ -1,4 +1,10 @@
-# Snowball Companion · 0.4.1
+# Snowball Companion · 0.5.0
+
+## 0.5.0 更新
+
+本版同步独立 Codex 活动核查、空闲依据、经过验签的固件下载缓存及蓝牙暂存客户端。下载与安装分开，设备自行决定安装时机；可靠活动覆盖只限本机 Codex Desktop。详见 [新手指南](../docs/START-HERE.md) 和 [更新说明](../docs/UPDATES.md)。
+
+Core 包只含雪球基础 Pet；完整包包含角色库。两者沿用相同插件 ID。下面的历史设备版本记录不代表本次重新进行了实机验收。
 
 **0.17.0 设备/电脑伴随端更新**：会话列表包含全部本机未归档Codex用户聊天，空闲聊天可主动布置任务，底部可确认创建独立聊天。网页支持文字或录音，设备使用既有语音输入；默认设置与权限不变。详见 [会话与任务](docs/SIDEBAR-TASKS.md)。
 
@@ -17,6 +23,8 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 随包 PNG 为 1536×2288、73 个有效帧，已通过 Pets 校验；不依赖过期 URL，不包含作者的账号 Pet ID。安装标记只写入接收者私有状态目录；换账号后必须重新核对 Pet 归属。没有 Pets 能力的宿主会明确提示未完成，不伪报安装成功。
 
 ## 本地安装与升级
+
+安装、升级或卸载的 Agent 操作规范见 [插件生命周期说明](plugins/xueqiu-status/skills/setup/references/plugin-lifecycle.md)。普通卸载只移除 Codex 适配器，账号 Pet、共享服务与配对数据分别管理。
 
 保留此目录完整，在固定位置运行：
 

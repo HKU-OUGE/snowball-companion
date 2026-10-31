@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import unittest
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / 'main/fonts/ui_font18b.c').is_file(), "Private firmware parity test; firmware is not part of the plugin distribution")
 class TextCoverage(unittest.TestCase):
     def test_question_arrows_and_status_symbols_have_glyphs(self):
         source=(Path(__file__).parents[1]/'main/fonts/ui_font18b.c').read_text()

@@ -1,13 +1,34 @@
 {
-  "version": "0.1.0",
-  "format": "Cursor Plugin, .cursor-plugin/plugin.json with hooks/hooks.json",
-  "host_tests": 9,
-  "host_tests_status": "passed",
-  "tests_cover": ["authenticated HTTP to an isolated bundled Hub", "per-session lifecycle", "late and reordered generations", "denial and tool failure semantics", "no synthetic waiting", "local privacy boundary", "failed delivery is not replayed", "hook manifest and fail-open malformed input"],
-  "local_hub_health": "authenticated read-only doctor passed",
-  "cursor_app": "not found on this computer; native plugin discovery and real Agent events not yet tested",
-  "device": "existing Snowball Hub/bridge integration reused; this Cursor plugin was not tested end-to-end on the physical display",
-  "platform": "Linux host tests only; macOS not tested, native Windows unsupported",
-  "hardware_firmware_changes": false,
-  "public_marketplace_published": false
+  "version": "0.2.0",
+  "release": "0.5.0",
+  "historical_validation": {
+    "version": "0.1.0",
+    "format": "Cursor Plugin, .cursor-plugin/plugin.json with hooks/hooks.json",
+    "host_tests": 9,
+    "host_tests_status": "passed",
+    "tests_cover": [
+      "authenticated HTTP to an isolated bundled Hub",
+      "per-session lifecycle",
+      "late and reordered generations",
+      "denial and tool failure semantics",
+      "no synthetic waiting",
+      "local privacy boundary",
+      "failed delivery is not replayed",
+      "hook manifest and fail-open malformed input"
+    ],
+    "local_hub_health": "authenticated read-only doctor passed",
+    "cursor_app": "not found on this computer; native plugin discovery and real Agent events not yet tested",
+    "device": "existing Snowball Hub/bridge integration reused; this Cursor plugin was not tested end-to-end on the physical display",
+    "platform": "Linux host tests only; macOS not tested, native Windows unsupported",
+    "hardware_firmware_changes": false,
+    "public_marketplace_published": false
+  },
+  "current_package_validation": {
+    "date": "2026-11-01",
+    "tests_passed": 38,
+    "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider cursor/tests",
+    "scope": "Isolated host tests; includes 29 shared activity/OTA regressions. No live host plugin install, service changes, firmware updates or real Agent/device test.",
+    "real_host_installation_tested": false,
+    "real_device_end_to_end_tested": false
+  }
 }

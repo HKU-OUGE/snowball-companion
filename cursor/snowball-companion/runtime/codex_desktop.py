@@ -27,6 +27,7 @@ from datetime import datetime
 from attention_model import clean_question, QID
 from desktop_directory import DesktopDirectory
 from app_tools import AppTools, AppToolError
+from codex_activity import CodexActivity
 
 
 def opaque(value):
@@ -163,6 +164,7 @@ class CodexDesktop:
         self.last_index = 0
         self.directory=DesktopDirectory(self.home)
         self.app_tools=AppTools(self.home)
+        self.activity=CodexActivity(self.app_tools)
 
     def route(self, session, question):
         if not session.startswith('codex-hooks/') or not QID.fullmatch(session.split('/',1)[1]): return None

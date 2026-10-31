@@ -1,6 +1,10 @@
 # Snowball Companion for Cursor
 
-这是一个 Cursor 原生插件包，用于把本机 Cursor Agent 会话的可观察状态发送给现有 Snowball Hub，让雪球通过已有的蓝牙或 Wi-Fi 链路显示。插件版本 0.1.0。
+## 0.2.0 更新
+
+配套公共运行时与 Codex 0.5.0 同步，包含认证蓝牙更新客户端；Cursor Hooks、命令和入口保持独立。单独启动的 Hub 不启用 Codex 活动轮询，没有可靠空闲依据时不自动安装。详见 [新手指南](../docs/START-HERE.md) 和 [更新说明](../docs/UPDATES.md)。包构建和隔离测试不等于真实 Agent 或实体设备验收。
+
+这是一个 Cursor 原生插件包，用于把本机 Cursor Agent 会话的可观察状态发送给现有 Snowball Hub，让雪球通过已有的蓝牙或 Wi-Fi 链路显示。插件版本 0.2.0。
 
 ## 安装
 
@@ -80,7 +84,7 @@ python3 -m venv ~/.local/share/snowball-companion/venv
 ~/.local/share/snowball-companion/venv/bin/python runtime/bridge.py watch --source ~/.local/state/xueqiu/hub/snapshot.json
 ```
 
-串口路径 `/dev/ttyACM0` 仅为 Linux 示例，应先确认实际设备。独立配对、macOS 和 Cursor Agent 实机流程没有在本次打包中验证。卸载插件时，退出 Cursor 后删除 `~/.cursor/plugins/local/snowball-companion/`；共享 Hub 与设备配对信息会保留。插件状态位于 `~/.config/xueqiu/hook-state/cursor-agent-plugin/`。
+串口路径 `/dev/ttyACM0` 仅为 Linux 示例，应先确认实际设备。独立配对、macOS 和 Cursor Agent 实机流程没有在本次打包中验证。卸载手动复制的插件时，先核对服务的 `ExecStart` 和前台进程是否引用该目录的 `runtime/`；若仍被使用，先迁移共享运行时或在用户要求停用整个产品时一并停止。退出 Cursor 后，将 `~/.cursor/plugins/local/snowball-companion/` 移出本地插件扫描目录作为备份，或删除已核对归属的这个精确目录，然后重新打开 Cursor 验证不再加载。不要删除整个 `.cursor` 配置；共享 Hub 与设备配对信息默认保留。插件状态位于 `~/.config/xueqiu/hook-state/cursor-agent-plugin/`。
 
 接口依据：[Cursor Plugins](https://cursor.com/docs/plugins)、[Plugins reference](https://cursor.com/docs/reference/plugins)、[Hooks](https://cursor.com/docs/hooks)。这是独立第三方插件，并非 Cursor 官方发布。
 

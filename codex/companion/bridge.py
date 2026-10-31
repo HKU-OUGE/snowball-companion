@@ -680,6 +680,7 @@ async def connected_session(args, config):
     device = await find_device(config)
     agent = await linux_agent(device)
     speech = None
+    ota = None
     try:
         async with BleakClient(device, timeout=20, pair=sys.platform != 'linux') as client:
             await read_info(client, config)
@@ -712,6 +713,35 @@ async def connected_session(args, config):
             pets = args._pet_relay
             from network_provision import NetworkProvision
             network = NetworkProvision()
+            from ota_idle_heartbeat import IdleHeartbeat
+            from ota_relay import OtaRelay
+            idle_heartbeat = IdleHeartbeat()
+            ota = OtaRelay()
+            last_ota_service = 0.0
+            def ota_should_stop():
+                if speech.latency_sensitive:return True
+                try:
+                    p=json.loads((power.root/'latest.json').read_text())
+                    return not (p.get('device')==config['device'] and p.get('connected') is True and
+                        p.get('valid') is True and p.get('power') in (2,3) and
+                        type(p.get('percent')) is int and p['percent']>=30 and
+                        0<=time.time()-p.get('received_at',0)<25)
+                except (OSError,ValueError,TypeError):return True
+            async def ota_service_live():
+                nonlocal last_ota_service
+                now=time.monotonic()
+                if now-last_ota_service<1:return False
+                last_ota_service=now;current=None;current_target=None
+                try:
+                    current=json.loads(args.source.read_text()) if args.source else None
+                    current_target=parse_source(current)
+                except (OSError,ValueError,TypeError):pass
+                await attention.step(client,config,current)
+                await relay.step(client,config,current_target)
+                await idle_heartbeat.step(client,config,read_info,current)
+                await power.step(client,config,read_info,current,current_target)
+                await speech.step(client,config,current)
+                return True
             source_notice = None
             previous = None
             last_bulk = float('-inf')
@@ -775,8 +805,18 @@ async def connected_session(args, config):
                 except Exception as error:
                     print(f'Speech transport failed: {type(error).__name__}; ATT={getattr(error,"code",None)}',flush=True)
                     raise
+                if args.command=='watch':
+                    try:
+                        await idle_heartbeat.step(client,config,read_info,payload)
+                        await ota.step(client,config,read_info,ota_service_live,ota_should_stop)
+                    except Exception as error:
+                        # Maintenance must not take down normal task status.
+                        if ota.notice!='maintenance_unavailable':
+                            print(f'OTA maintenance unavailable: {type(error).__name__}',flush=True)
+                        ota.notice='maintenance_unavailable'
                 await asyncio.sleep(.03 if speech.transferring else .2)
     finally:
+        if ota is not None:ota.close()
         if speech is not None:
             await speech.close()
         if agent:

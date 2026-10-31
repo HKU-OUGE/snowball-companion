@@ -38,10 +38,10 @@ class CodexAdapterTests(unittest.TestCase):
             path = Path(directory) / 'state_5.sqlite'
             with sqlite3.connect(path) as db:
                 db.execute('CREATE TABLE threads (id TEXT PRIMARY KEY, name TEXT, title TEXT)')
-                db.execute('INSERT INTO threads VALUES (?, ?, ?)', ('named', '创建像素卡通小宠物', 'SECRET_FIRST_PROMPT'))
+                db.execute('INSERT INTO threads VALUES (?, ?, ?)', ('named', '演示项目测试会话', 'SECRET_FIRST_PROMPT'))
                 db.execute('INSERT INTO threads VALUES (?, ?, ?)', ('unnamed', None, 'SECRET_FIRST_PROMPT'))
                 db.execute('INSERT INTO threads VALUES (?, ?, ?)', ('cleared', '', 'SECRET_FIRST_PROMPT'))
-            self.assertEqual(adapter.session_title('named', directory), '创建像素卡通小宠物')
+            self.assertEqual(adapter.session_title('named', directory), '演示项目测试会话')
             self.assertIsNone(adapter.session_title('unnamed', directory))
             self.assertEqual(adapter.session_title('cleared', directory), '')
 

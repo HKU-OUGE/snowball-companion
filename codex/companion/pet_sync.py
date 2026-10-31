@@ -74,7 +74,8 @@ class PetRelay:
     Keep this object across BLE reconnects. Operations remain sequential with the
     existing status/catalogue writers, so shared packet sequences cannot race.
     """
-    def __init__(self, logger=None):
+    def __init__(self, logger=None, io_timeout=IO_TIMEOUT):
+        self.io_timeout = io_timeout
         self.attempted = OrderedDict()
         self.pending = None
         self.last_poll = float('-inf')
@@ -89,7 +90,7 @@ class PetRelay:
         if now - self.last_poll < POLL_SECONDS:
             return None
         self.last_poll = now
-        info = await asyncio.wait_for(read_info(client, config), IO_TIMEOUT)
+        info = await asyncio.wait_for(read_info(client, config), self.io_timeout)
         if info.get('pet_v') != 1:
             self.pending = None
             return None
@@ -128,5 +129,5 @@ class PetRelay:
             self.attempted.popitem(last=False)
         self.pending = {'nonce': nonce, 'revision': revision, 'character_id': character,
                         'sequence': info['accepted'] + 1, 'started': now}
-        await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), IO_TIMEOUT)
+        await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), self.io_timeout)
         return None

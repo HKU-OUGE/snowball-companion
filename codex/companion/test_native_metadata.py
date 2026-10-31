@@ -6,6 +6,7 @@ import tempfile
 import unittest
 
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / 'main/xueqiu_ble.c').is_file(), "Private firmware parity test; firmware is not part of the plugin distribution")
 class NativeMetadataTests(unittest.TestCase):
     def test_native_validator_unicode_and_malformed_bytes(self):
         source = Path(__file__).resolve().parent.parent / 'main/xueqiu_ble.c'

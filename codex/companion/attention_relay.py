@@ -9,6 +9,7 @@ import struct
 import time
 
 from attention_model import QID, clean_question
+from bridge import transport_io_timeout
 
 ACTIONS = {3: 'snooze', 4: 'ignore', 5: 'restore'}
 STATUS = {'active': 0, 'snoozed': 1, 'ignored': 2}
@@ -153,7 +154,7 @@ class AttentionRelay:
                 packet = head + hmac.digest(bytes.fromhex(config['key']), head, 'sha256')
                 if len(packet) > 272:
                     raise ValueError('Question packet exceeds ATT limit')
-                await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), 8)
+                await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), transport_io_timeout(client))
                 info = dict(info, accepted=info['accepted'] + 1)
             self.sent_at[p] = time.monotonic()
             self.fingerprints[p] = fingerprint
@@ -200,6 +201,6 @@ class SummaryRelay:
             info=await self.read_info(client,config)
             for op,body in packets:
                 head=struct.pack('<BBBI8s',7,p,op,info['accepted']+1,bytes.fromhex(info['nonce']))+body
-                await asyncio.wait_for(client.write_gatt_char(WRITE,head+hmac.digest(bytes.fromhex(config['key']),head,'sha256'),response=True),8)
+                await asyncio.wait_for(client.write_gatt_char(WRITE,head+hmac.digest(bytes.fromhex(config['key']),head,'sha256'),response=True),transport_io_timeout(client))
                 info=dict(info,accepted=info['accepted']+1)
             self.fingerprints[p]=fp;self.sent_at[p]=time.monotonic()

@@ -1,11 +1,21 @@
 ---
 name: setup
-description: Set up Snowball Companion, list its character library, install or switch a bundled ChatGPT Pet, or check an existing installation. Optional Bluetooth companion display setup is separate.
+description: Set up, install, upgrade, inspect, or uninstall the Snowball Companion Codex plugin; list, install, or switch its bundled ChatGPT Pets. Shared device services and account Pets have separate removal scopes.
 ---
 
 # Snowball Companion setup and character switching
 
 Use this workflow when the user runs Setup or asks to list, install, or switch a companion. The host exposes this skill as the plugin setup action; it is not a silent installation hook. The user's explicit switch request authorizes selecting that character; do not ask for the same permission again.
+
+## Software installation and removal
+
+For plugin package installation, upgrade, inspection, uninstall, or cleanup,
+read [plugin lifecycle](references/plugin-lifecycle.md). Use its discovery and
+scope checks before changing a host installation. A documentation-only request
+must not perform installation or removal. If the user names only a Pet, keep
+that request in the authenticated Pets workflow instead of removing software.
+
+For Pet setup or switching, continue below. Hardware services remain optional.
 
 ## Choose a character
 

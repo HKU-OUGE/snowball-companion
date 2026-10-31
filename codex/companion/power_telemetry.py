@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import struct
 import time
+from bridge import transport_io_timeout
 
 POWER = '9e7a0004-6ed4-4b6b-bf37-43dc42838c20'
 WRITE = '9e7a0003-6ed4-4b6b-bf37-43dc42838c20'
@@ -94,14 +95,14 @@ class PowerRelay:
             info = await read_info(client, config)
             key = bytes.fromhex(config['key'])
             if now - self.last_clock >= 600 or info['nonce'] != self.last_boot:
-                await asyncio.wait_for(client.write_gatt_char(WRITE, clock_packet(key, info, int(time.time())), response=True), 8)
+                await asyncio.wait_for(client.write_gatt_char(WRITE, clock_packet(key, info, int(time.time())), response=True), transport_io_timeout(client))
                 self.last_clock = now
                 self.last_boot = info['nonce']
-            raw = bytes(await asyncio.wait_for(client.read_gatt_char(POWER), 8))
+            raw = bytes(await asyncio.wait_for(client.read_gatt_char(POWER), transport_io_timeout(client)))
             row = decode(raw, key, info['nonce'])
             received = time.time()
             row.update(received_at=received, received_iso=datetime.datetime.fromtimestamp(received, datetime.timezone.utc).isoformat(),
-                       connected=True, device=config['device'], source='device',
+                       connected=True, device=config['device'], source='device', transport='wifi' if getattr(client,'transport',None)=='wifi' else 'ble',
                        provider=(source or {}).get('provider'),
                        task_fresh=(source or {}).get('task_fresh') is True,
                        status_current=target is not None and (target.valid_until is None or target.valid_until > received),

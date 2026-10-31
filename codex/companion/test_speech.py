@@ -62,6 +62,7 @@ class Messages(unittest.TestCase):
             with self.assertRaises(Invalid):self.hub.message({**self.request,**patch})
         self.desktop.deliver_instruction.assert_not_called()
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / 'main/speech_adpcm.h').is_file(), "Private firmware parity test; firmware is not part of the plugin distribution")
 class AdpcmParity(unittest.TestCase):
     def test_native_encoder_matches_standard_reference(self):
         root=Path(__file__).resolve().parents[1]

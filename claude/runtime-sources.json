@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "plugin_version": "0.2.0",
+  "note": "Reviewed shared runtime, relative package paths only; not proof of host or hardware validation.",
+  "files": {
+    "plugins/snowball-companion/runtime/app_tools.py": {
+      "sha256": "66dec2d150182c4e88b6c3cc4433bdcdc1778e7ef15d376fbd5436b306ff7079",
+      "bytes": 6074
+    },
+    "plugins/snowball-companion/runtime/attention_model.py": {
+      "sha256": "8ed7702eb5b9d8f542530a6832c4b2c8b578139e825f6c6f24576d96c13159e7",
+      "bytes": 2534
+    },
+    "plugins/snowball-companion/runtime/attention_relay.py": {
+      "sha256": "113af915dc1550d2cdf26fa5039b4af9c6ce8b6c051a452fe8c3ec79f0d36b0c",
+      "bytes": 10761
+    },
+    "plugins/snowball-companion/runtime/bridge.py": {
+      "sha256": "80236eb346835c2b4fcbd9586c022ecfcf31d45b604fb270a0131bbdfd3404ca",
+      "bytes": 48233
+    },
+    "plugins/snowball-companion/runtime/codex_activity.py": {
+      "sha256": "388ec0c791fa0239af19a3af06a8a60a42a8890378fe4f5dc64031d076b35862",
+      "bytes": 7579
+    },
+    "plugins/snowball-companion/runtime/codex_desktop.py": {
+      "sha256": "b9d664db3f40bf51cb2726d945c3d74b114a7e322b02f916cf8923013be593ca",
+      "bytes": 17140
+    },
+    "plugins/snowball-companion/runtime/desktop_directory.py": {
+      "sha256": "bf8d53b7c706cf8e1a7bc8899ed600d904765173a86b3383f431405832b30444",
+      "bytes": 3345
+    },
+    "plugins/snowball-companion/runtime/manage.py": {
+      "sha256": "da129617cdb92681c9edb9b0960b7b3ec350fafecec27d838029fa181184926e",
+      "bytes": 3900
+    },
+    "plugins/snowball-companion/runtime/network_provision.py": {
+      "sha256": "28dc1bd345f433a19ecb0571c4f6a14a5a2a125261cac765e66870f29f1f524f",
+      "bytes": 4700
+    },
+    "plugins/snowball-companion/runtime/network_security.py": {
+      "sha256": "dc6772399d4509c0c0b797885da4821f44071f49500a7dba788cb55a6d15b54d",
+      "bytes": 6631
+    },
+    "plugins/snowball-companion/runtime/ota_ble_frames.py": {
+      "sha256": "45531e2a7d41a626aedac868612a87d9e68f3099cb13edf0a3300097737ec30b",
+      "bytes": 2130
+    },
+    "plugins/snowball-companion/runtime/ota_ble_gatt.py": {
+      "sha256": "d997ef4eb0e00aead50471138ed140e1924b447867531e9c75ba598e1c2b6926",
+      "bytes": 1178
+    },
+    "plugins/snowball-companion/runtime/ota_ble_sender.py": {
+      "sha256": "c3fd94818eca0b7d3f0d2bfe80d63b29519dab10dd67309daae63aa9f47b9e4e",
+      "bytes": 3114
+    },
+    "plugins/snowball-companion/runtime/ota_ble_status.py": {
+      "sha256": "f7ee9c5ba94f02783cecacbe65a2f6ebf081a9e801ac314aa42611db55c38169",
+      "bytes": 1927
+    },
+    "plugins/snowball-companion/runtime/ota_download.py": {
+      "sha256": "58e11897b83cb5a7f53ba0b3275f536102eda397108f30db3ea0e02bdf55544d",
+      "bytes": 5907
+    },
+    "plugins/snowball-companion/runtime/ota_idle.py": {
+      "sha256": "69956dc8eb280d55c9e1ea718c83076fc31e8768be7d7ab9fbb0cb4007570b32",
+      "bytes": 4004
+    },
+    "plugins/snowball-companion/runtime/ota_idle_heartbeat.py": {
+      "sha256": "1e146f84a8c6ce9dd01c213a29e9b24226f6db22ac6a25c66af30a17095a9110",
+      "bytes": 1024
+    },
+    "plugins/snowball-companion/runtime/ota_relay.py": {
+      "sha256": "3513896630b3d40120868495bbce40a9751f9f0314165fada865bf3c0f3745e3",
+      "bytes": 2075
+    },
+    "plugins/snowball-companion/runtime/pet_sync.py": {
+      "sha256": "cac92d7b2987f6f243faf79f7d2680640085ae58a3f014c52ef58094044bbbf5",
+      "bytes": 6004
+    },
+    "plugins/snowball-companion/runtime/power_telemetry.py": {
+      "sha256": "65d1498f8af5af6bd66ed2db43db1c861d573ac614951a3f9bfd0f9d7baee633",
+      "bytes": 6645
+    },
+    "plugins/snowball-companion/runtime/speech_relay.py": {
+      "sha256": "7adfe43fc441ad3c6327aa1e620c687f391594238bb251a80c81b39da0e92b5b",
+      "bytes": 16737
+    },
+    "plugins/snowball-companion/runtime/status_hub.py": {
+      "sha256": "5d3104b40b5fd4a20a24eed0ed8150a2e761f130048999fdf42bc18352a8d06b",
+      "bytes": 43056
+    },
+    "plugins/snowball-companion/runtime/user_services.py": {
+      "sha256": "ca14bcb37eaefeb783bc45fc8ad45d8e6aa50c536005f2c7a56784deea4b83ee",
+      "bytes": 3819
+    }
+  }
+}

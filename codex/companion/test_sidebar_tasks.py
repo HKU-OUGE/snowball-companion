@@ -82,6 +82,7 @@ class ConfirmedCreation(unittest.TestCase):
   for value in [{**payload,'can_create':False},{**payload,'generated_at':time.time()-30}]:
    with self.assertRaises(ValueError):bound_target(value,meta)
 
+@unittest.skipUnless((Path(__file__).resolve().parents[1] / "main/ble_info_wire.h").is_file(), "Private firmware parity test; firmware is not part of this distribution")
 class ExpandedInfo(unittest.TestCase):
  def test_maximum_packed_order_and_three_hmacs_fit_attribute(self):
   root=Path(__file__).parents[1]
