@@ -241,7 +241,9 @@ def reject_unsigned_control(port):
         connection.close()
 
 
-def verify_hub_health(home):
+def authenticated_hub_get(home, endpoint):
+    if endpoint not in ('/v1/health', '/v1/snapshot'):
+        raise ValueError('Unexpected smoke Hub endpoint')
     from platform_support import private_file_ok, open_nofollow
     path = home/'.config/xueqiu/hub-token'
     if not private_file_ok(path):
@@ -250,13 +252,56 @@ def verify_hub_health(home):
         token = source.read(130).strip()
     connection = http.client.HTTPConnection('127.0.0.1', 4190, timeout=3)
     try:
-        connection.request('GET', '/v1/health', headers={'Authorization': 'Bearer '+token})
+        connection.request('GET', endpoint, headers={'Authorization': 'Bearer '+token})
         response = connection.getresponse()
-        value = json.loads(response.read(1024))
-        if response.status != 200 or value.get('ok') is not True or value.get('hub_alive') is not True:
-            raise ValueError('Real isolated Hub health check failed')
+        raw = response.read(262145)
+        if response.status != 200 or len(raw) > 262144:
+            raise ValueError('Isolated authenticated Hub read failed')
+        value = json.loads(raw)
+        if not isinstance(value, dict):
+            raise ValueError('Invalid isolated Hub response')
+        return value
     finally:
         connection.close()
+
+
+def verify_hub_health(home):
+    value = authenticated_hub_get(home, '/v1/health')
+    if value.get('ok') is not True or value.get('hub_alive') is not True:
+        raise ValueError('Real isolated Hub health check failed')
+
+
+def verify_hook_to_hub(cli, home, run):
+    """Synthetic lifecycle only: real installed Hook -> HTTP -> real Hub."""
+    script = Path(cli).parent/'_internal/bundled/codex/plugins/xueqiu-status/scripts/codex_hook.py'
+    if not script.is_file():
+        raise ValueError('Installed bundled Hook is missing')
+    session = 'windows-ci-live-hub-合成会话'
+    identity = hashlib.sha256(session.encode('utf-8')).hexdigest()[:32]
+    record_path = home/'.local/state/xueqiu/codex-adapter/hooks'/(identity+'.json')
+    if record_path.exists():
+        raise ValueError('Live Hook fixture session already exists')
+    events = [
+        ({'hook_event_name': 'UserPromptSubmit', 'prompt': '显式合成测试，不请求真实AI操作'}, 'thinking'),
+        ({'hook_event_name': 'PreToolUse', 'tool_name': 'exec_command',
+          'tool_use_id': 'windows-ci-synthetic-exec'}, 'running'),
+        ({'hook_event_name': 'Stop'}, 'completed'),
+    ]
+    for sequence, (event, phase) in enumerate(events, 1):
+        payload = json.dumps({**event, 'session_id': session}, ensure_ascii=False)
+        result = run(cli, 'hook', '--script', script, payload=payload)
+        if json.loads(result.stdout) != {}:
+            raise ValueError('Live synthetic Hook returned an unexpected control decision')
+        record = read_private_json(record_path)
+        delivery = record.get('last_delivery', {})
+        if record.get('seq') != sequence or delivery.get('seq') != sequence or delivery.get('status') != 'accepted':
+            raise ValueError('Synthetic Hook was not accepted by the running Hub')
+        snapshot = authenticated_hub_get(home, '/v1/snapshot')
+        rows = [row for row in snapshot.get('sessions', [])
+                if row.get('source') == 'codex-hooks' and row.get('session_id') == identity]
+        if len(rows) != 1 or rows[0].get('seq') != sequence or rows[0].get('phase') != phase:
+            raise ValueError('Live Hub did not reflect the exact synthetic Hook phase')
+    return 'verified_synthetic'
 
 
 def exercise_runtime(cli, home, run, foreground_launch=None):
@@ -269,7 +314,7 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
     if runtime_session_id() == 0:
         print('::warning::Runtime/autostart smoke skipped: Session 0 is noninteractive; product guard retained')
         return {'state': 'skipped', 'reason': 'session_0_noninteractive',
-                'supervisor': 'not_tested', 'autostart': 'not_tested'}
+                'supervisor': 'not_tested', 'autostart': 'not_tested', 'hook_to_hub': 'not_tested'}
     def command(operation):
         value = json.loads(run(cli, 'runtime', operation).stdout)
         if not isinstance(value, dict):
@@ -330,6 +375,7 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
             foreground_owned = True
         reject_unsigned_control(first['port'])
         verify_hub_health(home)
+        hook_to_hub = verify_hook_to_hub(cli, home, run)
         time.sleep(.3)
         repeated = command('start')
         again = read_private_json(record_path)
@@ -406,7 +452,7 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
             'detached_launch': 'verified_in_ci' if mode == 'detached' else 'rejected_by_ci_host_job',
             'explorer_independent_lifetime': 'not_tested',
             'supervisor': 'survived_launcher_exit' if mode == 'detached' else 'foreground_lifecycle_verified',
-            'hub': 'authenticated_health', 'control_hmac': 'valid_accepted_invalid_rejected',
+            'hub': 'authenticated_health', 'hook_to_hub': hook_to_hub, 'control_hmac': 'valid_accepted_invalid_rejected',
             'repeat_start': 'same_processes', 'bridge': 'missing_credentials',
             'autostart': 'owned_created_and_removed', 'stop': 'confirmed'}
 

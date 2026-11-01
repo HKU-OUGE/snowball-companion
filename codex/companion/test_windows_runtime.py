@@ -4,6 +4,7 @@ Win32 APIs are replaced at their handle boundary on non-Windows hosts. Kernel
 Job Objects, ACLs, Task Scheduler and real BLE still require Windows validation.
 """
 from contextlib import ExitStack, redirect_stderr
+import base64
 import ctypes
 import io
 import json
@@ -52,6 +53,7 @@ class API:
     def gate(self):return self.gate_ok
     def host_job_context(self):return {'in_job':False}
     def account_sid(self,name):raise ValueError('No such fixture account')
+    def task_tool(self):return str(Path(self.me['exe']).absolute().parent/'System32'/'schtasks.exe')
 
 class WindowsRuntimeTests(unittest.TestCase):
     def setUp(self):
@@ -111,7 +113,7 @@ class WindowsRuntimeTests(unittest.TestCase):
     def test_stop_and_autostart_remove_preserve_device_credentials(self):
         credentials=Path(self.temp.name)/'pairing.json';credentials.write_bytes(b'private fixture sentinel')
         self.assertEqual(runtime.stop()['state'],'stopped')
-        with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0x80070002,stdout='')):
+        with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0x80070002,stdout='')):
             runtime.remove_autostart()
         self.assertEqual(credentials.read_bytes(),b'private fixture sentinel')
     def supervisor(self):
@@ -157,16 +159,17 @@ class WindowsRuntimeTests(unittest.TestCase):
         self.assertNotIn('Password',xml);self.assertNotIn('HighestAvailable',xml)
         self.assertFalse(runtime._owned_task(xml,self.prefix,'S-1-5-21-other'))
     def test_cross_user_registration_and_removal_are_rejected_before_schtasks(self):
-        with patch.object(runtime,'_schtasks') as tasks:
+        with patch.object(runtime,'_schtasks') as tasks,patch.object(runtime,'_query_task') as query:
             for operation in (runtime.install_autostart,runtime.remove_autostart):
                 with self.assertRaises(ValueError):operation(user_sid='S-1-5-21-other')
             tasks.assert_not_called()
+            query.assert_not_called()
     def test_foreign_or_elevated_task_is_not_overwritten_or_deleted(self):
         for xml in [runtime._task_xml(self.prefix,'S-1-5-21-other'),runtime._task_xml(self.prefix,self.api.me['sid']).replace('LeastPrivilege','HighestAvailable')]:
-            with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0,stdout=xml)) as tasks:
+            with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0,stdout=xml)),patch.object(runtime,'_schtasks') as tasks:
                 with self.assertRaises(ValueError):runtime.install_autostart()
                 with self.assertRaises(ValueError):runtime.remove_autostart()
-                self.assertTrue(all(call.args[0][0]=='/Query' for call in tasks.call_args_list))
+                tasks.assert_not_called()
     def test_task_install_verifies_export_and_removal_does_not_stop_runtime(self):
         saved=[None];calls=[]
         def tasks(args):
@@ -175,7 +178,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             if args[0]=='/Create':saved[0]=Path(args[args.index('/XML')+1]).read_text(encoding='utf-16')
             if args[0]=='/Delete':saved[0]=None
             return SimpleNamespace(returncode=0,stdout='')
-        with patch.object(runtime,'_schtasks',side_effect=tasks),patch.object(runtime,'stop') as stop:
+        with patch.object(runtime,'_schtasks',side_effect=tasks),patch.object(runtime,'_query_task',side_effect=lambda name:tasks(['/Query',name])),patch.object(runtime,'stop') as stop:
             self.assertTrue(runtime.install_autostart()['installed']);self.assertNotIn('/F',calls[1])
             self.assertTrue(runtime.remove_autostart()['removed']);stop.assert_not_called()
         self.assertFalse(list(self.directory.glob('autostart-*.xml')))
@@ -245,12 +248,12 @@ class WindowsRuntimeTests(unittest.TestCase):
     def test_autostart_status_distinguishes_owned_foreign_and_unknown_without_writes(self):
         sid=self.api.me['sid']
         for xml,expected in [(runtime._task_xml(self.prefix,sid),'owned'),(runtime._task_xml(['old.exe','runtime'],sid),'other')]:
-            with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0,stdout=xml)) as call:
+            with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0,stdout=xml)) as call,patch.object(runtime,'_schtasks') as write:
                 self.assertEqual(runtime.autostart_status()['state'],expected)
-                self.assertEqual(call.call_args.args[0][0],'/Query')
-        with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=1,stdout='')):
+                self.assertEqual(call.call_args.args[0],runtime._task_name(sid));write.assert_not_called()
+        with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=1,stdout='')):
             self.assertIsNone(runtime.autostart_status()['installed']);self.assertEqual(runtime.autostart_status()['state'],'unavailable')
-        with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0x80070002,stdout='')):
+        with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0x80070002,stdout='')):
             self.assertEqual(runtime.autostart_status()['state'],'absent')
     def test_new_install_refuses_old_runtime_and_old_task(self):
         self.record(install='old-installation-id')
@@ -259,7 +262,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             with self.assertRaises(ValueError):runtime.stop()
             rpc.assert_not_called()
         old=runtime._task_xml(['old.exe','runtime'],self.api.me['sid'])
-        with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0,stdout=old)) as call:
+        with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0,stdout=old)) as call:
             with self.assertRaises(ValueError):runtime.install_autostart()
             self.assertEqual(call.call_count,1)
     def test_task_xml_transport_decoding_preserves_non_ascii_paths(self):
@@ -316,7 +319,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             if args[0]=='/Create':saved[0]=self.task_accounts('FIXTURE\\user','FIXTURE\\user')
             if args[0]=='/Delete':saved[0]=None
             return SimpleNamespace(returncode=0,stdout='')
-        with patch.object(self.api,'account_sid',return_value=sid),patch.object(runtime,'_schtasks',side_effect=tasks):
+        with patch.object(self.api,'account_sid',return_value=sid),patch.object(runtime,'_schtasks',side_effect=tasks),patch.object(runtime,'_query_task',side_effect=lambda name:tasks(['/Query',name])):
             self.assertTrue(runtime.install_autostart()['installed'])
             self.assertEqual(runtime.autostart_status()['state'],'owned')
             self.assertTrue(runtime.remove_autostart()['removed'])
@@ -370,11 +373,74 @@ class WindowsRuntimeTests(unittest.TestCase):
             with self.assertRaises(ValueError):api.account_sid(name)
         api.a.LookupAccountNameW.assert_not_called()
     def test_task_access_denied_is_not_absent_and_does_not_create_or_delete(self):
-        with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0x80070005,stdout='')) as call:
+        with patch.object(runtime,'_query_task',return_value=SimpleNamespace(returncode=0x80070005,stdout='')),patch.object(runtime,'_schtasks') as write:
             self.assertEqual(runtime.autostart_status()['state'],'unavailable')
             with self.assertRaises(RuntimeError):runtime.install_autostart()
             with self.assertRaises(RuntimeError):runtime.remove_autostart()
-            self.assertTrue(all(item.args[0][0]=='/Query' for item in call.call_args_list))
+            write.assert_not_called()
+
+    def test_only_missing_run_level_uses_scheduler_least_privilege_default(self):
+        sid=self.api.me['sid'];root=ET.fromstring(runtime._task_xml(self.prefix,sid))
+        principal=root.find('{'+runtime.TASK_NS+'}Principals/{'+runtime.TASK_NS+'}Principal')
+        level=principal.find('{'+runtime.TASK_NS+'}RunLevel');principal.remove(level)
+        self.assertTrue(runtime._owned_task(ET.tostring(root,encoding='unicode'),self.prefix,sid))
+        principal.append(level)
+        for value in ('',' ',None,'HighestAvailable','Unknown','leastprivilege'):
+            level.text=value
+            self.assertFalse(runtime._owned_task(ET.tostring(root,encoding='unicode'),self.prefix,sid))
+        level.text='LeastPrivilege';principal.append(ET.fromstring(ET.tostring(level)))
+        self.assertFalse(runtime._owned_task(ET.tostring(root,encoding='unicode'),self.prefix,sid))
+
+    def test_com_query_preserves_unicode_task_paths_and_uses_fixed_script_and_environment(self):
+        sid=self.api.me['sid'];name=runtime._task_name(sid)
+        base=Path(self.temp.name)/'合成 用户 profile'/'应用 数据'/'本地'
+        prefix=[str(base/'SnowballCLI.exe'),'runtime']
+        with patch.object(runtime,'BASE',base):
+            xml=runtime._task_xml(prefix,sid).replace('<RunLevel>LeastPrivilege</RunLevel>','')
+            raw=json.dumps({'v':1,'ok':True,'xml':xml},ensure_ascii=False).encode('utf-8')
+            native=SimpleNamespace(returncode=0,stdout=raw,stderr=b'PRIVATE_SENTINEL')
+            with patch.object(runtime.subprocess,'run',return_value=native) as run:
+                result=runtime._query_task(name)
+            self.assertEqual(result.returncode,0);self.assertEqual(result.stdout,xml);self.assertEqual(result.stderr,'')
+            self.assertTrue(runtime._owned_task(result.stdout,prefix,sid))
+            self.assertFalse(runtime._owned_task(result.stdout.replace('合成 用户','?? ??'),prefix,sid))
+        argv=run.call_args.args[0]
+        self.assertEqual(Path(argv[0]).name,'powershell.exe')
+        self.assertEqual(base64.b64decode(argv[-1]).decode('utf-16-le'),runtime.TASK_QUERY_SCRIPT)
+        self.assertNotIn(name,runtime.TASK_QUERY_SCRIPT)
+        self.assertEqual(run.call_args.kwargs['env']['SNOWBALL_TASK_NAME'],name)
+        self.assertNotIn('chcp',runtime.TASK_QUERY_SCRIPT.lower())
+        self.assertIn('[Console]::OutputEncoding',runtime.TASK_QUERY_SCRIPT)
+        self.assertIn('$task.Xml',runtime.TASK_QUERY_SCRIPT)
+
+    def test_com_query_preserves_hresult_and_never_treats_permission_or_invalid_output_as_missing(self):
+        name=runtime._task_name(self.api.me['sid'])
+        for code,absent in ((0x80070002,True),(0x80070003,True),(0x80070005,False),(0x80041315,False)):
+            raw=json.dumps({'v':1,'ok':False,'hresult':code}).encode()
+            with patch.object(runtime.subprocess,'run',return_value=SimpleNamespace(returncode=1,stdout=raw,stderr=b'private')):
+                result=runtime._query_task(name)
+            self.assertEqual(result.returncode,code);self.assertEqual(runtime._task_absent(result),absent)
+            self.assertEqual(result.stdout,'');self.assertEqual(result.stderr,'')
+        for raw in (b'private raw error',b'\xff',b'x'*262145,
+                    b'{"v":1,"ok":false,"hresult":0}',b'{"v":1,"ok":false,"hresult":-1}',
+                    b'{"v":1,"ok":false,"hresult":true}',b'{"v":1,"ok":true,"xml":""}'):
+            with patch.object(runtime.subprocess,'run',return_value=SimpleNamespace(returncode=1,stdout=raw,stderr=b'private')):
+                result=runtime._query_task(name)
+            self.assertNotEqual(result.returncode,0);self.assertFalse(runtime._task_absent(result))
+            self.assertEqual(result.stdout,'');self.assertEqual(result.stderr,'')
+        with patch.object(runtime.subprocess,'run') as run:
+            for invalid in ('OtherTask','SnowballCompanion-'+('a'*16)+';exit','../task',None):
+                with self.assertRaises(ValueError):runtime._query_task(invalid)
+            run.assert_not_called()
+
+    def test_com_query_transport_timeout_has_fixed_diagnostic_without_command_leak(self):
+        error=subprocess.TimeoutExpired('PRIVATE_COMMAND_SENTINEL',20)
+        with patch.object(runtime.subprocess,'run',side_effect=error):
+            with self.assertRaises(runtime.RuntimeFailure) as raised:
+                runtime._query_task(runtime._task_name(self.api.me['sid']))
+        report=runtime.error_report(raised.exception)
+        self.assertEqual(report['code'],'task_query_failed')
+        self.assertNotIn('PRIVATE_COMMAND_SENTINEL',json.dumps(report))
     def test_start_uses_hidden_breakaway_process_and_timeout_only_owns_its_handle(self):
         process=Process(123);outsider=Process(999)
         probe=Mock();probe.__enter__=Mock(return_value=probe);probe.__exit__=Mock(return_value=False)

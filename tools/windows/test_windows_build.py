@@ -16,7 +16,7 @@ import zipfile
 from types import SimpleNamespace
 from unittest.mock import patch
 import stage_payload as stage
-from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics, PackagedCommandError, verified_host_job_restriction, launch_foreground_in_ci, collect_task_failure, emit_task_failure
+from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics, PackagedCommandError, verified_host_job_restriction, launch_foreground_in_ci, collect_task_failure, emit_task_failure, verify_hook_to_hub
 import distribution_manifest as native
 
 HERE = Path(__file__).resolve().parent
@@ -280,6 +280,48 @@ class WindowsBuildTest(unittest.TestCase):
         self.assertLessEqual(len(output.getvalue().encode()), 16384)
         self.assertTrue(json.loads(output.getvalue())['truncated'])
 
+    def test_live_hook_to_hub_checks_each_accepted_phase(self):
+        cli = self.root/'installed/SnowballCLI.exe'
+        script = cli.parent/'_internal/bundled/codex/plugins/xueqiu-status/scripts/codex_hook.py'
+        script.parent.mkdir(parents=True); script.write_text('# synthetic entry fixture')
+        calls = []
+        identity = hashlib.sha256('windows-ci-live-hub-合成会话'.encode()).hexdigest()[:32]
+        def hook(executable, *args, payload):
+            self.assertEqual(executable, cli)
+            self.assertEqual(args, ('hook', '--script', script))
+            calls.append(json.loads(payload))
+            return SimpleNamespace(stdout='{}')
+        def record(path):
+            self.assertEqual(path.name, identity+'.json')
+            return {'seq': len(calls), 'last_delivery': {'seq': len(calls), 'status': 'accepted'}}
+        def snapshot(home, endpoint):
+            self.assertEqual(home, self.root); self.assertEqual(endpoint, '/v1/snapshot')
+            return {'sessions': [{'source': 'codex-hooks', 'session_id': identity,
+                'seq': len(calls), 'phase': ['thinking', 'running', 'completed'][len(calls)-1]}]}
+        with patch('smoke_distribution.read_private_json', side_effect=record), \
+             patch('smoke_distribution.authenticated_hub_get', side_effect=snapshot) as reads:
+            self.assertEqual(verify_hook_to_hub(cli, self.root, hook), 'verified_synthetic')
+        self.assertEqual([row['hook_event_name'] for row in calls], ['UserPromptSubmit', 'PreToolUse', 'Stop'])
+        self.assertEqual(calls[1]['tool_name'], 'exec_command')
+        self.assertEqual(reads.call_count, 3)
+
+    def test_live_hook_to_hub_rejects_unconfirmed_delivery_and_wrong_snapshot(self):
+        cli = self.root/'installed/SnowballCLI.exe'
+        script = cli.parent/'_internal/bundled/codex/plugins/xueqiu-status/scripts/codex_hook.py'
+        script.parent.mkdir(parents=True); script.write_text('# synthetic entry fixture')
+        run = lambda *args, **kwargs: SimpleNamespace(stdout='{}')
+        with patch('smoke_distribution.read_private_json', return_value={
+                'seq': 1, 'last_delivery': {'seq': 1, 'status': 'unconfirmed'}}), \
+             patch('smoke_distribution.authenticated_hub_get') as get:
+            with self.assertRaisesRegex(ValueError, 'not accepted'):
+                verify_hook_to_hub(cli, self.root, run)
+        get.assert_not_called()
+        with patch('smoke_distribution.read_private_json', return_value={
+                'seq': 1, 'last_delivery': {'seq': 1, 'status': 'accepted'}}), \
+             patch('smoke_distribution.authenticated_hub_get', return_value={'sessions': []}):
+            with self.assertRaisesRegex(ValueError, 'exact synthetic Hook phase'):
+                verify_hook_to_hub(cli, self.root, run)
+
     def test_pe_architecture_and_gui_console_subsystem(self):
         data = bytearray(256); data[:2] = b'MZ'
         struct.pack_into('<I', data, 0x3c, 0x80)
@@ -312,6 +354,7 @@ class RuntimeSmokeTests(unittest.TestCase):
             patch('smoke_distribution.read_private_json', side_effect=self.read),
             patch('smoke_distribution.reject_unsigned_control'),
             patch('smoke_distribution.verify_hub_health'),
+            patch('smoke_distribution.verify_hook_to_hub', return_value='verified_synthetic'),
             patch('smoke_distribution.emit_task_failure'),
         ]
         self.mocks = [p.start() for p in self.patches]
@@ -361,6 +404,7 @@ class RuntimeSmokeTests(unittest.TestCase):
         self.assertEqual(value['mode'], 'detached')
         self.assertEqual(value['supervisor'], 'survived_launcher_exit')
         self.assertEqual(value['bridge'], 'missing_credentials')
+        self.assertEqual(value['hook_to_hub'], 'verified_synthetic')
         self.assertEqual(self.calls.count('start'), 2)
         self.assertEqual(self.calls[-4:], ['remove-autostart', 'autostart-status', 'stop', 'status'])
         self.assertFalse(self.running); self.assertFalse(self.task)

@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import runpy
+import subprocess
 import sys
 sys.dont_write_bytecode = True
 
@@ -67,7 +68,7 @@ def main(argv=None):
             from windows_install import install_plugin
             print(json.dumps(install_plugin(args.codex), ensure_ascii=False))
             return 0
-    except (OSError, ValueError, RuntimeError) as error:
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         # No exception text: serial, BLE and subprocess errors may contain secrets.
         message = {'ok': False, 'code': type(error).__name__, 'message': '操作未完成，请打开 Snowball 向导查看分层诊断。'}
         if sys.stderr is not None:

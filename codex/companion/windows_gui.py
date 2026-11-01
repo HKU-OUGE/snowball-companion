@@ -251,7 +251,7 @@ class Wizard:
         codex = self.codex.get().strip()
         def action():
             result = subprocess.run([*installer.cli_prefix(), 'install-plugin', '--codex', codex],
-                capture_output=True, timeout=120, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                capture_output=True, timeout=180, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             if result.returncode:
                 raise installer.InstallError('Codex 插件注册失败。请核对 codex.exe 是否支持 plugin 命令，并检查 Codex 插件页；旧 Hooks 已保留。')
             return True

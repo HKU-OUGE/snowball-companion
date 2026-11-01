@@ -12,6 +12,7 @@ winbase/QueryFullProcessImageNameW (learn.microsoft.com/windows/win32).
 """
 from contextlib import contextmanager
 import argparse
+import base64
 import hashlib
 import hmac
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -657,13 +658,18 @@ def _task_ownership_checks(xml,prefix,sid):
         root=ET.fromstring(xml);ns={'t':TASK_NS}
         principals=root.findall('t:Principals/t:Principal',ns);actions=root.findall('t:Actions/*',ns)
         triggers=root.findall('t:Triggers/*',ns)
+        levels=root.findall('t:Principals/t:Principal/t:RunLevel',ns)
         text=lambda path:root.findtext(path,namespaces=ns)
+        # The Scheduler's documented default is LUA and its XML schema makes
+        # RunLevel optional. Only an absent element gets that default; empty,
+        # unknown, duplicate or explicit HighestAvailable remains rejected.
+        least_privilege=not levels or (len(levels)==1 and levels[0].text=='LeastPrivilege')
         return dict(zip(TASK_CHECKS,(
             len(principals)==1,len(actions)==1,len(triggers)==1,
             text('t:RegistrationInfo/t:Description')==_task_marker(sid),
             _task_user_matches(text('t:Principals/t:Principal/t:UserId'),sid),
             text('t:Principals/t:Principal/t:LogonType')=='InteractiveToken',
-            text('t:Principals/t:Principal/t:RunLevel')=='LeastPrivilege',
+            least_privilege,
             _task_user_matches(text('t:Triggers/t:LogonTrigger/t:UserId'),sid),
             os.path.normcase(text('t:Actions/t:Exec/t:Command') or '')==os.path.normcase(prefix[0]),
             text('t:Actions/t:Exec/t:Arguments')==subprocess.list2cmdline([*prefix[1:],'run']),
@@ -700,7 +706,58 @@ def _schtasks(args):
     return result
 
 
-def _query_task(name):return _schtasks(['/Query','/TN',name,'/XML','/HRESULT'])
+TASK_QUERY_SCRIPT = r"""$ErrorActionPreference = 'Stop'
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+try {
+    $service = New-Object -ComObject 'Schedule.Service'
+    $service.Connect()
+    $task = $service.GetFolder('\').GetTask($env:SNOWBALL_TASK_NAME)
+    $result = @{v=1;ok=$true;xml=[string]$task.Xml}
+    [Console]::Out.Write(($result | ConvertTo-Json -Compress -Depth 3))
+    exit 0
+} catch {
+    $exception = $_.Exception
+    while ($null -ne $exception.InnerException) { $exception = $exception.InnerException }
+    $code = ([int64]$exception.HResult) -band 4294967295L
+    [Console]::Out.Write((@{v=1;ok=$false;hresult=$code} | ConvertTo-Json -Compress))
+    exit 1
+}
+"""
+
+
+def _query_task(name):
+    """Read IRegisteredTask.Xml as Unicode, not schtasks' lossy ANSI export.
+
+    No account, path or XML is interpolated into PowerShell. The fixed task name
+    is passed through the environment. COM HRESULTs preserve not-found versus
+    access-denied/service errors; raw PowerShell stderr is never returned.
+    """
+    suffix=name.removeprefix('SnowballCompanion-') if isinstance(name,str) else ''
+    if (not isinstance(name,str) or name!='SnowballCompanion-'+suffix or len(suffix)!=16 or
+        any(c not in '0123456789abcdef' for c in suffix)):
+        raise ValueError('Invalid owned task name')
+    powershell=Path(_api().task_tool()).parent/'WindowsPowerShell'/'v1.0'/'powershell.exe'
+    encoded=base64.b64encode(TASK_QUERY_SCRIPT.encode('utf-16-le')).decode('ascii')
+    try:
+        native=subprocess.run([str(powershell),'-NoProfile','-NonInteractive','-EncodedCommand',encoded],
+            env={**os.environ,'SNOWBALL_TASK_NAME':name},capture_output=True,timeout=20,creationflags=0x08000000)
+    except (OSError,subprocess.SubprocessError) as error:
+        raise RuntimeFailure('task_query_failed',cause=error) from None
+    # E_FAIL on invalid transport; never infer absence from a decoder failure.
+    result=subprocess.CompletedProcess([],0x80004005,stdout='',stderr='')
+    try:
+        if len(native.stdout)>262144:return result
+        payload=json.loads(native.stdout.decode('utf-8-sig'))
+        if not isinstance(payload,dict) or type(payload.get('v')) is not int or payload['v']!=1:return result
+        if (native.returncode==0 and payload.get('ok') is True and
+            set(payload)=={'v','ok','xml'} and isinstance(payload['xml'],str)):
+            result.returncode=0;result.stdout=payload['xml']
+        elif (native.returncode!=0 and payload.get('ok') is False and
+              set(payload)=={'v','ok','hresult'} and type(payload['hresult']) is int and
+              0<payload['hresult']<=0xffffffff):
+            result.returncode=payload['hresult']
+    except (UnicodeError,ValueError):pass
+    return result
 
 
 def _task_absent(result):

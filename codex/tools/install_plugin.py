@@ -113,8 +113,8 @@ def install(codex, market):
         print(f'Old hook files preserved privately: {backup}', flush=True)
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM)}
         try:
-            subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True)
-            subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True)
+            subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True, timeout=45)
+            subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True, timeout=45)
         finally:
             # Run in this same outer process: missing PreToolUse hooks must not prevent repair.
             for sig in handlers:
@@ -135,6 +135,9 @@ def main():
     args = parser.parse_args()
     try:
         install(args.codex, args.market_root.resolve())
+    except subprocess.TimeoutExpired:
+        print('Codex plugin command timed out; old hook restoration was attempted.', file=sys.stderr)
+        return 124
     except subprocess.CalledProcessError as error:
         print(f'Codex installation failed (exit {error.returncode}); old hook restoration was attempted.', file=sys.stderr)
         return error.returncode if error.returncode > 0 else 1
