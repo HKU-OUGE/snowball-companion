@@ -1,5 +1,7 @@
 # Snowball Companion
 
+**Codex 0.6.0 Windows 原生版正在本分支验证：** [安装、首次绑定、后台与诊断](codex/docs/WINDOWS.md)。下面 v0.5.1 链接仍是已有稳定包；不要把它当作新的 Windows 安装器。
+
 雪球是 AI 工作时的桌面伙伴，可选连接 ESP32 圆屏。这里提供 **Codex、Claude Code 和 Cursor 三个独立的电脑插件**及使用教程；不包含网页应用、设备固件或云端服务源码。
 
 ## 下载与安装

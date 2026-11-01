@@ -14,6 +14,7 @@ from pathlib import Path
 import re
 import struct
 import time
+import tempfile
 from urllib.parse import urlsplit
 
 NETWORK = '9e7a0006-6ed4-4b6b-bf37-43dc42838c20'
@@ -25,16 +26,22 @@ def encode(value):
 
 
 def private_write(path, content):
+    from platform_support import ensure_private_dir, protect_private, reject_links
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    temp = path.with_name(path.name + '.tmp')
-    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
-    os.fchmod(fd, 0o600)
-    with os.fdopen(fd, 'wb') as f:
-        f.write(content)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(temp, path)
+    ensure_private_dir(path.parent)
+    reject_links(path)
+    fd, temp = tempfile.mkstemp(prefix='.' + path.name + '-', dir=path.parent)
+    try:
+        with os.fdopen(fd, 'wb') as f:
+            protect_private(temp)
+            f.write(content)
+            f.flush()
+            os.fsync(f.fileno())
+        reject_links(path)
+        os.replace(temp, path)
+    finally:
+        if os.path.exists(temp):
+            os.unlink(temp)
 
 
 def endpoint(value):

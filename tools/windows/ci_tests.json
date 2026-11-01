@@ -1,0 +1,13 @@
+[
+  "tools/windows/test_windows_build.py",
+  "codex/tools/test_platform_support.py",
+  "codex/companion/test_windows_runtime.py",
+  "codex/companion/test_pairing_store.py",
+  "codex/companion/test_device_setup.py",
+  "codex/companion/test_connection_diagnostics.py",
+  "codex/companion/test_windows_app.py",
+  "codex/tools/test_manifest_hooks.py",
+  "codex/tools/test_pending_questions.py",
+  "codex/tools/test_internal_suggestions.py",
+  "tools/windows/test_windows_installer.py"
+]

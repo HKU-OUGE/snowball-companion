@@ -31,7 +31,13 @@ older bundled runtime.
 
 ## Install or upgrade when requested
 
-Prefer the supplied marketplace-root `install.sh`. It delegates registration
+On native Windows, use the installed Snowball Companion wizard and its bundled
+`SnowballCLI.exe`; see [WINDOWS.md](WINDOWS.md). Do not run `install.sh` or
+require the user to install Python or invoke a chat for every connection.
+The wizard separates registration, Hook trust, first binding, and background
+startup; USB is only required for first binding or rebinding.
+
+On Linux, prefer the supplied marketplace-root `install.sh`. It delegates registration
 to Codex and preserves missing historical Hook scripts used by existing chats.
 It does not silently create an account Pet, modify Hook trust, or configure a
 device. Use the Setup character workflow only when the user requests the Pet.

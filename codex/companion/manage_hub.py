@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Manage this install's status hub, using its user service when installed."""
 import argparse
-import fcntl
+from platform_support import flock, LOCK_EX, private_file_ok
 import json
 import os
 from pathlib import Path
@@ -62,8 +62,7 @@ def health(record):
     """Authenticated local health only, no proxies/redirects and no token output."""
     try:
         path = Path(record['token_file'])
-        info = path.stat()
-        if path.is_symlink() or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        if not private_file_ok(path):
             return False
         token = path.read_text().strip()
         if not 32 <= len(token) <= 128:
@@ -112,6 +111,15 @@ def available_port(port):
 
 
 def run(args):
+    if sys.platform=='win32':
+        import windows_runtime
+        if (args.runtime_dir.expanduser().resolve()!=RUNTIME_DIR or
+                args.state_dir.expanduser().resolve()!=STATE_DIR or
+                args.token_file.expanduser().resolve()!=TOKEN_PATH or args.port!=4190):
+            raise ValueError('Windows shared runtime requires the fixed local Hub settings')
+        result=getattr(windows_runtime,args.command)()
+        print(json.dumps(result,ensure_ascii=False))
+        return 0 if result.get('state') not in ('unverified','unreachable') else 2
     from user_services import owned,control
     if (owned('hub') and args.runtime_dir.expanduser().resolve()==RUNTIME_DIR and
             args.state_dir.expanduser().resolve()==STATE_DIR and args.token_file.expanduser().resolve()==TOKEN_PATH and args.port==4190):
@@ -123,7 +131,7 @@ def run(args):
     record_path, log_path = runtime_dir / 'hub-runtime.json', runtime_dir / 'hub.log'
     lock_fd = os.open(runtime_dir / 'hub-manager.lock', os.O_CREAT | os.O_RDWR, 0o600)
     try:
-        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        flock(lock_fd, LOCK_EX)
         record = read_record(record_path)
         if args.command == 'status':
             if record is None:
@@ -213,7 +221,7 @@ def main():
         parser.error('port must be 1..65535 and startup timeout .5..60 seconds')
     try:
         return run(args)
-    except (OSError, ValueError):
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
         # Paths and HTTP input can contain sensitive material; avoid dumping exception text.
         print('Hub management failed. Check private directory access and configured settings.', file=sys.stderr)
         return 2

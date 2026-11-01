@@ -41,3 +41,9 @@ A web or ESP32 selection alone cannot activate the desktop Pet through a filesys
 The Pet works without an ESP32 or Bluetooth device. Configure the local status Hub and BLE bridge only when requested; use the package README and existing companion tools. Preserve pairing, session priorities, and hook trust. Do not start duplicate services, auto-approve hooks, restart the host, or send conversation/tool bodies.
 
 Recipient state belongs only under the recipient's CODEX_HOME state directory, never plugin assets. Never package credentials, pairing keys, account IDs, or local session records. A new character becomes available only after its full v2 atlas and manifest have passed the artwork pipeline and the catalog is updated to ready; account installation still requires the live Pets validator.
+
+## Native Windows companion
+
+For Windows native Codex, use the companion Windows wizard described in `references/WINDOWS.md`. Do not run the Unix `install.sh` or assume `python3`, `fcntl`, `/proc`, or systemd exists. Registering the adapter, trusting Hooks, binding the physical device, and starting the background runtime are separate checks. USB is only required for first binding or rebinding after a device reset; normal BLE status synchronization does not need repeated chat instructions. Never auto-approve hook trust. Windows Desktop control for watch replies/new chats remains unavailable; do not claim parity from passing status tests.
+
+On Windows, run bundled helper actions through the fixed installed `SnowballCLI.exe pet ...` entry instead of `python3 scripts/pet_setup.py ...`. The account Pets service still performs and verifies actual Pet installation; native companion installation does not create an account Pet.

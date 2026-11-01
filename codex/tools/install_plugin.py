@@ -2,7 +2,7 @@
 """Install only Snowball through Codex, preserving missing old hook cache files."""
 import argparse
 import datetime
-import fcntl
+from platform_support import flock, LOCK_EX, LOCK_NB, open_nofollow, private_file_ok, reject_links, protect_private
 import hashlib
 import json
 import os
@@ -16,10 +16,11 @@ PLUGIN = 'xueqiu-status@xueqiu-local'
 
 
 def private_dir(path):
+    reject_links(path)
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     if path.is_symlink():
         raise RuntimeError(f'Refusing symlink directory: {path}')
-    path.chmod(0o700)
+    protect_private(path)
 
 
 def checked_path(root, relative):
@@ -58,12 +59,12 @@ def backup_hooks(cache_root, backup_root):
                     target = backup / relative
                     target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
                     target.write_bytes(data)
-                    target.chmod(0o600)
+                    protect_private(target)
                     records.append({'path': str(relative), 'mode': item.stat().st_mode & 0o777,
                                     'sha256': hashlib.sha256(data).hexdigest()})
     (backup / 'manifest.json').write_text(json.dumps({'plugin': PLUGIN, 'cache_root': str(cache_root),
                                                     'files': records}, indent=2) + '\n')
-    (backup / 'manifest.json').chmod(0o600)
+    protect_private(backup / 'manifest.json')
     return backup, records
 
 
@@ -106,14 +107,14 @@ def install(codex, market):
     state_home = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))).expanduser()
     backup_root = state_home / 'xueqiu/plugin-upgrade-backups'
     private_dir(backup_root)
-    with (backup_root / 'install.lock').open('a') as lock:
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+    with os.fdopen(open_nofollow(backup_root / 'install.lock', os.O_CREAT | os.O_RDWR), 'a') as lock:
+        flock(lock.fileno(), LOCK_EX)
         backup, records = backup_hooks(cache_root, backup_root)
         print(f'Old hook files preserved privately: {backup}', flush=True)
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM)}
         try:
-            subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True)
-            subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True)
+            subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True, timeout=45)
+            subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True, timeout=45)
         finally:
             # Run in this same outer process: missing PreToolUse hooks must not prevent repair.
             for sig in handlers:
@@ -134,6 +135,9 @@ def main():
     args = parser.parse_args()
     try:
         install(args.codex, args.market_root.resolve())
+    except subprocess.TimeoutExpired:
+        print('Codex plugin command timed out; old hook restoration was attempted.', file=sys.stderr)
+        return 124
     except subprocess.CalledProcessError as error:
         print(f'Codex installation failed (exit {error.returncode}); old hook restoration was attempted.', file=sys.stderr)
         return error.returncode if error.returncode > 0 else 1

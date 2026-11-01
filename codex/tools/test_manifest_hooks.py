@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check the explicit legacy runtime entry and preserved standard manifest."""
+import base64
 import json
 from pathlib import Path
 import unittest
@@ -34,7 +35,8 @@ class ManifestHookTests(unittest.TestCase):
                 self.assertEqual(handlers[0], {
                     'type': 'command',
                     'command': 'python3 "${PLUGIN_ROOT}/scripts/codex_hook.py" hook',
-                    'timeout': 2})
+                    'commandWindows': 'powershell.exe -NoProfile -NonInteractive -EncodedCommand ' + base64.b64encode((PLUGIN/'scripts/windows_hook.ps1').read_text(encoding='utf-8').encode('utf-16-le')).decode('ascii'),
+                    'timeout': 3})
         self.assertTrue((PLUGIN / 'scripts/codex_hook.py').is_file())
 
 

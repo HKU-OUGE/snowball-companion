@@ -2,7 +2,7 @@
 """Local status and posted-question hub; reminder actions never answer or approve."""
 import argparse
 import hashlib
-import fcntl
+from platform_support import flock, LOCK_EX, LOCK_NB, open_nofollow, private_file_ok, reject_links, protect_private
 import hmac
 import json
 import math
@@ -43,8 +43,9 @@ class Invalid(ValueError):
 
 def private_dir(path):
     path = Path(path)
+    reject_links(path)
     path.mkdir(parents=True, mode=0o700, exist_ok=True)
-    os.chmod(path, 0o700)
+    protect_private(path)
     return path
 
 
@@ -59,6 +60,7 @@ def atomic_json(path, data):
             stream.write('\n')
             stream.flush()
             os.fsync(stream.fileno())
+        protect_private(temporary)
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary):
@@ -69,16 +71,24 @@ def load_token(path=TOKEN_PATH):
     path = Path(path)
     private_dir(path.parent)
     try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        fd = open_nofollow(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     except FileExistsError:
         pass
     else:
+        try:
+            protect_private(path)
+        except BaseException:
+            os.close(fd)
+            raise
         with os.fdopen(fd, 'w') as stream:
             stream.write(secrets.token_urlsafe(32) + '\n')
     if path.is_symlink() or not path.is_file():
         raise ValueError('Token must be a regular private file')
-    os.chmod(path, 0o600)
-    token = path.read_text().strip()
+    protect_private(path)
+    if not private_file_ok(path):
+        raise ValueError('Token must be a regular private file')
+    with os.fdopen(open_nofollow(path, os.O_RDONLY), 'r', encoding='utf-8') as stream:
+        token = stream.read().strip()
     if len(token) < 32 or len(token) > 128 or not re.fullmatch(r'[A-Za-z0-9_-]+', token):
         raise ValueError('Invalid token file; do not print its contents')
     return token
@@ -730,9 +740,9 @@ def main():
     parser.add_argument('--token-file', type=Path, default=TOKEN_PATH)
     args = parser.parse_args()
     private_dir(args.state_dir)
-    lock_fd = os.open(args.state_dir / 'hub.lock', os.O_CREAT | os.O_RDWR, 0o600)
+    lock_fd = open_nofollow(args.state_dir / 'hub.lock', os.O_CREAT | os.O_RDWR, 0o600)
     try:
-        fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        flock(lock_fd, LOCK_EX | LOCK_NB)
     except BlockingIOError:
         os.close(lock_fd)
         parser.error('Another hub owns this state directory')

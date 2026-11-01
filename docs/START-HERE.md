@@ -1,5 +1,7 @@
 # 第一次使用 Snowball Companion
 
+**Windows 原生 Codex 用户：** 请先看 [Windows 安装向导](../codex/docs/WINDOWS.md)，使用 `Snowball-Windows-x64.zip`。源码插件 ZIP 不等于自带依赖的 Windows 程序。
+
 先选你实际使用的软件。**只想使用 Codex 的桌宠时，不需要连接 ESP32。** Claude Code 和 Cursor 插件主要同步工作状态，不会在 ChatGPT 账号里自动创建 Pet。
 
 ## 1. 下载对应插件

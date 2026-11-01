@@ -2,7 +2,7 @@
 """Codex hook adapter. Only status, names and explicitly posted question titles; never reads transcripts."""
 import argparse
 from contextlib import contextmanager, closing
-import fcntl
+from platform_support import flock, LOCK_EX, LOCK_NB, open_nofollow, private_file_ok, reject_links, protect_private
 import hashlib
 import json
 import os
@@ -300,12 +300,13 @@ def hook_phase(payload, current):
 
 @contextmanager
 def locked_record(root, session):
+    reject_links(root)
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(root, 0o700)
+    protect_private(root)
     path = root / (session + '.json')
-    fd = os.open(root / (session + '.lock'), os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    fd = open_nofollow(root / (session + '.lock'), os.O_CREAT | os.O_RDWR, 0o600)
     with os.fdopen(fd, 'a') as lock:
-        fcntl.flock(lock, fcntl.LOCK_EX)
+        flock(lock, LOCK_EX)
         try:
             record = json.loads(path.read_text()) if path.exists() else {}
         except (ValueError, OSError):
@@ -315,6 +316,7 @@ def locked_record(root, session):
         try:
             with os.fdopen(handle, 'w') as output:
                 json.dump(record, output, separators=(',', ':'))
+            protect_private(temporary)
             os.replace(temporary, path)
         finally:
             if os.path.exists(temporary):
@@ -325,7 +327,10 @@ def send_event(event, token_path, endpoint):
     """Fixed loopback transport, proxies disabled, never print token or payload."""
     if endpoint != 'http://127.0.0.1:4190/v1/events':
         raise ValueError('Only the local Snowball hub endpoint is allowed')
-    token = token_path.read_text().strip()
+    if os.name == 'nt' and not private_file_ok(token_path):
+        raise ValueError('Hub token must have a private user ACL')
+    with os.fdopen(open_nofollow(token_path, os.O_RDONLY), 'r', encoding='utf-8') as stream:
+        token = stream.read().strip()
     if not token or len(token) > 512:
         raise ValueError('Invalid hub token')
     body = json.dumps(event, ensure_ascii=False, separators=(',', ':')).encode()
@@ -467,8 +472,11 @@ class JsonlReducer:
 
 def hooks_config(command):
     # Foreground localhost writes preserve event order, bounded to 250 ms on transport failure.
+    import base64
+    windows = Path(__file__).with_name('windows_hook.ps1').read_text(encoding='utf-8')
+    windows_command = 'powershell.exe -NoProfile -NonInteractive -EncodedCommand ' + base64.b64encode(windows.encode('utf-16-le')).decode('ascii')
     return {'description': 'Snowball: local status, session names and posted question titles; no answers or execution commands.',
-            'hooks': {event: [{'hooks': [{'type': 'command', 'command': command, 'timeout': 2}]}]
+            'hooks': {event: [{'hooks': [{'type': 'command', 'command': command, 'commandWindows': windows_command, 'timeout': 3}]}]
                       for event in HOOKS}}
 
 
@@ -479,6 +487,8 @@ def export_plugin(destination):
     (destination / 'hooks').mkdir()
     (destination / 'scripts').mkdir()
     (destination / 'scripts/codex_hook.py').write_bytes(Path(__file__).read_bytes())
+    (destination / 'scripts/platform_support.py').write_bytes(Path(__file__).with_name('platform_support.py').read_bytes())
+    (destination / 'scripts/windows_hook.ps1').write_bytes(Path(__file__).with_name('windows_hook.ps1').read_bytes())
     manifest = {'name': 'xueqiu-status', 'version': '0.2.0',
                 'description': 'Send minimal local Codex lifecycle state to the Snowball watch.',
                 'hooks': './hooks/hooks.json'}

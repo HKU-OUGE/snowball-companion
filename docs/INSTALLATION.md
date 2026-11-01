@@ -1,6 +1,6 @@
 # 安装、升级与卸载
 
-本文适用于本仓库的 Codex、Claude Code 和 Cursor 适配器。命令以 Linux 为例；
+本文适用于本仓库的 Codex、Claude Code 和 Cursor 适配器。**Codex 原生 Windows 用户先看 [Windows 向导](../codex/docs/WINDOWS.md)**：安装、绑定、后台与诊断都有独立入口。下方 shell 命令以 Linux 为例；
 先在当前机器查看 CLI 的 `--help`。Claude 和 Cursor 的 macOS 设备联动、原生
 Windows 安装不能仅凭这些命令视为已验证。最后核对日期：2026-11-01。
 
