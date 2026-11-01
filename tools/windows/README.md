@@ -1,8 +1,10 @@
 # Windows native candidate build
 
 Build on Windows x64 with CPython 3.12.10. The pinned dependency file includes the
-runtime, build toolchain and the explicit Windows test suite. No device access,
-plugin installation, services or release publication is performed by the build.
+runtime, build toolchain and the explicit Windows test suite. The build helper
+only creates the distribution; the separate smoke suite below exercises its
+runtime in an isolated test profile. Neither performs physical device access,
+real Codex plugin registration or release publication.
 
 ```powershell
 python -m venv .venv-windows
@@ -48,8 +50,20 @@ synthetic Hook events using an isolated temporary home. It calls the production
 `install_bundle` to copy the actual build into a temporary `LOCALAPPDATA` path
 containing Chinese characters and spaces, then runs the installed CLI and the
 actual `commandWindows` PowerShell launcher from a simulated plugin cache. Python
-is removed from the child PATH for that launcher check. It does not call shortcut
-creation, plugin registration, service startup or pairing. No real session,
-token, Hub service or device is used. Only a successful native run produces the ZIP and
-SHA-256 candidate artifacts. A green build does not prove Bluetooth hardware
-connectivity, real host Hook delivery, or a signed public release.
+is removed from the child PATH for that launcher check.
+
+The installed runtime then starts its real supervisor and authenticated Hub,
+checks singleton behavior and control authentication, delivers synthetic Hook
+events through the installed launcher to that Hub, creates and removes its own
+current-user login task, and confirms shutdown. All identities, tokens and
+events belong to the isolated fixture. The BLE child has no pairing credentials
+and does not connect to a physical device. If the hosted Windows Job explicitly
+forbids detached launch, the smoke suite records that restriction and exercises
+the existing foreground runtime inside the same Job; it does not label this as
+proof of independent lifetime after Explorer closes.
+
+Shortcut creation, real Codex plugin registration and trust, actual user session
+delivery, physical COM/BLE pairing, and Explorer-independent lifetime remain
+desktop acceptance checks. Only a successful native run produces the ZIP and
+SHA-256 candidate artifacts. A green build does not prove those desktop checks
+or a signed public release.
