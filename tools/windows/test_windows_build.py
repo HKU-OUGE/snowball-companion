@@ -2,6 +2,7 @@
 import ast
 import base64
 import hashlib
+import io
 import json
 import importlib.util
 import sys
@@ -15,11 +16,12 @@ import zipfile
 from types import SimpleNamespace
 from unittest.mock import patch
 import stage_payload as stage
-from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime
+from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics
 import distribution_manifest as native
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+sys.path.insert(0, str(ROOT/'codex/companion'))
 
 
 class WindowsBuildTest(unittest.TestCase):
@@ -199,6 +201,55 @@ class WindowsBuildTest(unittest.TestCase):
         self.assertEqual(sum(argv[1:3] == ['-NoProfile', '-NonInteractive'] for argv in calls), 3)
         lifecycle.assert_called_once()
         self.assertEqual(result['runtime_lifecycle']['state'], 'fixture_verified')
+
+    def test_failure_diagnostics_tail_only_synthetic_logs(self):
+        directory = self.root/'.local/state/xueqiu/windows-runtime'
+        directory.mkdir(parents=True)
+        (directory/'supervisor.log').write_bytes(b'prefix-not-in-tail'+b'x'*16384)
+        (directory/'hub.log').write_bytes(b'synthetic Hub traceback')
+        (directory/'bridge.log').write_bytes(b'synthetic bridge traceback')
+        (directory/'runtime.json').write_text('DO_NOT_READ_CONTROL_RECORD')
+        (directory/'hub-token').write_text('DO_NOT_READ_TOKEN')
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'in_job': True}):
+            value = collect_runtime_failure(self.root)
+        encoded = json.dumps(value)
+        self.assertNotIn('DO_NOT_READ', encoded)
+        self.assertNotIn('prefix-not-in-tail', encoded)
+        self.assertEqual(value['current_process_job'], {'in_job': True})
+        self.assertEqual(value['log_tails']['supervisor.log']['bytes_read'], 16384)
+        self.assertEqual(value['log_tails']['supervisor.log']['tail'], 'x'*16384)
+        self.assertEqual(set(value['log_tails']), {'supervisor.log', 'hub.log', 'bridge.log'})
+
+    def test_diagnostic_collector_does_not_follow_log_hardlink(self):
+        directory = self.root/'.local/state/xueqiu/windows-runtime'
+        directory.mkdir(parents=True)
+        record = directory/'runtime.json'; record.write_text('DO_NOT_READ_CONTROL_RECORD')
+        os.link(record, directory/'supervisor.log')
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'in_job': False}):
+            value = collect_runtime_failure(self.root)
+        self.assertEqual(value['log_tails'], {})
+
+    def test_runtime_failure_prints_diagnostic_but_stays_failure(self):
+        error = RuntimeError('synthetic start failure')
+        output = io.StringIO()
+        with patch('smoke_distribution.exercise_runtime', side_effect=error), \
+             patch('smoke_distribution.collect_runtime_failure', return_value={'fixture': 'trace'}), \
+             patch('sys.stderr', output):
+            with self.assertRaises(RuntimeError) as caught:
+                runtime_with_failure_diagnostics('fixture-cli', self.root, None)
+        self.assertIs(caught.exception, error)
+        self.assertEqual(json.loads(output.getvalue()), {'fixture': 'trace'})
+
+    def test_diagnostic_error_never_replaces_runtime_failure(self):
+        error = RuntimeError('synthetic start failure')
+        output = io.StringIO()
+        with patch('smoke_distribution.exercise_runtime', side_effect=error), \
+             patch('smoke_distribution.collect_runtime_failure', side_effect=PermissionError()), \
+             patch('sys.stderr', output):
+            with self.assertRaises(RuntimeError) as caught:
+                runtime_with_failure_diagnostics('fixture-cli', self.root, None)
+        self.assertIs(caught.exception, error)
+        self.assertEqual(json.loads(output.getvalue())['diagnostic_error'], 'PermissionError')
 
     def test_pe_architecture_and_gui_console_subsystem(self):
         data = bytearray(256); data[:2] = b'MZ'

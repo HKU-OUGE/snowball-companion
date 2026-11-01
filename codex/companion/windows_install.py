@@ -33,7 +33,7 @@ def bundle_root():
 
 
 def market_root():
-    return bundle_root() / 'codex'
+    return bundle_root() / 'codex' if getattr(sys, 'frozen', False) else Path(__file__).resolve().parents[1]
 
 
 def checked_relative(name):

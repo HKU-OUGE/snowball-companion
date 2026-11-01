@@ -3,7 +3,8 @@
 Win32 APIs are replaced at their handle boundary on non-Windows hosts. Kernel
 Job Objects, ACLs, Task Scheduler and real BLE still require Windows validation.
 """
-from contextlib import ExitStack
+from contextlib import ExitStack, redirect_stderr
+import ctypes
 import io
 import json
 import os
@@ -49,6 +50,7 @@ class API:
         self.closed.append(job)
         for p in self.assigned:p.terminate()
     def gate(self):return self.gate_ok
+    def host_job_context(self):return {'in_job':False}
 
 class WindowsRuntimeTests(unittest.TestCase):
     def setUp(self):
@@ -230,6 +232,7 @@ class WindowsRuntimeTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):api.current()
         else:self.assertEqual(api.current(),identity)
         self.assertIsNone(api.identity(-1))
+        self.assertIsInstance(api.host_job_context()['in_job'],bool)
         job=api.job();api.close_job(job)
     def test_frozen_launch_prefers_console_dispatcher_and_preserves_explicit_prefix(self):
         gui=Path(self.temp.name)/'Snowball.exe';cli=gui.with_name('SnowballCLI.exe');gui.touch();cli.touch()
@@ -285,5 +288,118 @@ class WindowsRuntimeTests(unittest.TestCase):
     def test_non_windows_status_has_no_process_or_task_side_effect(self):
         with patch.object(runtime,'_windows',return_value=False),patch.object(runtime,'_read_record') as read:
             self.assertFalse(runtime.status()['supported']);read.assert_not_called()
+
+    def test_safe_error_report_never_emits_exception_text_paths_or_commands(self):
+        secret='PRIVATE_PATH_AND_KEY_SENTINEL'
+        error=PermissionError(13,secret,secret);error.winerror=5
+        controlled=runtime.RuntimeFailure('supervisor_spawn_failed',cause=error,
+            details={'in_job':False,'exitcode':7,'path':secret,'command':secret,'token':secret})
+        report=runtime.error_report(controlled)
+        self.assertEqual(report['code'],'supervisor_spawn_failed')
+        self.assertEqual(report['error_type'],'PermissionError')
+        self.assertEqual(report['winerror'],5);self.assertEqual(report['errno'],13)
+        self.assertFalse(report['in_job']);self.assertNotIn(secret,json.dumps(report))
+        for other in (RuntimeError(secret),ValueError(secret),
+                      subprocess.TimeoutExpired(secret,20,output=secret,stderr=secret)):
+            self.assertNotIn(secret,json.dumps(runtime.error_report(other)))
+        report=runtime.error_report(runtime.RuntimeFailure(secret,details={'in_job':secret,'exitcode':secret}))
+        self.assertEqual(report['code'],'runtime_failed');self.assertNotIn(secret,json.dumps(report))
+
+    def test_cli_emits_fixed_code_and_numeric_winerror_without_raw_exception(self):
+        error=PermissionError(13,'PRIVATE_SENTINEL');error.winerror=5
+        failure=runtime.RuntimeFailure('supervisor_spawn_failed',cause=error)
+        output=io.StringIO()
+        with patch.object(runtime,'start',side_effect=failure),redirect_stderr(output):
+            self.assertEqual(runtime.main(['start']),2)
+        report=json.loads(output.getvalue())
+        self.assertEqual(report['operation'],'start')
+        self.assertEqual(report['code'],'supervisor_spawn_failed')
+        self.assertEqual(report['winerror'],5);self.assertEqual(report['error_type'],'PermissionError')
+        self.assertNotIn('PRIVATE_SENTINEL',output.getvalue())
+
+    def test_session_zero_has_actionable_code_not_inferred_job_restriction(self):
+        api=object.__new__(runtime.WinAPI)
+        with patch.object(api,'identity',return_value=dict(self.api.me,session=0)):
+            with self.assertRaises(runtime.RuntimeFailure) as raised:api.current()
+        self.assertEqual(runtime.error_report(raised.exception)['code'],'interactive_session_required')
+        with patch.object(api,'identity',return_value=None):
+            with self.assertRaises(runtime.RuntimeFailure) as raised:api.current()
+        self.assertEqual(raised.exception.code,'process_identity_unavailable')
+
+    def test_spawn_access_denied_requires_confirmed_job_flags_and_never_downgrades(self):
+        probe=Mock();probe.__enter__=Mock(return_value=probe);probe.__exit__=Mock(return_value=False)
+        error=PermissionError(13,'PRIVATE_SENTINEL');error.winerror=5
+        cases=[({'in_job':True,'breakaway_allowed':False,'silent_breakaway':False},'host_job_restricted'),
+               ({'in_job':False},'supervisor_spawn_failed'),
+               ({'in_job':True,'breakaway_allowed':True,'silent_breakaway':False},'supervisor_spawn_failed'),
+               ({'in_job':True,'breakaway_allowed':False,'silent_breakaway':True},'supervisor_spawn_failed'),
+               ({'in_job':True},'supervisor_spawn_failed')]
+        for context,expected in cases:
+            with self.subTest(context=context), \
+                 patch.object(runtime,'status',return_value={'state':'stopped','running':False}), \
+                 patch.object(runtime.socket,'socket',return_value=probe), \
+                 patch.object(runtime,'_log_stream',side_effect=lambda _:io.BytesIO()), \
+                 patch.object(self.api,'host_job_context',return_value=context), \
+                 patch.object(runtime.subprocess,'Popen',side_effect=error) as spawn:
+                with self.assertRaises(runtime.RuntimeFailure) as raised:runtime.start()
+                self.assertEqual(raised.exception.code,expected)
+                self.assertEqual(spawn.call_count,1)
+                self.assertTrue(spawn.call_args.kwargs['creationflags']&0x01000000)
+                self.assertEqual(runtime.error_report(raised.exception)['winerror'],5)
+
+    def test_failed_job_query_keeps_spawn_error_and_non_access_denied_does_not_query(self):
+        probe=Mock();probe.__enter__=Mock(return_value=probe);probe.__exit__=Mock(return_value=False)
+        for code in (5,2):
+            error=OSError(22,'PRIVATE_SENTINEL');error.winerror=code
+            with patch.object(runtime,'status',return_value={'state':'stopped','running':False}), \
+                 patch.object(runtime.socket,'socket',return_value=probe), \
+                 patch.object(runtime,'_log_stream',side_effect=lambda _:io.BytesIO()), \
+                 patch.object(self.api,'host_job_context',side_effect=OSError('private query failure')) as query, \
+                 patch.object(runtime.subprocess,'Popen',side_effect=error):
+                with self.assertRaises(runtime.RuntimeFailure) as raised:runtime.start()
+                self.assertEqual(raised.exception.code,'supervisor_spawn_failed')
+                self.assertEqual(runtime.error_report(raised.exception)['winerror'],code)
+                self.assertEqual(query.call_count,1 if code==5 else 0)
+
+    def test_native_job_context_decodes_real_limit_bits_without_mutating_job(self):
+        api=object.__new__(runtime.WinAPI);api.c=ctypes
+        api.w=SimpleNamespace(DWORD=ctypes.c_uint32,BOOL=ctypes.c_int)
+        api.k=Mock();api.k.GetCurrentProcess.return_value=-1
+        inside=[True];flags=[0]
+        def member(process,job,result):result._obj.value=inside[0];return True
+        def query(job,kind,out,size,actual):
+            self.assertIsNone(job);self.assertEqual(kind,2)
+            out._obj.flags=flags[0];return True
+        api.k.IsProcessInJob.side_effect=member
+        api.k.QueryInformationJobObject.side_effect=query
+        for value,expected in [(0,(False,False)),(0x800,(True,False)),(0x1000,(False,True)),(0x1800,(True,True))]:
+            flags[0]=value;context=api.host_job_context()
+            self.assertTrue(context['in_job'])
+            self.assertEqual((context['breakaway_allowed'],context['silent_breakaway']),expected)
+        inside[0]=False;api.k.QueryInformationJobObject.reset_mock()
+        self.assertEqual(api.host_job_context(),{'in_job':False})
+        api.k.QueryInformationJobObject.assert_not_called()
+        api.k.SetInformationJobObject.assert_not_called()
+
+    def test_controlled_child_assignment_failure_is_reported_and_backs_off(self):
+        supervisor=self.supervisor();output=io.StringIO()
+        with patch.object(self.api,'assign',side_effect=runtime.RuntimeFailure('child_job_assignment_failed')),redirect_stderr(output):
+            supervisor.step()
+        self.assertEqual(supervisor.children['hub']['state'],'backoff')
+        self.assertEqual(self.processes[0].terminated,1)
+        self.assertEqual(json.loads(output.getvalue())['code'],'child_job_assignment_failed')
+        supervisor.close()
+
+    def test_early_supervisor_exit_preserves_numeric_exitcode(self):
+        process=Process(123);process.returncode=17
+        probe=Mock();probe.__enter__=Mock(return_value=probe);probe.__exit__=Mock(return_value=False)
+        with patch.object(runtime,'status',return_value={'state':'stopped','running':False}), \
+             patch.object(runtime.socket,'socket',return_value=probe), \
+             patch.object(runtime,'_log_stream',side_effect=lambda _:io.BytesIO()), \
+             patch.object(runtime.subprocess,'Popen',return_value=process):
+            with self.assertRaises(runtime.RuntimeFailure) as raised:runtime.start()
+        self.assertEqual(raised.exception.code,'supervisor_exited')
+        self.assertEqual(runtime.error_report(raised.exception)['exitcode'],17)
+        self.assertEqual(process.terminated,0)
 
 if __name__=='__main__':unittest.main()

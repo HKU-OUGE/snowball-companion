@@ -137,7 +137,12 @@ class Wizard:
                 self.queue.put((True, action(), done))
             except Exception as error:
                 # Only our curated installer errors are user text. Never show raw BLE/USB errors.
-                safe = str(error) if isinstance(error, installer.InstallError) else '操作未完成。请进入连接诊断查看具体层级；现有绑定不会因失败被覆盖。'
+                if isinstance(error, installer.InstallError):
+                    safe = str(error)
+                else:
+                    from windows_runtime import error_report
+                    report = error_report(error)
+                    safe = report['message'] + ' [' + report['code'] + ']'
                 self.queue.put((False, safe, None))
         threading.Thread(target=worker, daemon=True).start()
 

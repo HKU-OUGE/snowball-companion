@@ -37,13 +37,82 @@ MAX_CONTROL = 8192
 _api_instance = None
 
 
+ERROR_CODES = frozenset({
+    'windows_required', 'process_identity_unavailable', 'interactive_session_required',
+    'runtime_unreachable', 'runtime_already_owned', 'hub_port_unavailable',
+    'host_job_restricted', 'supervisor_spawn_failed', 'supervisor_exited',
+    'supervisor_start_timeout', 'runtime_identity_changed', 'supervisor_stop_timeout',
+    'task_query_failed', 'task_create_failed', 'task_create_unverified',
+    'task_delete_failed', 'task_delete_unverified', 'child_job_create_failed',
+    'child_job_limits_failed', 'child_job_assignment_failed', 'runtime_failed',
+})
+
+
+class RuntimeFailure(RuntimeError):
+    """Fixed diagnostic codes, never OS messages, command lines or user paths."""
+    def __init__(self, code, *, cause=None, details=None):
+        self.code = code if code in ERROR_CODES else 'runtime_failed'
+        self.cause = cause
+        self.details = details or {}
+        super().__init__(self.code)
+
+
+def error_report(error):
+    """Public CLI/GUI diagnostic; all displayed text comes from fixed literals."""
+    controlled = isinstance(error, RuntimeFailure)
+    cause = error.cause if controlled and error.cause is not None else error
+    # Whitelist class labels too: arbitrary exception names are not diagnostics.
+    types = (subprocess.TimeoutExpired, subprocess.CalledProcessError,
+             PermissionError, FileNotFoundError, BlockingIOError, OSError,
+             ValueError, RuntimeError)
+    kind = next((t.__name__ for t in types if isinstance(cause, t)), 'RuntimeError')
+    code = error.code if controlled else ('os_error' if isinstance(cause, OSError) else 'runtime_failed')
+    messages = {
+        'windows_required': '后台需要在 Windows 中运行。',
+        'process_identity_unavailable': '无法验证当前 Windows 进程身份，未启动后台。',
+        'interactive_session_required': '请登录 Windows 后，从开始菜单打开雪球；后台不能运行在系统服务会话中。',
+        'runtime_unreachable': '已安装后台暂未响应，请查看连接诊断后重试。',
+        'runtime_already_owned': '当前用户已有雪球后台运行，请先在原版本中停止后台。',
+        'hub_port_unavailable': '本机同步端口被占用，未关闭已有程序。请查看连接诊断。',
+        'host_job_restricted': '当前启动环境不允许后台独立运行。请从开始菜单或资源管理器打开雪球，不要从受限终端启动。',
+        'supervisor_spawn_failed': 'Windows 未能启动独立后台，请查看诊断中的系统错误码。',
+        'supervisor_exited': '后台启动后提前退出，请查看后台诊断日志。',
+        'supervisor_start_timeout': '后台启动未得到确认，已停止本次创建的进程。',
+        'runtime_identity_changed': '后台进程身份已变化，未停止其他进程。请查看连接诊断。',
+        'supervisor_stop_timeout': '后台停止尚未得到确认，请稍后查看状态；没有强制关闭其他程序。',
+        'task_query_failed': '无法确认登录启动项状态，请检查 Windows 任务计划程序。',
+        'task_create_failed': '登录启动项创建失败，请检查 Windows 任务计划程序。',
+        'task_create_unverified': '登录启动项可能已创建，但尚未核实，请查看后台设置。',
+        'task_delete_failed': '登录启动项删除失败，请检查 Windows 任务计划程序。',
+        'task_delete_unverified': '登录启动项可能已删除，但尚未核实，请查看后台设置。',
+        'child_job_create_failed': '无法创建后台子进程管理组，后台未启动。',
+        'child_job_limits_failed': '无法设置后台子进程退出保护，后台未启动。',
+        'child_job_assignment_failed': '无法安全管理后台子进程，该子进程已停止。',
+    }
+    result = {'code': code, 'error_type': kind,
+              'message': messages.get(code, '后台操作未完成，请查看连接诊断和系统错误码。')}
+    for name in ('winerror', 'errno'):
+        value = getattr(cause, name, None)
+        if type(value) is int: result[name] = value
+    if controlled:
+        for name in ('in_job', 'breakaway_allowed', 'silent_breakaway'):
+            if type(error.details.get(name)) is bool: result[name] = error.details[name]
+        if type(error.details.get('exitcode')) is int: result['exitcode'] = error.details['exitcode']
+    return result
+
+
+def _error_record(error, operation):
+    return {'ok': False, 'error': 'Windows runtime operation failed; inspect private runtime logs',
+            'operation': operation, **error_report(error)}
+
+
 def _windows():
     return sys.platform == 'win32'
 
 
 def _require_windows():
     if not _windows():
-        raise RuntimeError('Windows interactive runtime is only available on Windows')
+        raise RuntimeFailure('windows_required')
 
 
 def _install_id():
@@ -98,11 +167,14 @@ class WinAPI:
         bind(self.k,'GetOEMCP',w.UINT)
         bind(self.k,'GetConsoleOutputCP',w.UINT)
         bind(self.k,'GetSystemDirectoryW',w.UINT,w.LPWSTR,w.UINT)
+        bind(self.k,'GetCurrentProcess',w.HANDLE)
+        bind(self.k,'IsProcessInJob',w.BOOL,w.HANDLE,w.HANDLE,c.POINTER(w.BOOL))
+        bind(self.k,'QueryInformationJobObject',w.BOOL,w.HANDLE,c.c_int,c.c_void_p,w.DWORD,c.POINTER(w.DWORD))
 
     def task_tool(self):
         path=self.c.create_unicode_buffer(32768)
         count=self.k.GetSystemDirectoryW(path,len(path))
-        if not 0<count<len(path):raise OSError('Cannot locate system task tool')
+        if not 0<count<len(path):raise self.c.WinError(self.c.get_last_error())
         return str(Path(path.value)/'schtasks.exe')
 
     def task_encoding(self):
@@ -110,13 +182,13 @@ class WinAPI:
 
     def _sid(self, process):
         c,w=self.c,self.w;token=w.HANDLE()
-        if not self.a.OpenProcessToken(process,8,c.byref(token)):raise OSError('Cannot inspect process owner')
+        if not self.a.OpenProcessToken(process,8,c.byref(token)):raise c.WinError(c.get_last_error())
         try:
             size=w.DWORD();self.a.GetTokenInformation(token,1,None,0,c.byref(size))
             buf=c.create_string_buffer(size.value)
-            if not self.a.GetTokenInformation(token,1,buf,size,c.byref(size)):raise OSError('Cannot inspect process token')
+            if not self.a.GetTokenInformation(token,1,buf,size,c.byref(size)):raise c.WinError(c.get_last_error())
             pointer=c.cast(buf,c.POINTER(c.c_void_p))[0]; text=w.LPWSTR()
-            if not self.a.ConvertSidToStringSidW(pointer,c.byref(text)):raise OSError('Cannot inspect process SID')
+            if not self.a.ConvertSidToStringSidW(pointer,c.byref(text)):raise c.WinError(c.get_last_error())
             try:return text.value
             finally:self.k.LocalFree(c.cast(text,c.c_void_p))
         finally:self.k.CloseHandle(token)
@@ -140,29 +212,49 @@ class WinAPI:
 
     def current(self):
         identity=self.identity(os.getpid())
-        if not identity or identity['session']==0:raise RuntimeError('Use the signed-in interactive Windows session, not Session 0')
+        if not identity:raise RuntimeFailure('process_identity_unavailable')
+        if identity['session']==0:raise RuntimeFailure('interactive_session_required')
         return identity
 
-    def job(self):
+    def _job_basic_type(self):
         c,w=self.c,self.w
         class Basic(c.Structure):
             _fields_=[('process_time',c.c_int64),('job_time',c.c_int64),('flags',w.DWORD),
                       ('min_ws',c.c_size_t),('max_ws',c.c_size_t),('active',w.DWORD),
                       ('affinity',c.c_size_t),('priority',w.DWORD),('scheduling',w.DWORD)]
+        return Basic
+
+    def host_job_context(self):
+        """Read the current immediate Job only; no policy change or process launch."""
+        c,w=self.c,self.w;inside=w.BOOL()
+        if not self.k.IsProcessInJob(self.k.GetCurrentProcess(),None,c.byref(inside)):
+            raise c.WinError(c.get_last_error())
+        result={'in_job':bool(inside.value)}
+        if inside.value:
+            limits=self._job_basic_type()()
+            if not self.k.QueryInformationJobObject(None,2,c.byref(limits),c.sizeof(limits),None):
+                raise c.WinError(c.get_last_error())
+            result.update(breakaway_allowed=bool(limits.flags&0x800),
+                          silent_breakaway=bool(limits.flags&0x1000))
+        return result
+
+    def job(self):
+        c,w=self.c,self.w;Basic=self._job_basic_type()
         class IO(c.Structure):_fields_=[('values',c.c_uint64*6)]
         class Extended(c.Structure):
             _fields_=[('basic',Basic),('io',IO),('process_mem',c.c_size_t),('job_mem',c.c_size_t),
                       ('peak_process',c.c_size_t),('peak_job',c.c_size_t)]
         handle=self.k.CreateJobObjectW(None,None)
-        if not handle:raise OSError('Cannot create owned child job')
+        if not handle:raise RuntimeFailure('child_job_create_failed',cause=c.WinError(c.get_last_error()))
         limits=Extended();limits.basic.flags=0x2000  # KILL_ON_JOB_CLOSE
         if not self.k.SetInformationJobObject(handle,9,c.byref(limits),c.sizeof(limits)):
-            self.k.CloseHandle(handle);raise OSError('Cannot set owned job lifetime')
+            error=c.WinError(c.get_last_error())
+            self.k.CloseHandle(handle);raise RuntimeFailure('child_job_limits_failed',cause=error)
         return handle
 
     def assign(self,job,child):
         if not self.k.AssignProcessToJobObject(job,int(child._handle)):
-            raise OSError('Cannot contain the owned child process')
+            raise RuntimeFailure('child_job_assignment_failed',cause=self.c.WinError(self.c.get_last_error()))
 
     def close_job(self,job):
         self.k.CloseHandle(job)  # Kernel terminates only processes assigned to this job.
@@ -312,27 +404,41 @@ def start(*,executable=None,entry=None,timeout=12):
     with _lock('manager.lock'):
         existing=status()
         if existing.get('running'):return existing
-        if existing['state']=='unreachable':raise RuntimeError('Owned runtime is not responding; inspect its private log')
+        if existing['state']=='unreachable':raise RuntimeFailure('runtime_unreachable')
         # A stale/reused PID never authorizes termination. The lifetime lock is
         # the authority for replacing a stale record, not the recorded PID.
         try:
             with _lock('supervisor.lock',nonblocking=True):pass
-        except BlockingIOError:raise RuntimeError('Another supervisor owns this user runtime') from None
+        except BlockingIOError as error:raise RuntimeFailure('runtime_already_owned',cause=error) from None
         with socket.socket() as probe:
             try:probe.bind(('127.0.0.1',4190))
-            except OSError:raise RuntimeError('Hub port is occupied; existing process was not stopped') from None
+            except OSError as error:raise RuntimeFailure('hub_port_unavailable',cause=error) from None
         with _log_stream('supervisor') as log:
-            process=subprocess.Popen([*prefix,'run'],stdin=subprocess.DEVNULL,stdout=log,stderr=log,
-                cwd=BASE,close_fds=True,creationflags=0x08000000|0x01000000|0x00000200)
+            try:
+                process=subprocess.Popen([*prefix,'run'],stdin=subprocess.DEVNULL,stdout=log,stderr=log,
+                    cwd=BASE,close_fds=True,creationflags=0x08000000|0x01000000|0x00000200)
+            except OSError as error:
+                # ERROR_ACCESS_DENIED alone is not proof of a Job restriction.
+                # Do not retry without BREAKAWAY: that can die with the GUI.
+                context={}
+                if getattr(error,'winerror',None)==5:
+                    try:context=_api().host_job_context()
+                    except (OSError,RuntimeError):pass
+                restricted=(context.get('in_job') is True and
+                            context.get('breakaway_allowed') is False and
+                            context.get('silent_breakaway') is False)
+                raise RuntimeFailure('host_job_restricted' if restricted else 'supervisor_spawn_failed',
+                                     cause=error,details=context) from None
         deadline=time.monotonic()+timeout
         while time.monotonic()<deadline:
-            if process.poll() is not None:raise RuntimeError('Supervisor startup failed; inspect its private log')
+            exitcode=process.poll()
+            if exitcode is not None:raise RuntimeFailure('supervisor_exited',details={'exitcode':exitcode})
             result=status()
             if result.get('running'):return result
             time.sleep(.1)
         # Only terminate the exact Popen handle we just created; never os.kill.
         process.terminate();process.wait(timeout=5)
-        raise RuntimeError('Supervisor startup timed out; its own process was stopped')
+        raise RuntimeFailure('supervisor_start_timeout')
 
 
 def stop(*,timeout=12):
@@ -341,14 +447,14 @@ def stop(*,timeout=12):
         record=_read_record()
         if record is None:return {'supported':True,'running':False,'state':'stopped','children':{}}
         if not _same_process(record):
-            raise RuntimeError('Process identity is stale or belongs to another session; nothing was stopped')
+            raise RuntimeFailure('runtime_identity_changed')
         _rpc(record,'stop')
         deadline=time.monotonic()+timeout
         while time.monotonic()<deadline:
             if _api().identity(record['identity']['pid'])!=record['identity']:
                 return {'supported':True,'running':False,'state':'stopped','children':{}}
             time.sleep(.1)
-        raise RuntimeError('Graceful supervisor shutdown was not confirmed; no other process was signaled')
+        raise RuntimeFailure('supervisor_stop_timeout')
 
 
 class Supervisor:
@@ -401,7 +507,10 @@ class Supervisor:
                 self._stop_child(child);child['state']='waiting_hub';continue
             if child['process'] is None and now>=child['next']:
                 try:self._spawn(kind,child)
-                except (OSError,ValueError):self._backoff(child)
+                except (OSError,ValueError,RuntimeFailure) as error:
+                    if sys.stderr is not None:
+                        print(json.dumps(_error_record(error,'child_'+kind),ensure_ascii=False),file=sys.stderr)
+                    self._backoff(child)
         hub=self.children['hub']
         self.hub_ready=bool(hub['process'] is not None and hub['process'].poll() is None and
                             now-hub['started']>=.25 and _hub_health())
@@ -564,7 +673,7 @@ def install_autostart(*,executable=None,entry=None,user_sid=None):
     with _lock('manager.lock'):
         name=_task_name(sid);query=_query_task(name)
         replace=query.returncode==0
-        if query.returncode and not _task_absent(query):raise RuntimeError('Task Scheduler ownership query unavailable')
+        if query.returncode and not _task_absent(query):raise RuntimeFailure('task_query_failed',details={'exitcode':query.returncode})
         if replace and not _owned_task(query.stdout,prefix,sid):raise ValueError('Existing task is not owned by this user installation')
         path=DIRECTORY/('autostart-'+secrets.token_hex(8)+'.xml')
         from platform_support import open_nofollow,protect_private
@@ -573,9 +682,9 @@ def install_autostart(*,executable=None,entry=None,user_sid=None):
             protect_private(path)
             with os.fdopen(fd,'w',encoding='utf-16') as out:fd=None;out.write(_task_xml(prefix,sid))
             result=_schtasks(['/Create','/TN',name,'/XML',str(path)]+(['/F'] if replace else []))
-            if result.returncode:raise RuntimeError('Interactive task registration failed; no password or elevated service was used')
+            if result.returncode:raise RuntimeFailure('task_create_failed',details={'exitcode':result.returncode})
             verify=_query_task(name)
-            if verify.returncode or not _owned_task(verify.stdout,prefix,sid):raise RuntimeError('Task registration could not be verified')
+            if verify.returncode or not _owned_task(verify.stdout,prefix,sid):raise RuntimeFailure('task_create_unverified',details={'exitcode':verify.returncode})
         finally:
             if fd is not None:os.close(fd)
             path.unlink(missing_ok=True)
@@ -588,10 +697,12 @@ def remove_autostart(*,executable=None,entry=None,user_sid=None):
     with _lock('manager.lock'):
         name=_task_name(sid);query=_query_task(name)
         if _task_absent(query):return {'removed':False,'state':'absent'}
-        if query.returncode:raise RuntimeError('Task Scheduler ownership query unavailable')
+        if query.returncode:raise RuntimeFailure('task_query_failed',details={'exitcode':query.returncode})
         if not _owned_task(query.stdout,prefix,sid):raise ValueError('Existing task is not owned by this user installation')
-        if _schtasks(['/Delete','/TN',name,'/F']).returncode:raise RuntimeError('Owned task removal failed')
-        if not _task_absent(_query_task(name)):raise RuntimeError('Owned task removal was not confirmed')
+        deleted=_schtasks(['/Delete','/TN',name,'/F'])
+        if deleted.returncode:raise RuntimeFailure('task_delete_failed',details={'exitcode':deleted.returncode})
+        verified=_query_task(name)
+        if not _task_absent(verified):raise RuntimeFailure('task_delete_unverified',details={'exitcode':verified.returncode})
     return {'removed':True,'running_unchanged':True}
 
 
@@ -615,9 +726,10 @@ def main(argv=None):
         if args.kind:parser.error('kind is only used by child')
         result=globals()[args.command.replace('-','_')]();print(json.dumps(result,ensure_ascii=False))
         return 0 if result.get('state') not in ('unverified','unreachable','unavailable') else 2
-    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError):
+    except (OSError,ValueError,RuntimeError,subprocess.SubprocessError) as error:
         # Do not echo process arguments, credentials, raw OS/task output.
-        print(json.dumps({'ok':False,'error':'Windows runtime operation failed; inspect private runtime logs'}),file=sys.stderr)
+        if sys.stderr is not None:
+            print(json.dumps(_error_record(error,args.command),ensure_ascii=False),file=sys.stderr)
         return 2
 
 

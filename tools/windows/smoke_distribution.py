@@ -11,6 +11,7 @@ import shutil
 import sys
 from pathlib import Path
 import struct
+import stat
 import subprocess
 import tempfile
 import time
@@ -29,6 +30,74 @@ def pe_subsystem(path):
     if struct.unpack_from('<H', data, pe+24)[0] != 0x20b:
         raise ValueError('Expected PE32+ executable')
     return struct.unpack_from('<H', data, pe+24+68)[0]
+
+
+def current_job_diagnostic():
+    """Read-only process membership; does not alter jobs or bypass constraints."""
+    if os.name != 'nt':
+        return {'supported': False}
+    import ctypes
+    from ctypes import wintypes
+    try:
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.GetCurrentProcess.argtypes = []
+        kernel.GetCurrentProcess.restype = wintypes.HANDLE
+        kernel.IsProcessInJob.argtypes = [wintypes.HANDLE, wintypes.HANDLE,
+                                         ctypes.POINTER(wintypes.BOOL)]
+        kernel.IsProcessInJob.restype = wintypes.BOOL
+        member = wintypes.BOOL()
+        if not kernel.IsProcessInJob(kernel.GetCurrentProcess(), None, ctypes.byref(member)):
+            return {'supported': True, 'available': False, 'winerror': ctypes.get_last_error()}
+        return {'supported': True, 'available': True, 'in_job': bool(member.value)}
+    except OSError as error:
+        return {'supported': True, 'available': False, 'winerror': getattr(error, 'winerror', None)}
+
+
+def collect_runtime_failure(home):
+    """Only this smoke's synthetic fixture logs, never runtime.json or tokens.
+
+    This is deliberately not a general product log collector. Its only caller
+    supplies the TemporaryDirectory profile created in run_distribution.
+    """
+    from platform_support import open_nofollow, reject_links
+    directory = Path(home)/'.local/state/xueqiu/windows-runtime'
+    result = {'scope': 'synthetic_windows_runtime_fixture',
+              'current_process_job': current_job_diagnostic(), 'log_tails': {}}
+    reject_links(directory)
+    # The supervisor owns exactly these log files. Do not recursively inspect
+    # state or follow a log-shaped link to a record/credential outside the list.
+    for name in ('supervisor.log', 'hub.log', 'bridge.log'):
+        path = directory/name
+        try:
+            info = path.lstat()
+            reject_links(path)
+            if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                continue
+            with os.fdopen(open_nofollow(path, os.O_RDONLY), 'rb') as source:
+                source.seek(0, os.SEEK_END)
+                source.seek(max(0, source.tell()-16384))
+                tail = source.read(16384)
+            result['log_tails'][name] = {'bytes_read': len(tail), 'tail': tail.decode('utf-8', errors='replace')}
+        except FileNotFoundError:
+            continue
+        except OSError as error:
+            result['log_tails'][name] = {'read_error': type(error).__name__,
+                                        'winerror': getattr(error, 'winerror', None)}
+    return result
+
+
+def runtime_with_failure_diagnostics(cli, home, run):
+    try:
+        return exercise_runtime(cli, home, run)
+    except Exception:
+        # Emit while the temporary home still exists, after lifecycle cleanup.
+        # Collection itself must never replace the original nonzero failure.
+        try:
+            print(json.dumps(collect_runtime_failure(home), ensure_ascii=True), file=sys.stderr, flush=True)
+        except Exception as error:
+            print(json.dumps({'scope': 'synthetic_windows_runtime_fixture',
+                              'diagnostic_error': type(error).__name__}), file=sys.stderr, flush=True)
+        raise
 
 
 def runtime_session_id():
@@ -261,7 +330,7 @@ def run_distribution(directory):
             raise ValueError('Installed commandWindows lost UTF-8 synthetic events')
         if list((home/'.config').rglob('ble-pairing.json')) or list((home/'.config').rglob('hub-token')):
             raise ValueError('Smoke test unexpectedly created credentials')
-        runtime = exercise_runtime(installed['cli'], home, run)
+        runtime = runtime_with_failure_diagnostics(installed['cli'], home, run)
         verify_distribution(installed['directory'])
     return {'version': version, 'doctor': 'ok', 'gui_smoke': 'ok', 'hook_events': 6, 'isolated_install': 'ok', 'commandWindows': 'ok', 'runtime_lifecycle': runtime}
 
