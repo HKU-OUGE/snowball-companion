@@ -16,7 +16,7 @@ import zipfile
 from types import SimpleNamespace
 from unittest.mock import patch
 import stage_payload as stage
-from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics
+from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics, PackagedCommandError, verified_host_job_restriction, launch_foreground_in_ci
 import distribution_manifest as native
 
 HERE = Path(__file__).resolve().parent
@@ -274,6 +274,8 @@ class RuntimeSmokeTests(unittest.TestCase):
         self.running = self.task = False
         self.identity = {'pid': 42, 'start': '100'}
         self.fail_install = self.fail_remove = self.fail_start = self.duplicate_start = False
+        self.fail_stop = False
+        self.job_report = None
         self.start_count = 0
         self.patches = [
             patch('smoke_distribution.runtime_session_id', return_value=1),
@@ -299,11 +301,16 @@ class RuntimeSmokeTests(unittest.TestCase):
         op = args[1]; self.calls.append(op)
         if op == 'status': value = self.snapshot()
         elif op == 'start':
-            self.start_count += 1; self.running = True
+            self.start_count += 1
+            if self.job_report is not None and self.start_count == 1:
+                raise PackagedCommandError(('runtime', 'start'), SimpleNamespace(returncode=2, stderr=json.dumps(self.job_report)))
+            self.running = True
             if self.fail_start: raise RuntimeError('synthetic partial start failure')
             if self.duplicate_start and self.start_count > 1: self.identity['pid'] = 99
             value = self.snapshot()
-        elif op == 'stop': self.running = False; value = self.snapshot()
+        elif op == 'stop':
+            if self.fail_stop: raise RuntimeError('synthetic stop failure')
+            self.running = False; value = self.snapshot()
         elif op == 'autostart-status':
             value = {'state': 'owned' if self.task else 'absent', 'owned': self.task, 'task': 'fixture-task'}
         elif op == 'install-autostart':
@@ -321,6 +328,8 @@ class RuntimeSmokeTests(unittest.TestCase):
     def test_real_branch_contract_checks_hmac_health_and_cleanup(self):
         value = self.invoke()
         self.assertEqual(value['state'], 'verified')
+        self.assertEqual(value['mode'], 'detached')
+        self.assertEqual(value['supervisor'], 'survived_launcher_exit')
         self.assertEqual(value['bridge'], 'missing_credentials')
         self.assertEqual(self.calls.count('start'), 2)
         self.assertEqual(self.calls[-4:], ['remove-autostart', 'autostart-status', 'stop', 'status'])
@@ -358,6 +367,94 @@ class RuntimeSmokeTests(unittest.TestCase):
         self.fail_remove = True
         with self.assertRaisesRegex(RuntimeError, 'autostart cleanup failed'): self.invoke()
         self.assertIn('stop', self.calls); self.assertFalse(self.running)
+
+    @staticmethod
+    def restricted_report():
+        return {'ok': False, 'operation': 'start', 'code': 'host_job_restricted',
+                'winerror': 5, 'in_job': True, 'breakaway_allowed': False, 'silent_breakaway': False}
+
+    def foreground_process(self):
+        test = self
+        class Process:
+            pid = 42
+            terminated = False
+            waited = []
+            def poll(self): return None if test.running else 0
+            def wait(self, timeout):
+                self.waited.append(timeout)
+                if test.running: raise __import__('subprocess').TimeoutExpired('fixture-runtime', timeout)
+                return 0
+            def terminate(self): self.terminated = True; test.running = False
+        self.running = True
+        return Process()
+
+    def test_verified_restricted_job_runs_foreground_without_claiming_detached_lifetime(self):
+        self.job_report = self.restricted_report()
+        processes = []
+        def launch(cli):
+            self.assertEqual(cli, 'fixture-cli.exe')
+            processes.append(self.foreground_process()); return processes[-1]
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'available': True, 'in_job': True}):
+            value = exercise_runtime('fixture-cli.exe', self.home, self.execute, foreground_launch=launch)
+        self.assertEqual(value['mode'], 'supervised_foreground_in_restricted_ci_job')
+        self.assertEqual(value['detached_launch'], 'rejected_by_ci_host_job')
+        self.assertEqual(value['supervisor'], 'foreground_lifecycle_verified')
+        self.assertEqual(value['explorer_independent_lifetime'], 'not_tested')
+        self.assertEqual(len(processes), 1); self.assertFalse(processes[0].terminated)
+        self.assertTrue(processes[0].waited)
+        self.assertFalse(self.running); self.assertFalse(self.task)
+        self.assertEqual(self.calls.count('start'), 2)
+
+    def test_restriction_requires_every_safe_field_and_independent_job_membership(self):
+        valid = self.restricted_report()
+        reports = [{k: v for k, v in valid.items() if k != field} for field in valid]
+        reports += [{**valid, 'code': 'supervisor_spawn_failed'}, {**valid, 'winerror': 87},
+                    {**valid, 'in_job': 1}, {**valid, 'breakaway_allowed': True}]
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'available': True, 'in_job': True}):
+            for report in reports:
+                error = PackagedCommandError(('runtime', 'start'), SimpleNamespace(returncode=2, stderr=json.dumps(report)))
+                self.assertFalse(verified_host_job_restriction(error), report)
+        error = PackagedCommandError(('runtime', 'start'), SimpleNamespace(returncode=2, stderr=json.dumps(valid)))
+        for current in ({'available': False}, {'available': True, 'in_job': False}):
+            with patch('smoke_distribution.current_job_diagnostic', return_value=current):
+                self.assertFalse(verified_host_job_restriction(error))
+
+    def test_unverified_spawn_failure_does_not_launch_foreground(self):
+        self.job_report = {**self.restricted_report(), 'code': 'supervisor_spawn_failed'}
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'available': True, 'in_job': True}), \
+             patch('smoke_distribution.launch_foreground_in_ci') as launch:
+            with self.assertRaises(PackagedCommandError):
+                exercise_runtime('fixture-cli.exe', self.home, self.execute, foreground_launch=launch)
+        launch.assert_not_called()
+
+    def test_foreground_task_failure_still_cleans_task_and_retained_process(self):
+        self.job_report = self.restricted_report(); self.fail_install = True
+        processes = []
+        def launch(_): processes.append(self.foreground_process()); return processes[-1]
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'available': True, 'in_job': True}):
+            with self.assertRaisesRegex(RuntimeError, 'partial task'):
+                exercise_runtime('fixture-cli.exe', self.home, self.execute, foreground_launch=launch)
+        self.assertFalse(self.task); self.assertFalse(self.running)
+        self.assertTrue(processes[0].waited); self.assertFalse(processes[0].terminated)
+
+    def test_foreground_failed_stop_terminates_only_retained_popen_and_still_fails(self):
+        self.job_report = self.restricted_report(); self.fail_stop = True
+        processes = []
+        def launch(_): processes.append(self.foreground_process()); return processes[-1]
+        with patch('smoke_distribution.current_job_diagnostic', return_value={'available': True, 'in_job': True}):
+            with self.assertRaisesRegex(RuntimeError, 'runtime cleanup failed'):
+                exercise_runtime('fixture-cli.exe', self.home, self.execute, foreground_launch=launch)
+        self.assertEqual(len(processes), 1); self.assertTrue(processes[0].terminated)
+        self.assertFalse(self.running); self.assertFalse(self.task)
+
+    def test_foreground_popen_uses_production_run_and_no_breakaway_flags(self):
+        with patch('smoke_distribution.subprocess.Popen', return_value='retained-process') as spawn:
+            value = launch_foreground_in_ci('fixture-cli.exe', self.home, {'FIXTURE': 'yes'})
+        self.assertEqual(value, 'retained-process')
+        self.assertEqual(spawn.call_args.args[0], ['fixture-cli.exe', 'runtime', 'run'])
+        self.assertEqual(spawn.call_args.kwargs['creationflags'], 0)
+        self.assertEqual(spawn.call_args.kwargs['env'], {'FIXTURE': 'yes'})
+        self.assertEqual(spawn.call_args.kwargs['cwd'], self.home)
 
     def test_preexisting_task_is_not_replaced_or_removed(self):
         self.task = True

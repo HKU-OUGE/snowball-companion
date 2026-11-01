@@ -121,3 +121,5 @@ Linux 单元测试、Windows CI、真实 Windows 蓝牙设备验收是三个不�
 [Bleak Windows 后端](https://bleak.readthedocs.io/en/latest/backends/windows.html)。
 
 账号桌宠仍通过插件 Setup 与宿主 Pets 服务安装／切换。Windows 不需要为随包辅助脚本另装 Python：安装目录中的 `SnowballCLI.exe pet --help`、`SnowballCLI.exe pet list` 可运行 Pet 辅助入口；创建账号 Pet 仍需当前账号授权及实际服务核验。
+
+如果 CI 的 Windows Job 明确禁止分离后台进程，生产入口会返回 `host_job_restricted`，不会静默改为随终端退出的子进程。CI 仅在核实这一错误后，使用已有 `runtime run` 前台模式留在同一 Job 内验证后台与任务计划；报告明确区分此模式和真正的独立后台启动。普通桌面从开始菜单启动后的独立寿命，以及实体蓝牙连接，仍需真实用户桌面验收。

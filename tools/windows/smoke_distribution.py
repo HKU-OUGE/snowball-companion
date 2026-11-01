@@ -32,6 +32,52 @@ def pe_subsystem(path):
     return struct.unpack_from('<H', data, pe+24+68)[0]
 
 
+class PackagedCommandError(RuntimeError):
+    def __init__(self, arguments, result):
+        self.arguments = tuple(map(str, arguments))
+        self.returncode = result.returncode
+        self.stderr = result.stderr
+        super().__init__(f'Packaged {self.arguments[0] if self.arguments else "entry"} failed: {result.stderr}')
+
+
+def verified_host_job_restriction(error):
+    """Only the production CLI's exact, corroborated spawn rejection qualifies."""
+    if (not isinstance(error, PackagedCommandError) or error.arguments != ('runtime', 'start')
+            or error.returncode != 2):
+        return False
+    try:
+        report = json.loads(error.stderr)
+    except (TypeError, ValueError):
+        return False
+    if not isinstance(report, dict):
+        return False
+    required = {'ok': False, 'operation': 'start', 'code': 'host_job_restricted',
+                'winerror': 5, 'in_job': True, 'breakaway_allowed': False,
+                'silent_breakaway': False}
+    if any(type(report.get(key)) is not type(value) or report[key] != value for key, value in required.items()):
+        return False
+    current = current_job_diagnostic()
+    return current.get('available') is True and current.get('in_job') is True
+
+
+def launch_foreground_in_ci(cli, home, env):
+    """Retain a Popen handle; inherit the CI Job without breakaway flags."""
+    from platform_support import ensure_private_dir, open_nofollow, protect_private
+    directory = ensure_private_dir(home/'.local/state/xueqiu/windows-runtime')
+    path = directory/'supervisor.log'
+    fd = open_nofollow(path, os.O_CREAT | os.O_WRONLY | os.O_APPEND)
+    try:
+        protect_private(path)
+        with os.fdopen(fd, 'ab', buffering=0) as log:
+            fd = None
+            return subprocess.Popen([str(cli), 'runtime', 'run'], stdin=subprocess.DEVNULL,
+                stdout=log, stderr=subprocess.STDOUT, env=env, cwd=home,
+                close_fds=True, creationflags=0)
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
 def current_job_diagnostic():
     """Read-only process membership; does not alter jobs or bypass constraints."""
     if os.name != 'nt':
@@ -86,9 +132,9 @@ def collect_runtime_failure(home):
     return result
 
 
-def runtime_with_failure_diagnostics(cli, home, run):
+def runtime_with_failure_diagnostics(cli, home, run, foreground_launch=None):
     try:
-        return exercise_runtime(cli, home, run)
+        return exercise_runtime(cli, home, run, foreground_launch=foreground_launch)
     except Exception:
         # Emit while the temporary home still exists, after lifecycle cleanup.
         # Collection itself must never replace the original nonzero failure.
@@ -156,7 +202,7 @@ def verify_hub_health(home):
         connection.close()
 
 
-def exercise_runtime(cli, home, run):
+def exercise_runtime(cli, home, run, foreground_launch=None):
     """Real installed CLI lifecycle, within the CI account's temporary profile.
 
     No credential fixture is installed: the bridge must exit at missing_credentials
@@ -182,14 +228,30 @@ def exercise_runtime(cli, home, run):
     record_path = state_dir/'windows-runtime/runtime.json'
     diagnostic_path = state_dir/'transport-diagnostic.json'
     attempted_start = attempted_task = False
+    foreground = None
+    foreground_owned = False
+    mode = 'detached'
     try:
         attempted_start = True  # Also clean up a partially successful launch.
-        started = command('start')
-        if started.get('running') is not True:
+        try:
+            started = command('start')
+        except PackagedCommandError as error:
+            if foreground_launch is None or not verified_host_job_restriction(error):
+                raise
+            rejected = command('status')
+            if rejected.get('state') != 'stopped' or rejected.get('running') is not False:
+                raise ValueError('Rejected detached launch left an unexpected runtime') from error
+            mode = 'supervised_foreground_in_restricted_ci_job'
+            print('::warning::Detached launch rejected by CI host Job; testing production runtime run inside that Job. Explorer independent lifetime remains untested.')
+            foreground = foreground_launch(cli)
+            started = None
+        if started is not None and started.get('running') is not True:
             raise ValueError('Supervisor start was not acknowledged')
-        # run() uses subprocess.run: the launcher CLI has already exited here.
+        # Only detached mode proves survival of the launcher CLI's exit.
         deadline = time.monotonic()+25
         while True:
+            if foreground is not None and foreground.poll() is not None:
+                raise RuntimeError('Supervised foreground runtime exited before readiness')
             snapshot = command('status')  # Product verifies both request and response HMAC.
             hub = snapshot.get('children', {}).get('hub', {})
             try:
@@ -204,6 +266,10 @@ def exercise_runtime(cli, home, run):
                 raise ValueError('Real Hub health or missing-credentials bridge diagnostic did not become ready')
             time.sleep(.2)
         first = read_private_json(record_path)
+        if foreground is not None:
+            if first.get('identity', {}).get('pid') != foreground.pid:
+                raise ValueError('Runtime identity does not belong to retained foreground process')
+            foreground_owned = True
         reject_unsigned_control(first['port'])
         verify_hub_health(home)
         time.sleep(.3)
@@ -230,19 +296,43 @@ def exercise_runtime(cli, home, run):
             except Exception:
                 cleanup_errors.append('autostart cleanup failed')
         if attempted_start:
+            may_stop = foreground is None or foreground_owned
+            if foreground is not None and not may_stop:
+                try:
+                    may_stop = read_private_json(record_path).get('identity', {}).get('pid') == foreground.pid
+                except (OSError, ValueError):
+                    may_stop = False
+            if may_stop:
+                try:
+                    stopped = command('stop')
+                    if stopped.get('running') is not False or stopped.get('state') != 'stopped':
+                        raise ValueError('Supervisor stop was not confirmed')
+                    if command('status').get('state') != 'stopped' or record_path.exists():
+                        raise ValueError('Supervisor state persisted after shutdown')
+                except Exception:
+                    cleanup_errors.append('runtime cleanup failed')
+        if foreground is not None:
+            # Stop via authenticated CLI first. On failed startup/shutdown, only
+            # the exact Popen handle created by this fixture may be terminated.
             try:
-                stopped = command('stop')
-                if stopped.get('running') is not False or stopped.get('state') != 'stopped':
-                    raise ValueError('Supervisor stop was not confirmed')
-                if command('status').get('state') != 'stopped' or record_path.exists():
-                    raise ValueError('Supervisor state persisted after shutdown')
+                try:
+                    exitcode = foreground.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    foreground.terminate()
+                    exitcode = foreground.wait(timeout=5)
+                    cleanup_errors.append('foreground required forced cleanup')
+                if exitcode != 0:
+                    cleanup_errors.append('foreground exited with failure')
             except Exception:
-                cleanup_errors.append('runtime cleanup failed')
+                cleanup_errors.append('foreground process cleanup failed')
         if cleanup_errors:
             raise RuntimeError('; '.join(cleanup_errors))
     if (home/'.config/xueqiu/ble-pairing.json').exists():
         raise ValueError('Runtime smoke unexpectedly created Bluetooth credentials')
-    return {'state': 'verified', 'supervisor': 'survived_launcher_exit',
+    return {'state': 'verified', 'mode': mode,
+            'detached_launch': 'verified_in_ci' if mode == 'detached' else 'rejected_by_ci_host_job',
+            'explorer_independent_lifetime': 'not_tested',
+            'supervisor': 'survived_launcher_exit' if mode == 'detached' else 'foreground_lifecycle_verified',
             'hub': 'authenticated_health', 'control_hmac': 'valid_accepted_invalid_rejected',
             'repeat_start': 'same_processes', 'bridge': 'missing_credentials',
             'autostart': 'owned_created_and_removed', 'stop': 'confirmed'}
@@ -269,7 +359,7 @@ def run_distribution(directory):
                 env=env, cwd=home, timeout=40)
             if result.returncode:
                 # Only synthetic fixture output; no real profile was provided.
-                raise RuntimeError(f'Packaged {args[0] if args else "entry"} failed: {result.stderr}')
+                raise PackagedCommandError(args, result)
             return result
         version = run(cli, '--version').stdout.strip()
         if version != 'Snowball Companion 0.6.0':
@@ -330,7 +420,8 @@ def run_distribution(directory):
             raise ValueError('Installed commandWindows lost UTF-8 synthetic events')
         if list((home/'.config').rglob('ble-pairing.json')) or list((home/'.config').rglob('hub-token')):
             raise ValueError('Smoke test unexpectedly created credentials')
-        runtime = runtime_with_failure_diagnostics(installed['cli'], home, run)
+        runtime = runtime_with_failure_diagnostics(installed['cli'], home, run,
+            foreground_launch=lambda executable: launch_foreground_in_ci(executable, home, env))
         verify_distribution(installed['directory'])
     return {'version': version, 'doctor': 'ok', 'gui_smoke': 'ok', 'hook_events': 6, 'isolated_install': 'ok', 'commandWindows': 'ok', 'runtime_lifecycle': runtime}
 
