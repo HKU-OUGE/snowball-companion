@@ -19,6 +19,10 @@ class AppToolError(ValueError):
 class AppTools:
     def __init__(self,home=None):self.home=Path(home or Path.home())
     def pipe(self):
+        # Windows named-pipe Desktop control has not been implemented. Hooks
+        # and read-only catalogues remain available; never guess an IPC path.
+        if os.name == 'nt':
+            return None
         candidates=[]
         if self.home==Path.home():
             if os.environ.get('CODEX_APP_TOOLS_PIPE_PATH'):candidates.append(os.environ['CODEX_APP_TOOLS_PIPE_PATH'])

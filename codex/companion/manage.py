@@ -24,6 +24,10 @@ def identity(pid, expected_script=None):
 
 
 def running():
+    if sys.platform=='win32':
+        import windows_runtime
+        result=windows_runtime.status()
+        return result if result.get('running') else None
     try:
         rec=json.loads(RECORD.read_text())
         return rec if identity(rec['pid'], rec.get('script', str(BRIDGE)))==rec['start'] else None
@@ -31,6 +35,11 @@ def running():
 
 
 def stop(quiet=False):
+    if sys.platform=='win32':
+        import windows_runtime
+        result=windows_runtime.stop()
+        if not quiet:print(json.dumps(result,ensure_ascii=False))
+        return result
     rec=running()
     if rec:
         os.kill(rec['pid'],signal.SIGTERM)
@@ -49,6 +58,17 @@ def main():
     a=p.parse_args()
     if a.source is not None and a.command != 'start':
         p.error('--source is only valid with start')
+    if sys.platform=='win32':
+        import windows_runtime
+        if a.source is not None and a.source.expanduser().resolve()!=ROOT/'hub/snapshot.json':
+            p.error('Windows shared runtime uses the live Hub snapshot; demo substitution is not supported')
+        try:result=getattr(windows_runtime,a.command)()
+        except (OSError,ValueError,RuntimeError,subprocess.SubprocessError):
+            print(json.dumps({'ok':False,'error':'Windows shared runtime operation failed'}),file=sys.stderr)
+            raise SystemExit(2)
+        print(json.dumps(result,ensure_ascii=False))
+        if result.get('state') in ('unverified','unreachable'):raise SystemExit(2)
+        return
     from user_services import owned,control
     if owned('bridge'):
         if a.source is not None and a.source.expanduser().resolve()!=ROOT/'hub/snapshot.json':

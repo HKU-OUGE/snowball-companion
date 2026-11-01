@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Inspect a bundled character and remember account-verified Pets; no network calls."""
 import argparse
-import fcntl
+from platform_support import flock, LOCK_EX, LOCK_NB, open_nofollow, private_file_ok, reject_links, protect_private
 import hashlib
 import http.client
 import json
@@ -98,12 +98,13 @@ def record(pet_id, meta, path, selected=False):
     if not ID.fullmatch(character):
         raise ValueError('Invalid character ID')
     safe_path(path.parent, path.name)
+    reject_links(path.parent)
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    path.parent.chmod(0o700)
+    protect_private(path.parent)
     lock = safe_path(path.parent, path.name + '.lock')
-    lock_fd = os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    lock_fd = open_nofollow(lock, os.O_CREAT | os.O_RDWR, 0o600)
     try:
-        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        flock(lock_fd, LOCK_EX)
         result = read_state(path)
         result['characters'][character] = {
             'pet_id': pet_id, 'asset_key': meta['asset_key'], 'sha256': meta['sha256'],
@@ -120,7 +121,7 @@ def record(pet_id, meta, path, selected=False):
                 stream.write('\n')
                 stream.flush()
                 os.fsync(stream.fileno())
-            os.chmod(tmp, 0o600)
+            protect_private(tmp)
             os.replace(tmp, path)
         finally:
             if os.path.exists(tmp):
@@ -148,7 +149,10 @@ def sync(character, root=ROOT, token_path=None):
     asset(root, character)
     path = token_path or Path.home() / '.config/xueqiu/hub-token'
     safe_path(path.parent, path.name)
-    token = path.read_text().strip()
+    if os.name == 'nt' and not private_file_ok(path):
+        raise ValueError('Hub token must have a private user ACL')
+    with os.fdopen(open_nofollow(path, os.O_RDONLY), 'r', encoding='utf-8') as stream:
+        token = stream.read().strip()
     if not re.fullmatch(r'[A-Za-z0-9_-]{32,128}', token):
         raise ValueError('Invalid Hub token file')
     connection = http.client.HTTPConnection('127.0.0.1', 4190, timeout=2)

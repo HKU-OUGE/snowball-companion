@@ -114,7 +114,8 @@ def download_prepared(prepared,public_key=PUBLIC_KEY,opener=None,now=None,cache_
  if cache_dir is not None:
   root=Path(cache_dir);root.mkdir(mode=0o700,parents=True,exist_ok=True);cache=root/(m['sha256']+'.bin')
   try:
-   fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW)
+   from platform_support import open_nofollow
+   fd=open_nofollow(cache,os.O_RDONLY)
    with os.fdopen(fd,'rb') as stream:cached=stream.read(m['size']+1)
    if len(cached)==m['size'] and hashlib.sha256(cached).hexdigest()==m['sha256']:data=cached
   except OSError:pass

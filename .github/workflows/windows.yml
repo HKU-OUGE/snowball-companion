@@ -1,0 +1,46 @@
+name: Windows native build
+on:
+  workflow_dispatch:
+  push:
+    paths: ['codex/**', 'tools/**', '.github/workflows/windows.yml', 'docs/**', 'AGENTS.md']
+  pull_request:
+    paths: ['codex/**', 'tools/**', '.github/workflows/windows.yml', 'docs/**', 'AGENTS.md']
+permissions:
+  contents: read
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows-x64:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12.10'
+          architecture: x64
+      - name: Standard-user tests, native build and packaged smoke checks
+        shell: powershell
+        run: |
+          $Python = (Get-Command python.exe).Source
+          & ./tools/windows/run_standard_user.ps1 -Python $Python
+      - name: Test report and synthetic build logs
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: windows-validation
+          path: |
+            windows-tests.xml
+            windows-ci-logs/*.txt
+          if-no-files-found: warn
+      - name: Candidate Windows bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: Snowball-Windows-x64-0.6.0
+          path: |
+            dist/windows/Snowball-Windows-x64-0.6.0.zip
+            dist/windows/Snowball-Windows-x64-0.6.0.zip.sha256
+          if-no-files-found: error

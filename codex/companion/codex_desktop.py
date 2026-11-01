@@ -42,6 +42,8 @@ class DeliveryError(ValueError):
 
 class DesktopIPC:
     def __init__(self, path):
+        if os.name == 'nt':
+            raise DeliveryError('desktop_control_unsupported_on_windows')
         path = Path(path)
         for p, is_socket in ((path.parent, False), (path, True)):
             s = p.lstat()
@@ -156,7 +158,7 @@ class VisibleSummary:
 class CodexDesktop:
     def __init__(self, home=None, ipc_factory=DesktopIPC):
         self.home = Path(home or Path.home())
-        self.root = self.home/'.codex'
+        self.root = Path(os.environ.get('CODEX_HOME', str(self.home/'.codex'))) if self.home == Path.home() else self.home/'.codex'
         self.routes_root = self.home/'.local/state/xueqiu/codex-adapter/hooks'
         self.socket_path = self.root/'ipc/ipc.sock'
         self.ipc_factory = ipc_factory
@@ -181,6 +183,8 @@ class CodexDesktop:
         except (OSError, ValueError, KeyError, TypeError): return None
 
     def available(self):
+        if os.name == 'nt':
+            return False
         try:
             s = self.socket_path.lstat()
             return stat.S_ISSOCK(s.st_mode) and s.st_uid == os.getuid() and not s.st_mode & 0o022

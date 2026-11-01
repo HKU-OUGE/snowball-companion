@@ -21,6 +21,13 @@ WRITE = '9e7a0003-6ed4-4b6b-bf37-43dc42838c20'
 PROVIDERS = ['Codex', 'Claude', 'Cursor']
 STATES = ['idle', 'thinking', 'running', 'waiting', 'completed', 'failed']
 CONFIG = Path.home() / '.config/xueqiu/ble-pairing.json'
+_last_diagnostic_alive = 0.0
+
+
+def transport_diagnostic(state, *, error=None, ack=None):
+    if sys.platform == 'win32':
+        from connection_diagnostics import record_transport
+        record_transport(state, error=error, ack=ack)
 
 def transport_io_timeout(client, default=8):
     """A remote adapter may extend transport I/O; BLE keeps its existing limit."""
@@ -467,17 +474,28 @@ class CatalogRelay:
         return refreshed
 
 
+class AuthenticationError(ValueError):
+    """A complete INFO response failed the bound identity or HMAC check."""
+
+
 def verify_info(info, config):
     if info.get('v') != 1 or info.get('device') != config['device']:
-        raise ValueError('Device identity/version mismatch')
+        raise AuthenticationError('Device identity/version mismatch')
     msg = b'XQINFO' + struct.pack('<8sIIBB', bytes.fromhex(info['nonce']), info['accepted'], info['applied'], info['provider'], info['state'])
     expected = hmac.digest(bytes.fromhex(config['key']), msg, 'sha256').hex()
     if not hmac.compare_digest(expected, info.get('proof', '')):
-        raise ValueError('Device authentication failed; USB-bind the intended watch first')
+        raise AuthenticationError('Device authentication failed; USB-bind the intended watch first')
     return info
 
 
 def pair_usb(port, config_path):
+    if sys.platform == 'win32':
+        from device_setup import bind_device
+        result = asyncio.run(bind_device(port, config_path))
+        print(json.dumps(result, ensure_ascii=False), flush=True)
+        if not result.get('ok'):
+            raise ValueError(result.get('code', 'binding_failed'))
+        return
     import serial
     s = serial.Serial()
     s.port, s.baudrate, s.timeout = port, 115200, .2
@@ -655,8 +673,13 @@ def decode_info(raw):
 
 
 async def read_info(client, config):
+    global _last_diagnostic_alive
     raw = bytes(await asyncio.wait_for(client.read_gatt_char(INFO), transport_io_timeout(client)))
-    return verify_info(decode_info(raw), config)
+    info = verify_info(decode_info(raw), config)
+    if sys.platform == 'win32' and time.monotonic() - _last_diagnostic_alive >= HEARTBEAT_SECONDS:
+        transport_diagnostic('alive')
+        _last_diagnostic_alive = time.monotonic()
+    return info
 
 
 async def send(client, config, provider, state, valid_until=None, session_id=None, display_name=''):
@@ -676,6 +699,23 @@ async def send(client, config, provider, state, valid_until=None, session_id=Non
 
 
 async def connected_session(args, config):
+    if sys.platform != 'win32':
+        return await _connected_session(args, config)
+    from connection_diagnostics import device_session_lock, _classify
+    with device_session_lock():
+        transport_diagnostic('connecting')
+        try:
+            result = await _connected_session(args, config)
+        except Exception as error:
+            code = 'auth_mismatch' if isinstance(error, AuthenticationError) else _classify(error)
+            transport_diagnostic('error', error=code)
+            raise
+        else:
+            transport_diagnostic('disconnected')
+            return result
+
+
+async def _connected_session(args, config):
     from bleak import BleakClient
     device = await find_device(config)
     agent = await linux_agent(device)
@@ -684,6 +724,7 @@ async def connected_session(args, config):
     try:
         async with BleakClient(device, timeout=20, pair=sys.platform != 'linux') as client:
             await read_info(client, config)
+            transport_diagnostic('authenticated')
             print(f'Connected and authenticated: {config["device"]}', flush=True)
             if args.command == 'demo':
                 for i, state in enumerate(STATES):
@@ -798,6 +839,8 @@ async def connected_session(args, config):
                     await summaries.step(client, config, payload)
                     await pets.step(client, config, payload, read_info)
                 ack = await relay.step(client, config, target)
+                if ack is not None:
+                    transport_diagnostic('applied', ack=ack.get('applied'))
                 if target is None:
                     previous = None
                 elif ack is not None and (target.provider, target.state) != previous:
@@ -831,7 +874,15 @@ async def run(args):
     if args.command == 'scan':
         await find_device()
         return
-    config = json.loads(args.config.read_text())
+    if sys.platform == 'win32':
+        from pairing_store import load, PairingStoreError
+        try:
+            config = load(args.config)
+        except PairingStoreError as error:
+            transport_diagnostic('error', error=error.code)
+            raise
+    else:
+        config = json.loads(args.config.read_text())
     delay = 2
     if args.command == 'control':
         async def console():
@@ -870,7 +921,7 @@ def main():
     p.add_argument('--config', type=Path, default=CONFIG)
     sub = p.add_subparsers(dest='command', required=True)
     pair = sub.add_parser('pair-usb')
-    pair.add_argument('--port', default='/dev/ttyACM0')
+    pair.add_argument('--port', required=sys.platform == 'win32', default=None if sys.platform == 'win32' else '/dev/ttyACM0')
     for name in ['scan', 'check', 'demo']:
         sub.add_parser(name)
     for name in ['send', 'watch', 'control']:

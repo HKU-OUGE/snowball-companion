@@ -1,4 +1,8 @@
-# Snowball Companion · 0.5.1
+# Snowball Companion · 0.6.0
+
+## 0.6.0：Windows 原生安装与绑定
+
+Windows 用户请使用自带依赖的原生向导：[Windows 安装、后台运行、首次绑定和诊断](docs/WINDOWS.md)。首次 USB 绑定成功后，日常只需蓝牙与后台，不需要每次在聊天中执行命令。Windows 从手表回复／新建对话的 Desktop 控制仍未接入；状态同步与私有控制分别验证。
 
 ## 0.5.1：设备手动更新请求
 
@@ -36,7 +40,7 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 ./install.sh
 ```
 
-本安装器需要 Python 3 和 Codex CLI，使用 Unix 文件锁，已在本机 Linux 验证。Windows 用户应通过宿主支持的本地市场流程安装，不能直接运行此 shell 安装器；尚未完成 Windows/macOS 实机验证。
+上述 shell 入口用于 Linux，需要 Python 3 和 Codex CLI。Windows 使用 [原生安装向导](docs/WINDOWS.md)，不运行此 shell 文件。Windows 原生 CI 与真实蓝牙硬件验收分别报告；macOS 设备集成仍需单独验证。
 
 稳定技术 ID 仍为 `xueqiu-status@xueqiu-local`，以保留现有安装、设备配对和私有状态。显示名称为 **Snowball Companion**。升级器保留旧会话仍引用的 Hook 脚本，不改写 Hook 信任。若宿主要求审阅新的/变化的 Hooks，请在 `/hooks` 中按提示完成；重新加载插件后运行设置。不要为了加载插件中断正在运行的任务。
 

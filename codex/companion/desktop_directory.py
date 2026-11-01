@@ -1,6 +1,7 @@
 from contextlib import closing
 """Read-only user-chat inventory. Presence is separate from live task evidence."""
 import json
+import os
 from pathlib import Path
 import sqlite3
 import time
@@ -19,6 +20,8 @@ def title(value):
 class DesktopDirectory:
     def __init__(self,home):
         self.home=Path(home);self.root=self.home/'.codex';self.rows={};self.updated=0;self.last_scan=0;self.error=None
+        if self.home == Path.home():
+            self.root = Path(os.environ.get('CODEX_HOME', str(self.root))).expanduser().absolute()
     def refresh(self,force=False):
         if not force and time.monotonic()-self.last_scan<5:return
         self.last_scan=time.monotonic()

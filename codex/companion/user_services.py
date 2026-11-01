@@ -1,5 +1,6 @@
 """Optional per-user login services; only manage units owned by this exact install."""
 import argparse
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -13,12 +14,24 @@ UNITS=Path.home()/'.config/systemd/user'
 def unit_name(kind):return f'snowball-{kind}.service'
 def marker(kind):return f'# Snowball managed install: {ROOT / SCRIPTS[kind]}'
 def owned(kind):
+    if kind not in SCRIPTS:raise ValueError('Unknown shared service')
+    if sys.platform=='win32':
+        import windows_runtime
+        # Ownership means a verified task for this installation, not simply
+        # that Windows supports the manager. Unknown/foreign tasks stay false.
+        try:return windows_runtime.autostart_status().get('owned') is True
+        except (OSError,ValueError,RuntimeError,subprocess.SubprocessError):return False
     path=UNITS/unit_name(kind)
     try:return not path.is_symlink() and path.stat().st_uid==os.getuid() and path.read_text().splitlines()[0]==marker(kind)
     except (OSError,IndexError):return False
 
 def control(kind,command):
     """Call only after owned(); never affect another installation's unit."""
+    if sys.platform=='win32':
+        if kind not in SCRIPTS or command not in ('start','stop','status'):raise ValueError('Unsupported Windows shared runtime operation')
+        import windows_runtime
+        result=getattr(windows_runtime,command)();print(json.dumps(result,ensure_ascii=False))
+        return 0 if result.get('state') not in ('unverified','unreachable') else 2
     if not owned(kind):raise ValueError('Service is not owned by this install')
     if command=='status':
         result=subprocess.run(['systemctl','--user','is-active',unit_name(kind)],capture_output=True,text=True,timeout=10)
@@ -40,6 +53,12 @@ def contents(kind,python):
         '[Install]\nWantedBy=default.target\n')
 
 def install(python):
+    if sys.platform=='win32':
+        import windows_runtime
+        executable=None if getattr(sys,'frozen',False) and Path(python)==Path(sys.executable) else python
+        windows_runtime.install_autostart(executable=executable)
+        windows_runtime.start(executable=executable)
+        return
     if sys.platform!='linux':raise ValueError('Login service currently supports Linux systemd users')
     python=Path(python).absolute()
     if not python.is_file():raise ValueError('Python runtime missing')
