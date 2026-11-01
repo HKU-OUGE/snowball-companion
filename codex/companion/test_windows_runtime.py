@@ -51,6 +51,7 @@ class API:
         for p in self.assigned:p.terminate()
     def gate(self):return self.gate_ok
     def host_job_context(self):return {'in_job':False}
+    def account_sid(self,name):raise ValueError('No such fixture account')
 
 class WindowsRuntimeTests(unittest.TestCase):
     def setUp(self):
@@ -233,6 +234,8 @@ class WindowsRuntimeTests(unittest.TestCase):
         else:self.assertEqual(api.current(),identity)
         self.assertIsNone(api.identity(-1))
         self.assertIsInstance(api.host_job_context()['in_job'],bool)
+        account=os.environ.get('USERDOMAIN','')+'\\'+os.environ.get('USERNAME','')
+        self.assertEqual(api.account_sid(account),identity['sid'])
         job=api.job();api.close_job(job)
     def test_frozen_launch_prefers_console_dispatcher_and_preserves_explicit_prefix(self):
         gui=Path(self.temp.name)/'Snowball.exe';cli=gui.with_name('SnowballCLI.exe');gui.touch();cli.touch()
@@ -264,6 +267,108 @@ class WindowsRuntimeTests(unittest.TestCase):
         for raw,encoding in [(text.encode('utf-16'),'cp936'),(text.encode('utf-8'),'cp936'),(text.encode('gbk'),'cp936')]:
             self.assertEqual(runtime._decode_task_output(raw,encoding),text)
             self.assertEqual(ET.fromstring(runtime._decode_task_output(raw,encoding)).text,'雪球')
+
+    def task_accounts(self,principal,trigger):
+        root=ET.fromstring(runtime._task_xml(self.prefix,self.api.me['sid']))
+        ns={'t':runtime.TASK_NS}
+        root.find('t:Principals/t:Principal/t:UserId',ns).text=principal
+        root.find('t:Triggers/t:LogonTrigger/t:UserId',ns).text=trigger
+        return ET.tostring(root,encoding='unicode')
+
+    def test_normalized_task_account_names_require_same_resolved_sid(self):
+        sid=self.api.me['sid'];alias='FIXTURE\\雪用户'
+        with patch.object(self.api,'account_sid',return_value=sid) as lookup:
+            for principal,trigger in ((alias,sid),(sid,alias),(alias,alias)):
+                self.assertTrue(runtime._owned_task(self.task_accounts(principal,trigger),self.prefix,sid))
+            self.assertTrue(all(call.args==(alias,) for call in lookup.call_args_list))
+        for value in ('S-1-5-21-999',''):
+            with patch.object(self.api,'account_sid') as lookup:
+                self.assertFalse(runtime._owned_task(self.task_accounts(value,sid),self.prefix,sid))
+                lookup.assert_not_called()
+        with patch.object(self.api,'account_sid',return_value='S-1-5-21-999'):
+            self.assertFalse(runtime._owned_task(self.task_accounts(alias,sid),self.prefix,sid))
+        with patch.object(self.api,'account_sid',side_effect=OSError('unresolved private name')):
+            self.assertFalse(runtime._owned_task(self.task_accounts(sid,alias),self.prefix,sid))
+
+    def test_account_normalization_does_not_weaken_marker_executable_arguments_or_privilege(self):
+        sid=self.api.me['sid'];xml=self.task_accounts('FIXTURE\\user','FIXTURE\\user')
+        with patch.object(self.api,'account_sid',return_value=sid):
+            for before,after in ((self.prefix[0],'foreign.exe'),('runtime run','runtime stop'),
+                                 ('LeastPrivilege','HighestAvailable'),('InteractiveToken','Password'),
+                                 (runtime._task_marker(sid),'unowned task')):
+                self.assertFalse(runtime._owned_task(xml.replace(before,after),self.prefix,sid))
+
+    def test_utf16_task_transport_accepts_bomless_newline_prefix_and_preserves_owned_values(self):
+        sid=self.api.me['sid'];xml='<?xml version="1.0" encoding="UTF-16"?>'+runtime._task_xml(self.prefix,sid)
+        for encoding in ('utf-16-le','utf-16-be','utf-16','utf-8-sig'):
+            for prefix in ('','\r\n',' \t\n'):
+                decoded=runtime._decode_task_output((prefix+xml).encode(encoding),'cp936')
+                self.assertEqual(decoded,xml)
+                self.assertTrue(runtime._owned_task(decoded,self.prefix,sid))
+        with self.assertRaises(UnicodeDecodeError):
+            runtime._decode_task_output(b'<\x00x','cp936')
+
+    def test_task_create_verify_and_remove_accept_windows_normalized_user_names(self):
+        saved=[None];sid=self.api.me['sid'];calls=[]
+        def tasks(args):
+            calls.append(args[0])
+            if args[0]=='/Query':return SimpleNamespace(returncode=0 if saved[0] else 0x80070002,stdout=saved[0] or '')
+            if args[0]=='/Create':saved[0]=self.task_accounts('FIXTURE\\user','FIXTURE\\user')
+            if args[0]=='/Delete':saved[0]=None
+            return SimpleNamespace(returncode=0,stdout='')
+        with patch.object(self.api,'account_sid',return_value=sid),patch.object(runtime,'_schtasks',side_effect=tasks):
+            self.assertTrue(runtime.install_autostart()['installed'])
+            self.assertEqual(runtime.autostart_status()['state'],'owned')
+            self.assertTrue(runtime.remove_autostart()['removed'])
+            self.assertEqual(runtime.autostart_status()['state'],'absent')
+        self.assertEqual(calls.count('/Create'),1);self.assertEqual(calls.count('/Delete'),1)
+
+    def test_task_check_report_only_exposes_fixed_boolean_fields(self):
+        checks=runtime._task_ownership_checks(self.task_accounts('UNKNOWN\\private',self.api.me['sid']),self.prefix,self.api.me['sid'])
+        self.assertFalse(checks['principal_user']);self.assertTrue(checks['trigger_user'])
+        self.assertTrue(all(type(v) is bool for v in checks.values()))
+        checks['private']='PRIVATE_SENTINEL';checks['command']='PRIVATE_SENTINEL'
+        report=runtime.error_report(runtime.RuntimeFailure('task_create_unverified',details={'task_checks':checks}))
+        self.assertNotIn('PRIVATE_SENTINEL',json.dumps(report));self.assertNotIn('private',report['task_checks'])
+        self.assertFalse(any(runtime._task_ownership_checks('bad XML',self.prefix,self.api.me['sid']).values()))
+
+    def test_native_account_sid_uses_bounded_two_pass_user_lookup_and_frees_sid_string(self):
+        last_error=[0];kind=[1];sid_size=[28];second_ok=[True]
+        class CTypes:
+            def __getattr__(self,name):return getattr(ctypes,name)
+            @staticmethod
+            def set_last_error(value):last_error[0]=value
+            @staticmethod
+            def get_last_error():return last_error[0]
+            @staticmethod
+            def WinError(code):
+                error=OSError('private native detail');error.winerror=code;return error
+        api=object.__new__(runtime.WinAPI);api.c=CTypes()
+        api.w=SimpleNamespace(DWORD=ctypes.c_uint32,LPWSTR=ctypes.c_wchar_p)
+        api.a=Mock();api.k=Mock();calls=[]
+        def lookup(system,name,sid,size,domain,domain_size,use):
+            self.assertIsNone(system);self.assertEqual(name,'FIXTURE\\user');calls.append(sid is None)
+            if sid is None:
+                size._obj.value=sid_size[0];domain_size._obj.value=8;last_error[0]=122;return False
+            use._obj.value=kind[0];last_error[0]=1332;return second_ok[0]
+        api.a.LookupAccountNameW.side_effect=lookup;api.a.IsValidSid.return_value=True
+        def convert(sid,out):out._obj.value=self.api.me['sid'];return True
+        api.a.ConvertSidToStringSidW.side_effect=convert
+        self.assertEqual(api.account_sid('FIXTURE\\user'),self.api.me['sid'])
+        self.assertEqual(calls,[True,False]);api.k.LocalFree.assert_called_once()
+        api.a.ConvertSidToStringSidW.reset_mock();kind[0]=2
+        with self.assertRaises(ValueError):api.account_sid('FIXTURE\\user')
+        api.a.ConvertSidToStringSidW.assert_not_called()
+        calls.clear();sid_size[0]=69
+        with self.assertRaises(OSError):api.account_sid('FIXTURE\\user')
+        self.assertEqual(calls,[True])
+        sid_size[0]=28;second_ok[0]=False
+        with self.assertRaises(OSError) as raised:api.account_sid('FIXTURE\\user')
+        self.assertEqual(raised.exception.winerror,1332)
+        api.a.LookupAccountNameW.reset_mock()
+        for name in ('', 'user\0other', 'x'*513):
+            with self.assertRaises(ValueError):api.account_sid(name)
+        api.a.LookupAccountNameW.assert_not_called()
     def test_task_access_denied_is_not_absent_and_does_not_create_or_delete(self):
         with patch.object(runtime,'_schtasks',return_value=SimpleNamespace(returncode=0x80070005,stdout='')) as call:
             self.assertEqual(runtime.autostart_status()['state'],'unavailable')

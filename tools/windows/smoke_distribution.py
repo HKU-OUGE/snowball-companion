@@ -132,6 +132,63 @@ def collect_runtime_failure(home):
     return result
 
 
+def collect_task_failure(expected_name, cli):
+    """Query only the current SID's task that this fixture found absent first."""
+    import windows_runtime
+    api = windows_runtime._api()
+    sid = api.current()['sid']
+    name = windows_runtime._task_name(sid)
+    if name != expected_name or not re.fullmatch(r'SnowballCompanion-[a-f0-9]{16}', name):
+        raise ValueError('Diagnostic task identity changed; no task was queried')
+    # Same exact /Query arguments as production _query_task, retaining bytes
+    # here because decoding/BOM normalization is the issue being investigated.
+    result = subprocess.run([api.task_tool(), '/Query', '/TN', name, '/XML', '/HRESULT'],
+        capture_output=True, timeout=20, creationflags=0x08000000)
+    raw = result.stdout
+    if not isinstance(raw, bytes):
+        raise ValueError('Task diagnostic transport must preserve raw bytes')
+    encoding = api.task_encoding()
+    if raw.startswith((b'\xff\xfe', b'\xfe\xff')):
+        encoding = 'utf-16'
+    elif raw.startswith(b'<\x00'):
+        encoding = 'utf-16-le'
+    else:
+        try:
+            raw.decode('utf-8-sig')
+            encoding = 'utf-8-sig'
+        except UnicodeDecodeError:
+            pass
+    return {'scope': 'synthetic_current_user_task', 'task': name,
+            'query_returncode': result.returncode, 'stdout_bytes': len(raw),
+            'prefix_hex': raw[:16].hex(), 'decoding': encoding,
+            'utf8_bom': raw.startswith(b'\xef\xbb\xbf'),
+            'utf16_bom': raw.startswith((b'\xff\xfe', b'\xfe\xff')),
+            'installed_cli': str(cli),
+            'xml_repr': repr(raw[:16384].decode(encoding, errors='replace')),
+            'truncated': len(raw) > 16384}
+
+
+def emit_task_failure(expected_name, cli):
+    try:
+        value = collect_task_failure(expected_name, cli)
+    except Exception as error:
+        value = {'scope': 'synthetic_current_user_task', 'diagnostic_error': type(error).__name__}
+    # Bound the entire JSON emission, including repr/JSON escape expansion.
+    encoded = json.dumps(value, ensure_ascii=True)
+    while len(encoded.encode('utf-8')) > 16383:
+        text = value.get('xml_repr', '')
+        if not text:
+            value = {'scope': 'synthetic_current_user_task', 'diagnostic_error': 'OutputTooLarge'}
+        else:
+            value['xml_repr'] = text[:max(0, len(text)//2)]
+            value['truncated'] = True
+        encoded = json.dumps(value, ensure_ascii=True)
+    try:
+        print(encoded, file=sys.stderr, flush=True)
+    except (OSError, ValueError):
+        pass  # A broken diagnostic stream cannot replace the runtime failure.
+
+
 def runtime_with_failure_diagnostics(cli, home, run, foreground_launch=None):
     try:
         return exercise_runtime(cli, home, run, foreground_launch=foreground_launch)
@@ -231,6 +288,7 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
     foreground = None
     foreground_owned = False
     mode = 'detached'
+    primary_error = None
     try:
         attempted_start = True  # Also clean up a partially successful launch.
         try:
@@ -286,6 +344,11 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
         task = command('autostart-status')
         if task.get('state') != 'owned' or task.get('owned') is not True or task.get('task') != created.get('task'):
             raise ValueError('Installed autostart task ownership was not verified')
+    except Exception as error:
+        primary_error = error
+        if attempted_task:
+            emit_task_failure(task_before.get('task'), cli)
+        raise
     finally:
         cleanup_errors = []
         if attempted_task:
@@ -326,7 +389,17 @@ def exercise_runtime(cli, home, run, foreground_launch=None):
             except Exception:
                 cleanup_errors.append('foreground process cleanup failed')
         if cleanup_errors:
-            raise RuntimeError('; '.join(cleanup_errors))
+            if primary_error is None:
+                if attempted_task:
+                    emit_task_failure(task_before.get('task'), cli)
+                raise RuntimeError('; '.join(cleanup_errors))
+            # Keep the exact install/start failure as the propagated exception.
+            # Cleanup evidence supplements it rather than replacing its code.
+            message = '; '.join(cleanup_errors)
+            if hasattr(primary_error, 'add_note'):
+                primary_error.add_note('CI cleanup also failed: '+message)
+            print(json.dumps({'scope': 'synthetic_runtime_cleanup', 'errors': cleanup_errors}),
+                  file=sys.stderr, flush=True)
     if (home/'.config/xueqiu/ble-pairing.json').exists():
         raise ValueError('Runtime smoke unexpectedly created Bluetooth credentials')
     return {'state': 'verified', 'mode': mode,

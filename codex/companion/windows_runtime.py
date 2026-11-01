@@ -46,6 +46,9 @@ ERROR_CODES = frozenset({
     'task_delete_failed', 'task_delete_unverified', 'child_job_create_failed',
     'child_job_limits_failed', 'child_job_assignment_failed', 'runtime_failed',
 })
+TASK_CHECKS = ('single_principal','single_action','single_trigger','marker',
+               'principal_user','logon_type','run_level','trigger_user',
+               'command','arguments','working_directory')
 
 
 class RuntimeFailure(RuntimeError):
@@ -98,6 +101,9 @@ def error_report(error):
         for name in ('in_job', 'breakaway_allowed', 'silent_breakaway'):
             if type(error.details.get(name)) is bool: result[name] = error.details[name]
         if type(error.details.get('exitcode')) is int: result['exitcode'] = error.details['exitcode']
+        checks=error.details.get('task_checks')
+        if isinstance(checks,dict):
+            result['task_checks']={name:checks[name] for name in TASK_CHECKS if type(checks.get(name)) is bool}
     return result
 
 
@@ -157,6 +163,9 @@ class WinAPI:
         bind(self.a,'OpenProcessToken',w.BOOL,w.HANDLE,w.DWORD,c.POINTER(w.HANDLE))
         bind(self.a,'GetTokenInformation',w.BOOL,w.HANDLE,c.c_int,c.c_void_p,w.DWORD,c.POINTER(w.DWORD))
         bind(self.a,'ConvertSidToStringSidW',w.BOOL,c.c_void_p,c.POINTER(w.LPWSTR))
+        bind(self.a,'LookupAccountNameW',w.BOOL,w.LPCWSTR,w.LPCWSTR,c.c_void_p,
+             c.POINTER(w.DWORD),w.LPWSTR,c.POINTER(w.DWORD),c.POINTER(c.c_int))
+        bind(self.a,'IsValidSid',w.BOOL,c.c_void_p)
         bind(self.k,'LocalFree',c.c_void_p,c.c_void_p)
         bind(self.k,'CreateJobObjectW',w.HANDLE,c.c_void_p,w.LPCWSTR)
         bind(self.k,'SetInformationJobObject',w.BOOL,w.HANDLE,c.c_int,c.c_void_p,w.DWORD)
@@ -215,6 +224,29 @@ class WinAPI:
         if not identity:raise RuntimeFailure('process_identity_unavailable')
         if identity['session']==0:raise RuntimeFailure('interactive_session_required')
         return identity
+
+    def account_sid(self,name):
+        """Resolve Scheduler's canonical account name, never compare a username alone."""
+        if not isinstance(name,str) or not 1<=len(name)<=512 or '\0' in name:
+            raise ValueError('Invalid task account identity')
+        c,w=self.c,self.w;size=w.DWORD();domain_size=w.DWORD();kind=c.c_int()
+        c.set_last_error(0)
+        self.a.LookupAccountNameW(None,name,None,c.byref(size),None,c.byref(domain_size),c.byref(kind))
+        error=c.get_last_error()
+        # 122 is ERROR_INSUFFICIENT_BUFFER. Bound native allocations even for
+        # malformed task names; group/service identities never authorize a task.
+        if error!=122 or not 1<=size.value<=68 or not 1<=domain_size.value<=32768:
+            raise c.WinError(error)
+        sid=c.create_string_buffer(size.value);domain=c.create_unicode_buffer(domain_size.value)
+        if not self.a.LookupAccountNameW(None,name,sid,c.byref(size),domain,c.byref(domain_size),c.byref(kind)):
+            raise c.WinError(c.get_last_error())
+        if kind.value!=1 or not self.a.IsValidSid(sid):
+            raise ValueError('Task account is not an individual user')
+        text=w.LPWSTR()
+        if not self.a.ConvertSidToStringSidW(sid,c.byref(text)):
+            raise c.WinError(c.get_last_error())
+        try:return text.value
+        finally:self.k.LocalFree(c.cast(text,c.c_void_p))
 
     def _job_basic_type(self):
         c,w=self.c,self.w
@@ -611,31 +643,51 @@ def _task_xml(prefix,sid):
     return ET.tostring(task,encoding='unicode',xml_declaration=False)
 
 
-def _owned_task(xml,prefix,sid):
+def _task_user_matches(value,sid):
+    if value==sid:return True
+    # A different literal SID must never be reinterpreted as an account name.
+    if not isinstance(value,str) or not value or value.upper().startswith('S-'):return False
+    try:return _api().account_sid(value)==sid
+    except (OSError,ValueError,RuntimeError):return False
+
+
+def _task_ownership_checks(xml,prefix,sid):
+    """Safe boolean diagnostics; paths, account names and XML are never returned."""
     try:
         root=ET.fromstring(xml);ns={'t':TASK_NS}
         principals=root.findall('t:Principals/t:Principal',ns);actions=root.findall('t:Actions/*',ns)
         triggers=root.findall('t:Triggers/*',ns)
         text=lambda path:root.findtext(path,namespaces=ns)
-        return (len(principals)==len(actions)==len(triggers)==1 and
-            text('t:RegistrationInfo/t:Description')==_task_marker(sid) and
-            text('t:Principals/t:Principal/t:UserId')==sid and
-            text('t:Principals/t:Principal/t:LogonType')=='InteractiveToken' and
-            text('t:Principals/t:Principal/t:RunLevel')=='LeastPrivilege' and
-            text('t:Triggers/t:LogonTrigger/t:UserId')==sid and
-            os.path.normcase(text('t:Actions/t:Exec/t:Command') or '')==os.path.normcase(prefix[0]) and
-            text('t:Actions/t:Exec/t:Arguments')==subprocess.list2cmdline([*prefix[1:],'run']) and
-            text('t:Actions/t:Exec/t:WorkingDirectory')==str(BASE))
-    except ET.ParseError:return False
+        return dict(zip(TASK_CHECKS,(
+            len(principals)==1,len(actions)==1,len(triggers)==1,
+            text('t:RegistrationInfo/t:Description')==_task_marker(sid),
+            _task_user_matches(text('t:Principals/t:Principal/t:UserId'),sid),
+            text('t:Principals/t:Principal/t:LogonType')=='InteractiveToken',
+            text('t:Principals/t:Principal/t:RunLevel')=='LeastPrivilege',
+            _task_user_matches(text('t:Triggers/t:LogonTrigger/t:UserId'),sid),
+            os.path.normcase(text('t:Actions/t:Exec/t:Command') or '')==os.path.normcase(prefix[0]),
+            text('t:Actions/t:Exec/t:Arguments')==subprocess.list2cmdline([*prefix[1:],'run']),
+            text('t:Actions/t:Exec/t:WorkingDirectory')==str(BASE))))
+    except ET.ParseError:return dict.fromkeys(TASK_CHECKS,False)
+
+
+def _owned_task(xml,prefix,sid):
+    return all(_task_ownership_checks(xml,prefix,sid).values())
 
 
 def _decode_task_output(raw,encoding):
     # schtasks may emit a BOM or the local console code page while its XML
     # declaration says UTF-16. Decode transport bytes before parsing Unicode.
-    if raw.startswith((b'\xff\xfe',b'\xfe\xff')):return raw.decode('utf-16')
-    if raw.startswith(b'<\x00'):return raw.decode('utf-16-le')
-    try:return raw.decode('utf-8-sig')
-    except UnicodeDecodeError:return raw.decode(encoding)
+    if raw.startswith((b'\xff\xfe',b'\xfe\xff')):text=raw.decode('utf-16')
+    # BOM-less UTF-16 may have CR/LF/space before the opening XML token.
+    elif raw.startswith((b'<\x00',b'\r\x00',b'\n\x00',b' \x00',b'\t\x00')):text=raw.decode('utf-16-le')
+    elif raw.startswith((b'\x00<',b'\x00\r',b'\x00\n',b'\x00 ',b'\x00\t')):text=raw.decode('utf-16-be')
+    else:
+        try:text=raw.decode('utf-8-sig')
+        except UnicodeDecodeError:text=raw.decode(encoding)
+    # schtasks can prefix a transport newline before the XML declaration.
+    # Do not normalize any account, path or argument text inside the document.
+    return text.lstrip('\ufeff \t\r\n')
 
 
 def _schtasks(args):
@@ -684,7 +736,9 @@ def install_autostart(*,executable=None,entry=None,user_sid=None):
             result=_schtasks(['/Create','/TN',name,'/XML',str(path)]+(['/F'] if replace else []))
             if result.returncode:raise RuntimeFailure('task_create_failed',details={'exitcode':result.returncode})
             verify=_query_task(name)
-            if verify.returncode or not _owned_task(verify.stdout,prefix,sid):raise RuntimeFailure('task_create_unverified',details={'exitcode':verify.returncode})
+            checks=_task_ownership_checks(verify.stdout,prefix,sid)
+            if verify.returncode or not all(checks.values()):
+                raise RuntimeFailure('task_create_unverified',details={'exitcode':verify.returncode,'task_checks':checks})
         finally:
             if fd is not None:os.close(fd)
             path.unlink(missing_ok=True)

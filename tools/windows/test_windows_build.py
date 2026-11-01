@@ -16,7 +16,7 @@ import zipfile
 from types import SimpleNamespace
 from unittest.mock import patch
 import stage_payload as stage
-from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics, PackagedCommandError, verified_host_job_restriction, launch_foreground_in_ci
+from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime, collect_runtime_failure, runtime_with_failure_diagnostics, PackagedCommandError, verified_host_job_restriction, launch_foreground_in_ci, collect_task_failure, emit_task_failure
 import distribution_manifest as native
 
 HERE = Path(__file__).resolve().parent
@@ -251,6 +251,35 @@ class WindowsBuildTest(unittest.TestCase):
         self.assertIs(caught.exception, error)
         self.assertEqual(json.loads(output.getvalue())['diagnostic_error'], 'PermissionError')
 
+    def test_task_diagnostic_queries_only_verified_current_user_name_and_keeps_bom(self):
+        sid = 'S-1-5-21-synthetic'
+        name = 'SnowballCompanion-'+hashlib.sha256(sid.encode()).hexdigest()[:16]
+        api = SimpleNamespace(current=lambda: {'sid': sid}, task_tool=lambda: 'fixture-schtasks.exe', task_encoding=lambda: 'cp437')
+        runtime = SimpleNamespace(_api=lambda: api, _task_name=lambda value: 'SnowballCompanion-'+hashlib.sha256(value.encode()).hexdigest()[:16])
+        raw = '<?xml version="1.0"?><Task>合成 用户</Task>'.encode('utf-16')
+        with patch.dict(sys.modules, {'windows_runtime': runtime}), \
+             patch('smoke_distribution.subprocess.run', return_value=SimpleNamespace(returncode=0, stdout=raw)) as query:
+            report = collect_task_failure(name, 'fixture-cli.exe')
+        self.assertEqual(query.call_args.args[0], ['fixture-schtasks.exe', '/Query', '/TN', name, '/XML', '/HRESULT'])
+        self.assertTrue(report['utf16_bom'])
+        self.assertEqual(report['decoding'], 'utf-16')
+        self.assertIn('合成 用户', report['xml_repr'])
+        self.assertEqual(report['prefix_hex'], raw[:16].hex())
+        with patch.dict(sys.modules, {'windows_runtime': runtime}), \
+             patch('smoke_distribution.subprocess.run') as query:
+            with self.assertRaisesRegex(ValueError, 'identity changed'):
+                collect_task_failure('some-other-task', 'fixture-cli.exe')
+        query.assert_not_called()
+
+    def test_task_diagnostic_total_emission_is_at_most_16k(self):
+        output = io.StringIO()
+        with patch('smoke_distribution.collect_task_failure', return_value={
+                'scope': 'synthetic_current_user_task', 'xml_repr': repr('合成\n'*16000)}), \
+             patch('sys.stderr', output):
+            emit_task_failure('fixture-task', 'fixture-cli')
+        self.assertLessEqual(len(output.getvalue().encode()), 16384)
+        self.assertTrue(json.loads(output.getvalue())['truncated'])
+
     def test_pe_architecture_and_gui_console_subsystem(self):
         data = bytearray(256); data[:2] = b'MZ'
         struct.pack_into('<I', data, 0x3c, 0x80)
@@ -283,6 +312,7 @@ class RuntimeSmokeTests(unittest.TestCase):
             patch('smoke_distribution.read_private_json', side_effect=self.read),
             patch('smoke_distribution.reject_unsigned_control'),
             patch('smoke_distribution.verify_hub_health'),
+            patch('smoke_distribution.emit_task_failure'),
         ]
         self.mocks = [p.start() for p in self.patches]
         for p in self.patches: self.addCleanup(p.stop)
@@ -350,6 +380,18 @@ class RuntimeSmokeTests(unittest.TestCase):
         self.assertIn('remove-autostart', self.calls)
         self.assertIn('stop', self.calls)
         self.assertFalse(self.task); self.assertFalse(self.running)
+
+    def test_original_task_registration_failure_survives_cleanup_failure(self):
+        self.fail_install = self.fail_remove = True
+        output = io.StringIO()
+        with patch('sys.stderr', output):
+            with self.assertRaisesRegex(RuntimeError, 'synthetic partial task registration failure') as failure:
+                self.invoke()
+        self.assertIn('autostart cleanup failed', output.getvalue())
+        self.assertTrue(any('cleanup also failed' in note for note in failure.exception.__notes__))
+        self.mocks[-1].assert_called_once_with('fixture-task', 'fixture-cli.exe')
+        self.assertIn('stop', self.calls)
+        self.assertFalse(self.running)
 
     def test_partial_start_still_attempts_stop_but_never_registers_task(self):
         self.fail_start = True
@@ -460,6 +502,7 @@ class RuntimeSmokeTests(unittest.TestCase):
         self.task = True
         with self.assertRaisesRegex(ValueError, 'already has an autostart'): self.invoke()
         self.assertNotIn('start', self.calls); self.assertNotIn('remove-autostart', self.calls)
+        self.mocks[-1].assert_not_called()
         self.assertTrue(self.task)
 
 
