@@ -1,6 +1,6 @@
 {
   "name": "snowball-companion",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Snowball Companion for local Claude Code Desktop and CLI: observational status, pending-question reminders, and the existing companion display.",
   "author": {
     "name": "Snowball Companion"

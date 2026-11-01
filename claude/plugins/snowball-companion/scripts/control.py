@@ -25,7 +25,7 @@ def main():
     if args.command == 'characters':
         print(json.dumps(CHARACTERS, ensure_ascii=False, indent=2))
         return 0
-    report = {'plugin': 'snowball-companion', 'version': '0.2.0', 'python': sys.version.split()[0],
+    report = {'plugin': 'snowball-companion', 'version': '0.2.1', 'python': sys.version.split()[0],
               'platform': sys.platform, 'hub_url': 'http://127.0.0.1:4190',
               'provider': 'Claude', 'automatic_permission_approval': False}
     try:

@@ -6,16 +6,18 @@
 
 **第一次使用，请从 [新手指南](docs/START-HERE.md) 开始。** 已安装用户请先看 [升级与卸载](docs/INSTALLATION.md)，保留已有配对与共享服务。
 
-下载 **v0.5.0** 安装包，也可在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases/tag/v0.5.0) 查看版本说明与校验文件。
+本次准备 **v0.5.1** 安装包；请先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 确认该版本已发布。下列链接在资产发布后可用，源码或本地构建完成不代表已经发布。
 
 | 软件 | 下载 | 说明 |
 | --- | --- | --- |
-| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.0/Snowball-Codex.zip) | [Codex 0.5.0](codex/README.md) |
-| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.0/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
-| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.0/Snowball-Claude.zip) | [Claude 0.2.0](claude/README.md) |
-| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.0/Snowball-Cursor.zip) | [Cursor 0.2.0](cursor/README.md) |
+| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Codex.zip) | [Codex 0.5.1](codex/README.md) |
+| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
+| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Claude.zip) | [Claude 0.2.1](claude/README.md) |
+| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Cursor.zip) | [Cursor 0.2.1](cursor/README.md) |
 
 每个 ZIP 有配套 `.sha256` 文件，Release 同时提供 `SHA256SUMS`。解压后保留完整目录，不要只复制单个 Hook。Core 构建时强制小于 8,000,000 字节。若要从设备 USB 安装盘复制这些包，需要相应设备固件；本仓库不声称已经部署该固件。
+
+新固件的手动蓝牙更新需要新版电脑插件：Codex 0.5.1、Claude／Cursor 0.2.1。新版兼容老设备的 v1 协议。设备 SD 安装盘中的旧离线包没有被本次源码更新替换；从离线包安装后，请联网按 [升级说明](docs/INSTALLATION.md) 更新插件。
 
 ## 能力与验证边界
 

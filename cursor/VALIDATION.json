@@ -1,6 +1,6 @@
 {
-  "version": "0.2.0",
-  "release": "0.5.0",
+  "version": "0.2.1",
+  "release": "0.5.1",
   "historical_validation": {
     "version": "0.1.0",
     "format": "Cursor Plugin, .cursor-plugin/plugin.json with hooks/hooks.json",
@@ -25,10 +25,22 @@
   },
   "current_package_validation": {
     "date": "2026-11-01",
-    "tests_passed": 38,
+    "tests_passed": 52,
     "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider cursor/tests",
-    "scope": "Isolated host tests; includes 29 shared activity/OTA regressions. No live host plugin install, service changes, firmware updates or real Agent/device test.",
+    "scope": "Isolated host tests including request-bound manual BLE OTA v2 and legacy v1 compatibility. No live installation, service changes, hardware update or real Agent/device test.",
     "real_host_installation_tested": false,
     "real_device_end_to_end_tested": false
-  }
+  },
+  "previous_package_validation": [
+    {
+      "release": "0.5.0",
+      "version": "0.2.0",
+      "date": "2026-11-01",
+      "tests_passed": 38,
+      "command": "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q -p no:cacheprovider cursor/tests",
+      "scope": "Isolated host tests; includes 29 shared activity/OTA regressions. No live host plugin install, service changes, firmware updates or real Agent/device test.",
+      "real_host_installation_tested": false,
+      "real_device_end_to_end_tested": false
+    }
+  ]
 }

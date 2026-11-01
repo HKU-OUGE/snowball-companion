@@ -43,3 +43,33 @@ def test_cache_is_revalidated_and_corruption_is_repaired(tmp_path):
  cache=next(tmp_path.glob('*.bin'));cache.write_bytes(b'wrong')
  repair=Opener(cat,b'image');download('1.2.2',pub,repair,NOW,cache_dir=tmp_path)
  assert len(repair.urls)==2 and cache.read_bytes()==b'image'
+
+
+def test_check_only_returns_complete_catalogue_and_prepared_download_locks_target():
+ data=b'valid image';pub,envelope=release(data)
+ raw=json.dumps({'update':{'available':True,'installable':True,'manifest':envelope},'announcements':[{'title':'news'}]},ensure_ascii=False).encode()
+ opener=Opener(raw,data);prepared=check_catalogue('1.2.2',pub,opener,NOW)
+ assert prepared.raw==raw and len(opener.urls)==1 and prepared.metadata['version']=='1.2.3'
+ with pytest.raises(OTAError):download_prepared(prepared,pub,opener,NOW,target='1.2.4')
+ assert len(opener.urls)==1
+ assert download_prepared(prepared,pub,opener,NOW,target='1.2.3')[1]==data
+ assert len(opener.urls)==2 and '/v1/firmware/' in opener.urls[-1]
+
+def test_progress_is_streamed_and_cancellation_never_commits_partial_image(tmp_path):
+ import io,threading
+ data=b'z'*40000;pub,envelope=release(data)
+ raw=json.dumps({'update':{'available':True,'installable':True,'manifest':envelope}}).encode()
+ prepared=check_catalogue('1.2.2',pub,Opener(raw,data),NOW)
+ class StreamingOpener:
+  def open(self,req,timeout):
+   response=Response(req.full_url,data);stream=io.BytesIO(data);response.read=stream.read;return response
+ progress=[]
+ assert download_prepared(prepared,pub,StreamingOpener(),NOW,target='1.2.3',progress=progress.append)[1]==data
+ assert progress[:3]==[16384,32768,40000] and progress[-1]==40000
+ cancelled=threading.Event()
+ with pytest.raises(OTAError):download_prepared(prepared,pub,StreamingOpener(),NOW,cache_dir=tmp_path,target='1.2.3',progress=lambda n:cancelled.set(),cancelled=cancelled.is_set)
+ assert not list(tmp_path.glob('*.bin'))
+ # An untrusted caller cannot mutate the supposedly prepared signed envelope.
+ from dataclasses import replace
+ bad=dict(envelope,payload=envelope['payload']+' ')
+ with pytest.raises(OTAError):download_prepared(replace(prepared,manifest=json.dumps(bad).encode()),pub,StreamingOpener(),NOW,target='1.2.3')

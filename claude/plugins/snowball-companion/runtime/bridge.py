@@ -716,7 +716,11 @@ async def connected_session(args, config):
             from ota_idle_heartbeat import IdleHeartbeat
             from ota_relay import OtaRelay
             idle_heartbeat = IdleHeartbeat()
-            ota = OtaRelay()
+            # A short reconnect must not lose the signed catalogue the user
+            # just reviewed. close() cancels I/O but retains bounded metadata.
+            if not hasattr(args, '_ota_relay'):
+                args._ota_relay = OtaRelay()
+            ota = args._ota_relay
             last_ota_service = 0.0
             def ota_should_stop():
                 if speech.latency_sensitive:return True

@@ -1,5 +1,9 @@
 # Snowball Companion
 
+## 0.5.1：设备手动更新请求
+
+支持新固件发起的手动检查和确认版本下载请求，蓝牙优先；电脑端继续兼容旧更新协议。检查只返回版本与公告，确认后才请求对应镜像，不静默替换已确认版本。Wi-Fi 回退由兼容设备固件处理。旧固件不会因安装插件自动获得新请求界面；本次包准备与主机测试不代表已完成实机验收。
+
 Use **Setup** to install or switch a desktop Pet. Ask “列出可用宠物” or “切换到边牧”; setup checks the character catalog, validates its complete sprite sheet, reuses an existing owned Pet when possible, then activates it through the authenticated Pets service.
 
 The library defines fourteen characters: Snowball, Border Collie, round-faced Orange Cat, blue-eyed Ragdoll, Chiikawa, Hachiware, Usagi, My Melody, Kuromi, Homelander, **old Joseph Joestar from Stardust Crusaders**, StellaLou, Frank Underwood, and Heisenberg. The source of availability is `assets/pet/catalog.json`: pending artwork is visible in the catalog but cannot be installed. Check actual availability with `python3 scripts/pet_setup.py list` rather than assuming all fourteen atlases are bundled.

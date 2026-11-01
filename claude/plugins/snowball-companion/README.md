@@ -1,4 +1,8 @@
-# Snowball Companion for Claude Code · 0.2.0
+# Snowball Companion for Claude Code · 0.2.1
+
+## 0.2.1：设备手动更新请求
+
+支持新固件发起的手动检查和确认版本下载请求，蓝牙优先；电脑端继续兼容旧更新协议。检查只返回版本与公告，确认后才请求对应镜像，不静默替换已确认版本。Wi-Fi 回退由兼容设备固件处理。旧固件不会因安装插件自动获得新请求界面；本次包准备与主机测试不代表已完成实机验收。
 
 让雪球显示 Claude Code 的会话状态。适用于 **Claude Code Desktop 的本地 Code 会话与本机 CLI**，复用现有 Snowball Hub → 蓝牙／Wi-Fi → ESP32 通道。不会烧录固件，也不会改动 Codex 插件或设备上的角色资源。
 

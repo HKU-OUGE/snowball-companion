@@ -4,7 +4,7 @@
 
 ## 1. 下载对应插件
 
-从 [v0.5.0 下载页](https://github.com/HKU-OUGE/snowball-companion/releases/tag/v0.5.0) 下载对应 ZIP，也可以克隆仓库。解压后保留全部目录。
+先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 核对 v0.5.1 是否已发布，再下载对应 ZIP；也可以克隆源码。解压后保留全部目录。新固件的手动蓝牙更新需要 Codex 0.5.1 或 Claude／Cursor 0.2.1 插件；新版仍兼容老设备 v1 协议。
 
 | 软件 | 安装包 | 解压后进入 |
 | --- | --- | --- |
@@ -78,3 +78,7 @@ claude plugin install snowball-companion@snowball-local --scope user
 这项功能需要兼容的设备固件和安装盘镜像；只有电脑插件 ZIP 或 USB 串口不能证明设备已经支持。安装盘里的包可能早于线上版本，需要最新版时查看 [Releases](https://github.com/HKU-OUGE/snowball-companion/releases)。
 
 电脑插件更新与固件更新分开处理，见 [更新说明](UPDATES.md)。普通卸载只移除指定平台插件；账号 Pet、其他平台、设备配对和共享服务分别管理。
+
+### 使用旧离线安装包后
+
+设备 SD 安装盘可能仍保存较早的离线包。本次电脑插件源码更新不会自动替换这份安装盘。完成离线安装后，请联网检查 GitHub Release，并按 [安装与升级](INSTALLATION.md) 更新对应插件；确认电脑桥接服务已使用新版运行时，再在新固件上使用手动蓝牙更新。不要删除旧配对或重复启动 Hub。

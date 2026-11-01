@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "plugin_version": "0.2.0",
-  "note": "Reviewed shared runtime, relative package paths only; not proof of host or hardware validation.",
+  "plugin_version": "0.2.1",
+  "note": "Reviewed runtime package paths and hashes only; not proof of live host or device validation.",
   "files": {
     "plugins/snowball-companion/runtime/app_tools.py": {
       "sha256": "66dec2d150182c4e88b6c3cc4433bdcdc1778e7ef15d376fbd5436b306ff7079",
@@ -16,8 +16,8 @@
       "bytes": 10761
     },
     "plugins/snowball-companion/runtime/bridge.py": {
-      "sha256": "80236eb346835c2b4fcbd9586c022ecfcf31d45b604fb270a0131bbdfd3404ca",
-      "bytes": 48233
+      "sha256": "c176b6614f735f9131e9321ac565e10f3650218a4d571aa443a5e880fbe50df3",
+      "bytes": 48486
     },
     "plugins/snowball-companion/runtime/codex_activity.py": {
       "sha256": "388ec0c791fa0239af19a3af06a8a60a42a8890378fe4f5dc64031d076b35862",
@@ -44,24 +44,24 @@
       "bytes": 6631
     },
     "plugins/snowball-companion/runtime/ota_ble_frames.py": {
-      "sha256": "45531e2a7d41a626aedac868612a87d9e68f3099cb13edf0a3300097737ec30b",
-      "bytes": 2130
+      "sha256": "ef178a925a9a07975dbdd74ae603ed59deb06cfc18fda316732efbb057894481",
+      "bytes": 3742
     },
     "plugins/snowball-companion/runtime/ota_ble_gatt.py": {
-      "sha256": "d997ef4eb0e00aead50471138ed140e1924b447867531e9c75ba598e1c2b6926",
-      "bytes": 1178
+      "sha256": "8262c4a2987a1edf6c2ffdcad19c9dddfff2bdfcbe4e4d92f19e2a0d441c8566",
+      "bytes": 3359
     },
     "plugins/snowball-companion/runtime/ota_ble_sender.py": {
       "sha256": "c3fd94818eca0b7d3f0d2bfe80d63b29519dab10dd67309daae63aa9f47b9e4e",
       "bytes": 3114
     },
     "plugins/snowball-companion/runtime/ota_ble_status.py": {
-      "sha256": "f7ee9c5ba94f02783cecacbe65a2f6ebf081a9e801ac314aa42611db55c38169",
-      "bytes": 1927
+      "sha256": "8b6de371185d52f723aa06b08eda39058f2a3682aa1ab05703b39fd3c093d1c2",
+      "bytes": 2796
     },
     "plugins/snowball-companion/runtime/ota_download.py": {
-      "sha256": "58e11897b83cb5a7f53ba0b3275f536102eda397108f30db3ea0e02bdf55544d",
-      "bytes": 5907
+      "sha256": "864f2cf94f25ed53e7b2962d2562ae656c931ed4de49d1bbb98f092e0e09c010",
+      "bytes": 8853
     },
     "plugins/snowball-companion/runtime/ota_idle.py": {
       "sha256": "69956dc8eb280d55c9e1ea718c83076fc31e8768be7d7ab9fbb0cb4007570b32",
@@ -72,8 +72,8 @@
       "bytes": 1024
     },
     "plugins/snowball-companion/runtime/ota_relay.py": {
-      "sha256": "3513896630b3d40120868495bbce40a9751f9f0314165fada865bf3c0f3745e3",
-      "bytes": 2075
+      "sha256": "21125bfd32a7daecdc0f242b7837ced705d1136deca3f77eb3b4af5abefd1d2c",
+      "bytes": 9657
     },
     "plugins/snowball-companion/runtime/pet_sync.py": {
       "sha256": "cac92d7b2987f6f243faf79f7d2680640085ae58a3f014c52ef58094044bbbf5",

@@ -1,10 +1,11 @@
-"""Local preparation of a signed Snowball release for a future BLE sender.
+"""Local preparation of verified Snowball catalogues and signed releases.
 
 The device independently verifies the same envelope and image. No download
 here starts an installation or changes an active BLE connection.
 """
 import base64, hashlib, json, re, time, os, tempfile
 from pathlib import Path
+from dataclasses import dataclass
 from urllib.parse import urlencode
 from urllib.request import Request, build_opener, HTTPRedirectHandler, ProxyHandler
 from cryptography.hazmat.primitives import hashes
@@ -16,7 +17,7 @@ LAYOUT='snowball-ota-v1'
 KEY_ID='snowball-release-2026-01'
 PUBLIC_KEY=bytes.fromhex('04e5bd8fe55036d84dfad0956937eac84eb770f26553437ca4220785110d0de45da590b83fbee181bc62d096a8defeeee8d7b450fdc75a20fa2539d829180d0737')
 MAX_IMAGE=0x600000
-MAX_CATALOG=65536
+MAX_CATALOG=16000
 VERSION=re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$')
 OUTER={'payload','signature','keyId'}
 INNER={'schema','model','channel','version','layout','size','sha256','objectKey','issuedAt','notes','installable'}
@@ -55,23 +56,60 @@ def verify_manifest(envelope, public_key, current, now=None):
  if not isinstance(m.get('notes'),str) or len(m['notes'].encode())>=512 or any(ord(c)<32 and c not in '\n\t' for c in m['notes']):raise OTAError('invalid notes')
  return m
 
-def _get(path,limit,opener=None):
+def _get(path,limit,opener=None,*,progress=None,cancelled=None):
  if not path.startswith('/v1/') or '\\' in path or '..' in path:raise OTAError('invalid path')
  with (opener or build_opener(ProxyHandler({}),NoRedirect())).open(Request(ORIGIN+path,headers={'Accept-Encoding':'identity','User-Agent':'SnowballCompanion/0.23.0'}),timeout=30) as r:
   if r.status!=200 or r.geturl()!=ORIGIN+path:raise OTAError('unexpected response')
   length=r.headers.get('Content-Length')
   if length is not None and (not length.isdigit() or int(length)>limit):raise OTAError('response too large')
-  out=r.read(limit+1)
+  if r.headers.get('Content-Encoding','identity').lower()!='identity':raise OTAError('encoded response rejected')
+  # read1 returns available transport bytes rather than waiting to fill the
+  # entire image. A superseding manual request is checked between every read.
+  read=getattr(r,'read1',r.read);pieces=[];used=0
+  expected=int(length) if length is not None else None
+  while expected is None or used<expected:
+   if cancelled and cancelled():raise OTAError('cancelled')
+   block=read(min(16384,limit+1-used))
+   if not block:break
+   pieces.append(block);used+=len(block)
+   if used>limit:raise OTAError('response too large')
+   if progress:progress(used)
+  out=b''.join(pieces)
   if len(out)>limit:raise OTAError('response too large')
+  if length is not None and len(out)!=int(length):raise OTAError('incomplete response')
+  if cancelled and cancelled():raise OTAError('cancelled')
   return out
 
-def download(current,public_key,opener=None,now=None,cache_dir=None):
+@dataclass(frozen=True)
+class PreparedCatalogue:
+ raw: bytes
+ manifest: bytes | None
+ metadata: dict | None
+ current: str
+
+
+def check_catalogue(current,public_key=PUBLIC_KEY,opener=None,now=None,*,cancelled=None):
+ if not isinstance(current,str) or len(current)>=32 or not VERSION.fullmatch(current):raise OTAError('invalid current version')
  q=urlencode({'model':MODEL,'channel':'stable','current':current,'layout':LAYOUT})
- cat=parse_json(_get('/v1/catalog?'+q,MAX_CATALOG,opener));u=cat.get('update') if isinstance(cat,dict) else None
+ raw=_get('/v1/catalog?'+q,MAX_CATALOG,opener,cancelled=cancelled)
+ cat=parse_json(raw);u=cat.get('update') if isinstance(cat,dict) else None
  if not isinstance(u,dict) or type(u.get('available')) is not bool:raise OTAError('invalid catalog')
- if not u['available']:return None
+ if not u['available']:return PreparedCatalogue(raw,None,None,current)
  if u.get('installable') is not True:raise OTAError('release not installable')
  envelope=u.get('manifest');m=verify_manifest(envelope,public_key,current,now)
+ if 'version' in u and u['version']!=m['version']:raise OTAError('catalog version mismatch')
+ wire=json.dumps(envelope,ensure_ascii=False,separators=(',',':')).encode()
+ if len(wire)>6144:raise OTAError('manifest too large')
+ return PreparedCatalogue(raw,wire,m,current)
+
+
+def download_prepared(prepared,public_key=PUBLIC_KEY,opener=None,now=None,cache_dir=None,*,target=None,progress=None,cancelled=None):
+ if not isinstance(prepared,PreparedCatalogue):raise OTAError('invalid prepared catalogue')
+ if prepared.manifest is None:return None
+ if cancelled and cancelled():raise OTAError('cancelled')
+ envelope=parse_json(prepared.manifest)
+ m=verify_manifest(envelope,public_key,prepared.current,now)
+ if target is not None and (not isinstance(target,str) or target!=m['version']):raise OTAError('confirmed target unavailable')
  data=None;cache=None
  if cache_dir is not None:
   root=Path(cache_dir);root.mkdir(mode=0o700,parents=True,exist_ok=True);cache=root/(m['sha256']+'.bin')
@@ -82,8 +120,10 @@ def download(current,public_key,opener=None,now=None,cache_dir=None):
   except OSError:pass
  fetched=data is None
  if fetched:
-  data=_get('/v1/firmware/'+m['objectKey'],m['size'],opener)
+  data=_get('/v1/firmware/'+m['objectKey'],m['size'],opener,progress=progress,cancelled=cancelled)
  if len(data)!=m['size'] or hashlib.sha256(data).hexdigest()!=m['sha256']:raise OTAError('image hash mismatch')
+ if cancelled and cancelled():raise OTAError('cancelled')
+ if progress:progress(len(data))
  if cache is not None and fetched:
   fd,tmp=tempfile.mkstemp(prefix='.download-',dir=cache.parent)
   try:
@@ -95,5 +135,20 @@ def download(current,public_key,opener=None,now=None,cache_dir=None):
  if len(wire)>6144:raise OTAError('manifest too large')
  return wire,data,m['version']
 
-def download_official(current):
- return download(current,PUBLIC_KEY,cache_dir=Path.home()/'.cache/xueqiu/ota')
+
+def download(current,public_key,opener=None,now=None,cache_dir=None,*,progress=None,cancelled=None):
+ # Retain the original API and tuple while sharing the exact validation path.
+ prepared=check_catalogue(current,public_key,opener,now,cancelled=cancelled)
+ return download_prepared(prepared,public_key,opener,now,cache_dir,progress=progress,cancelled=cancelled)
+
+
+def check_catalogue_official(current,*,cancelled=None):
+ return check_catalogue(current,PUBLIC_KEY,cancelled=cancelled)
+
+
+def download_prepared_official(prepared,*,target,progress=None,cancelled=None):
+ return download_prepared(prepared,PUBLIC_KEY,cache_dir=Path.home()/'.cache/xueqiu/ota',target=target,progress=progress,cancelled=cancelled)
+
+
+def download_official(current,*,progress=None,cancelled=None):
+ return download(current,PUBLIC_KEY,progress=progress,cancelled=cancelled,cache_dir=Path.home()/'.cache/xueqiu/ota')

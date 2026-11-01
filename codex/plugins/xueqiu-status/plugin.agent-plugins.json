@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "xueqiu-status",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Snowball Companion — a switchable pixel Pet library with optional local AI status and Bluetooth companion display.",
   "extensions": {
     "com.openai": {
