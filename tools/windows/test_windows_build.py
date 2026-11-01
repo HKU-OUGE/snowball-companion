@@ -15,7 +15,7 @@ import zipfile
 from types import SimpleNamespace
 from unittest.mock import patch
 import stage_payload as stage
-from smoke_distribution import pe_subsystem, run_distribution
+from smoke_distribution import pe_subsystem, run_distribution, exercise_runtime
 import distribution_manifest as native
 
 HERE = Path(__file__).resolve().parent
@@ -169,6 +169,7 @@ class WindowsBuildTest(unittest.TestCase):
         def execute(argv, **kwargs):
             calls.append(argv)
             if argv[1] == '--version': output = 'Snowball Companion 0.6.0\n'
+            elif argv[1:3] == ['pet', 'list']: output = json.dumps({'characters': [{'id': 'snowball', 'name': '雪球'}]})
             elif argv[1:3] == ['doctor', '--json']: output = json.dumps({'checks': [{'code': 'dependencies', 'versions': {'bleak': '3.0.2', 'pyserial': '3.5'}}]})
             elif argv[1:3] == ['gui', '--smoke-test']: output = ''
             else:
@@ -187,12 +188,17 @@ class WindowsBuildTest(unittest.TestCase):
             return SimpleNamespace(returncode=0, stdout=output, stderr='')
         with patch('smoke_distribution.pe_subsystem', side_effect=lambda path: 3 if path.name=='SnowballCLI.exe' else 2), \
              patch('smoke_distribution.subprocess.run', side_effect=execute), \
-             patch.dict(os.environ, {'SYSTEMROOT': str(self.root/'Windows')}):
+             patch.dict(os.environ, {'SYSTEMROOT': str(self.root/'Windows')}), \
+             patch('smoke_distribution.exercise_runtime', return_value={'state': 'fixture_verified'}) as lifecycle:
             result = run_distribution(distribution)
         self.assertEqual(result['hook_events'], 6)
         self.assertEqual(result['isolated_install'], 'ok')
         self.assertEqual(result['commandWindows'], 'ok')
-        self.assertEqual(len(calls), 10)
+        self.assertTrue(any(argv[1:3] == ['pet', 'list'] for argv in calls))
+        self.assertTrue(any(argv[1:3] == ['doctor', '--json'] for argv in calls))
+        self.assertEqual(sum(argv[1:3] == ['-NoProfile', '-NonInteractive'] for argv in calls), 3)
+        lifecycle.assert_called_once()
+        self.assertEqual(result['runtime_lifecycle']['state'], 'fixture_verified')
 
     def test_pe_architecture_and_gui_console_subsystem(self):
         data = bytearray(256); data[:2] = b'MZ'
@@ -206,6 +212,107 @@ class WindowsBuildTest(unittest.TestCase):
             self.assertEqual(pe_subsystem(path), subsystem)
         struct.pack_into('<H', data, 0x84, 0x14c); path.write_bytes(data)
         with self.assertRaises(ValueError): pe_subsystem(path)
+
+
+class RuntimeSmokeTests(unittest.TestCase):
+    """Only mocks here: the installed CLI/HTTP branches run for real in CI."""
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
+        self.home = Path(self.temp.name)
+        self.calls = []
+        self.running = self.task = False
+        self.identity = {'pid': 42, 'start': '100'}
+        self.fail_install = self.fail_remove = self.fail_start = self.duplicate_start = False
+        self.start_count = 0
+        self.patches = [
+            patch('smoke_distribution.runtime_session_id', return_value=1),
+            patch('smoke_distribution.time.sleep'),
+            patch('smoke_distribution.read_private_json', side_effect=self.read),
+            patch('smoke_distribution.reject_unsigned_control'),
+            patch('smoke_distribution.verify_hub_health'),
+        ]
+        self.mocks = [p.start() for p in self.patches]
+        for p in self.patches: self.addCleanup(p.stop)
+
+    def read(self, path):
+        if path.name == 'runtime.json':
+            return {'identity': dict(self.identity), 'port': 4199, 'install': 'fixture-install'}
+        return {'state': 'error', 'error': 'missing_credentials'}
+
+    def snapshot(self):
+        return {'state': 'running' if self.running else 'stopped', 'running': self.running,
+                'children': {'hub': {'pid': 43, 'healthy': True}} if self.running else {}}
+
+    def execute(self, cli, *args):
+        self.assertEqual(cli, 'fixture-cli.exe'); self.assertEqual(args[0], 'runtime')
+        op = args[1]; self.calls.append(op)
+        if op == 'status': value = self.snapshot()
+        elif op == 'start':
+            self.start_count += 1; self.running = True
+            if self.fail_start: raise RuntimeError('synthetic partial start failure')
+            if self.duplicate_start and self.start_count > 1: self.identity['pid'] = 99
+            value = self.snapshot()
+        elif op == 'stop': self.running = False; value = self.snapshot()
+        elif op == 'autostart-status':
+            value = {'state': 'owned' if self.task else 'absent', 'owned': self.task, 'task': 'fixture-task'}
+        elif op == 'install-autostart':
+            self.task = True
+            if self.fail_install: raise RuntimeError('synthetic partial task registration failure')
+            value = {'installed': True, 'interactive': True, 'elevated': False, 'task': 'fixture-task'}
+        elif op == 'remove-autostart':
+            if self.fail_remove: raise RuntimeError('synthetic removal failure')
+            self.task = False; value = {'removed': True}
+        else: self.fail('Unexpected runtime action '+op)
+        return SimpleNamespace(stdout=json.dumps(value))
+
+    def invoke(self): return exercise_runtime('fixture-cli.exe', self.home, self.execute)
+
+    def test_real_branch_contract_checks_hmac_health_and_cleanup(self):
+        value = self.invoke()
+        self.assertEqual(value['state'], 'verified')
+        self.assertEqual(value['bridge'], 'missing_credentials')
+        self.assertEqual(self.calls.count('start'), 2)
+        self.assertEqual(self.calls[-4:], ['remove-autostart', 'autostart-status', 'stop', 'status'])
+        self.assertFalse(self.running); self.assertFalse(self.task)
+        self.mocks[3].assert_called_once_with(4199)
+        self.mocks[4].assert_called_once_with(self.home)
+
+    def test_session_zero_reports_skip_without_starting_anything(self):
+        self.mocks[0].return_value = 0
+        value = self.invoke()
+        self.assertEqual(value['state'], 'skipped')
+        self.assertEqual(value['reason'], 'session_0_noninteractive')
+        self.assertEqual(self.calls, [])
+
+    def test_partial_task_registration_still_removes_owned_task_and_stops(self):
+        self.fail_install = True
+        with self.assertRaisesRegex(RuntimeError, 'partial task'): self.invoke()
+        self.assertIn('remove-autostart', self.calls)
+        self.assertIn('stop', self.calls)
+        self.assertFalse(self.task); self.assertFalse(self.running)
+
+    def test_partial_start_still_attempts_stop_but_never_registers_task(self):
+        self.fail_start = True
+        with self.assertRaisesRegex(RuntimeError, 'partial start'): self.invoke()
+        self.assertIn('stop', self.calls); self.assertNotIn('install-autostart', self.calls)
+        self.assertFalse(self.running)
+
+    def test_duplicate_supervisor_is_a_failure_and_still_stops(self):
+        self.duplicate_start = True
+        with self.assertRaisesRegex(ValueError, 'second supervisor'): self.invoke()
+        self.assertIn('stop', self.calls); self.assertNotIn('install-autostart', self.calls)
+        self.assertFalse(self.running)
+
+    def test_task_cleanup_error_does_not_prevent_runtime_cleanup(self):
+        self.fail_remove = True
+        with self.assertRaisesRegex(RuntimeError, 'autostart cleanup failed'): self.invoke()
+        self.assertIn('stop', self.calls); self.assertFalse(self.running)
+
+    def test_preexisting_task_is_not_replaced_or_removed(self):
+        self.task = True
+        with self.assertRaisesRegex(ValueError, 'already has an autostart'): self.invoke()
+        self.assertNotIn('start', self.calls); self.assertNotIn('remove-autostart', self.calls)
+        self.assertTrue(self.task)
 
 
 if __name__ == '__main__': unittest.main()

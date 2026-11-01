@@ -48,10 +48,11 @@ a = Analysis([str(companion/'snowball_windows.py')],
     datas=datas, hiddenimports=sorted(hidden), hookspath=[], hooksconfig={}, runtime_hooks=[],
     excludes=['bleak.backends.bluezdbus', 'bleak.backends.corebluetooth'], noarchive=False, optimize=0)
 pyz = PYZ(a.pure)
-gui = EXE(pyz, a.scripts, [], exclude_binaries=True, name='Snowball',
+options = [('X utf8', None, 'OPTION')]
+gui = EXE(pyz, a.scripts, options, exclude_binaries=True, name='Snowball',
           debug=False, bootloader_ignore_signals=False, strip=False, upx=False,
           console=False, disable_windowed_traceback=False, contents_directory='_internal')
-cli = EXE(pyz, a.scripts, [], exclude_binaries=True, name='SnowballCLI',
+cli = EXE(pyz, a.scripts, options, exclude_binaries=True, name='SnowballCLI',
           debug=False, bootloader_ignore_signals=False, strip=False, upx=False,
           console=True, contents_directory='_internal')
 coll = COLLECT(gui, cli, a.binaries, a.datas, strip=False, upx=False, name='Snowball')

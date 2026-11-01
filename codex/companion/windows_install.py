@@ -72,7 +72,7 @@ def validate_bundle(source, version=VERSION):
     return manifest
 
 
-def read_current(root=None):
+def read_current(root=None, *, verify=True):
     root = Path(root) if root else app_root()
     marker = root / 'current.json'
     reject_links(marker)
@@ -86,10 +86,49 @@ def read_current(root=None):
         raise InstallError('安装记录不属于 Snowball。')
     target = root / ('app-' + version)
     reject_links(target)
-    if not target.is_dir() or not (target / MANIFEST).is_file():
+    if not target.is_dir():
         raise InstallError('安装目录已移动或不完整，请重新安装。')
-    validate_bundle(target, version=version)
+    if verify:
+        validate_bundle(target, version=version)
     return {'version': version, 'directory': target, 'cli': target / 'SnowballCLI.exe', 'gui': target / 'Snowball.exe'}
+
+
+def repair_installation(source):
+    """Rebuild the same version only while the shared runtime is stopped.
+
+    Never execute the damaged executable or delete it. Keep a quarantine copy,
+    and retain the same fixed task path so login preferences need no rewrite.
+    """
+    from platform_support import flock, LOCK_EX, LOCK_NB
+    from windows_runtime import _lock
+    import uuid
+    validate_bundle(source)
+    root = ensure_private_dir(app_root())
+    with os.fdopen(open_nofollow(root/'migration.lock', os.O_CREAT | os.O_RDWR), 'a') as lock:
+        flock(lock, LOCK_EX | LOCK_NB)
+        with _lock('manager.lock', nonblocking=True), _lock('supervisor.lock', nonblocking=True):
+            previous = read_current(root, verify=False)  # metadata only; no process call
+            if not previous or previous['version'] != VERSION:
+                raise InstallError('修复需要与已安装版本相同的完整安装包。')
+            suffix = uuid.uuid4().hex[:12]
+            quarantine = root / ('repair-' + VERSION + '-' + suffix)
+            marker_backup = root / ('repair-current-' + suffix + '.json')
+            previous['directory'].rename(quarantine)
+            try:
+                (root/'current.json').rename(marker_backup)
+                try:
+                    result = install_bundle(source, root)
+                except Exception:
+                    target = previous['directory']
+                    if target.exists():
+                        target.rename(root/('repair-incomplete-' + suffix))
+                    if marker_backup.exists():
+                        os.replace(marker_backup, root/'current.json')
+                    raise
+            except Exception:
+                quarantine.rename(previous['directory'])
+                raise
+            return result
 
 
 def _publish_current(root, version=VERSION):
@@ -229,9 +268,11 @@ def _install_and_switch_locked(source):
                 if new_task.get('state') == 'owned':
                     _runtime_command(installed, 'remove-autostart')
             _publish_current(app_root(), previous['version'])
-            if removed:
+            # Commands can change state before returning an error. These owned
+            # operations are idempotent and restore the original preferences.
+            if had_autostart:
                 _runtime_command(previous, 'install-autostart')
-            if stopped:
+            if was_running:
                 _runtime_command(previous, 'start')
         raise
 

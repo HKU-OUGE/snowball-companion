@@ -176,6 +176,7 @@ class Wizard:
         self.paragraph('升级会短暂停止本机雪球后台，再由下一步恢复。不会修改设备固件、重置手表或删除账号里的 Pet。', True)
         self.button('安装到这台电脑', self.install_native, True)
         self.button('打开已安装版本', self.open_installed)
+        self.button('修复损坏的安装（后台需已停止）', self.repair)
         self.paragraph('如果已经在安装目录中运行，直接进入下一步。', True)
 
     def install_native(self):
@@ -205,6 +206,14 @@ class Wizard:
             self.window.destroy()
         except (OSError, ValueError):
             self.status.set('无法打开已安装版本，请检查安装目录。')
+
+    def repair(self):
+        if not getattr(sys, 'frozen', False):
+            self.status.set('请从相同版本的完整 Windows 安装包中执行修复。')
+            return
+        self.submit('正在确认后台已停止并修复；旧目录和配置会保留…',
+            lambda: installer.repair_installation(Path(sys.executable).parent),
+            lambda _: self.status.set('修复完成，旧目录已隔离保留。请打开已安装版本并启动后台。'))
 
     def page_1(self):
         self.paragraph('让 Codex 将状态交给雪球。')

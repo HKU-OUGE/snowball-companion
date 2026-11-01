@@ -111,6 +111,25 @@ def test_runtime_cannot_start_from_download_folder(tmp_path):
             install.require_installed()
 
 
+def test_old_autostart_is_restored_after_ambiguous_removal(tmp_path):
+    source = make_bundle(tmp_path/'download')
+    old = {'version': '0.5.9', 'cli': Path('old.exe')}
+    calls = []
+    def command(current, operation):
+        calls.append(operation)
+        if operation == 'status': return {'state': 'running', 'running': True}
+        if operation == 'autostart-status': return {'state': 'owned'}
+        if operation == 'remove-autostart': raise install.InstallError('post-delete query failed')
+        return {}
+    with patch.object(install, 'read_current', return_value=old), \
+         patch.object(install, 'app_root', return_value=tmp_path), \
+         patch.object(install, '_publish_current'), \
+         patch.object(install, '_runtime_command', side_effect=command):
+        with pytest.raises(install.InstallError):
+            install._install_and_switch_locked(source)
+    assert calls[-2:] == ['install-autostart', 'start']
+
+
 def test_packaged_hook_override_decodes_to_reviewed_source():
     plugin = BASE.parent / 'plugins/xueqiu-status'
     expected = (plugin/'scripts/windows_hook.ps1').read_text(encoding='utf-8')
@@ -179,3 +198,32 @@ def test_windows_bridge_loads_protected_store_without_plain_json(tmp_path):
         asyncio.run(bridge.run(args))
     load.assert_called_once_with(args.config)
     session.assert_awaited_once_with(args, config)
+
+
+def test_repair_missing_executable_never_runs_damaged_code(tmp_path):
+    from contextlib import nullcontext
+    import windows_runtime
+    source = make_bundle(tmp_path/'download')
+    root = tmp_path/'installed'
+    install.install_bundle(source, root)
+    (root/'app-0.6.0/SnowballCLI.exe').unlink()
+    with patch.object(install, 'app_root', return_value=root), \
+         patch.object(windows_runtime, '_lock', return_value=nullcontext()), \
+         patch.object(install, '_runtime_command') as command:
+        repaired = install.repair_installation(source)
+    assert repaired['cli'].read_bytes() == b'fake-cli'
+    assert list(root.glob('repair-0.6.0-*'))
+    command.assert_not_called()
+
+
+def test_repair_refuses_running_runtime(tmp_path):
+    import windows_runtime
+    source = make_bundle(tmp_path/'download')
+    root = tmp_path/'installed'
+    install.install_bundle(source, root)
+    (root/'app-0.6.0/SnowballCLI.exe').unlink()
+    with patch.object(install, 'app_root', return_value=root), \
+         patch.object(windows_runtime, '_lock', side_effect=BlockingIOError):
+        with pytest.raises(BlockingIOError):
+            install.repair_installation(source)
+    assert not list(root.glob('repair-0.6.0-*'))
