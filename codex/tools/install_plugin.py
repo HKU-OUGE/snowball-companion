@@ -142,7 +142,7 @@ def install(codex, market):
             finally:
                 for sig, handler in handlers.items():
                     signal.signal(sig, handler)
-    print('Snowball Companion installed. Setup/trust is not per-chat. Check Hooks in the running Desktop, not only a fresh CLI. If the host has not loaded them, fully reload only after active work finishes, then verify real events. Run Setup to install/activate the Pet and review changed Hooks if requested; installation alone does not create a Pet.')
+    print('Snowball Companion installed. Setup/trust is not per-chat. Use the current chat composer Review hooks button; the global Settings page may show no Hooks when there are no projects. An empty Settings list is not proof of missing Hooks. Verify real events after user review. Run Setup to install/activate the Pet and review changed Hooks if requested; installation alone does not create a Pet.')
 
 
 def main():

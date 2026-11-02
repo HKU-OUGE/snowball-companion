@@ -81,13 +81,18 @@ status verification; never inject fake busy/idle events to make the screen green
 
 User-scope plugin installation and trust of an unchanged definition are not
 per-chat setup. Do not ask users to configure Hooks again for every chat.
-Inspect the running Desktop's Settings > Hooks page separately from a fresh
-CLI app-server's hooks/list response. A fresh CLI returning ten trusted Hooks
-cannot prove that the already-running Desktop loaded them. If the live host
-lists no Hooks and real adapter records are absent even in a new chat, report
-that loading discrepancy. After all active work finishes, a full host reload
-may be required; do not interrupt active work, force-restart the host, or claim
-that reopening a chat alone will solve it. Verify loading and real events again.
+Inspect the current chat's actual Hook configuration separately from a fresh
+CLI app-server's hooks/list response. The current Desktop Settings > Hooks
+page disables its query when there are no configured project roots, showing
+an empty list and disabled refresh. That UI state is not proof that the host
+failed to load Hooks; do not prescribe repeated restarts or per-chat setup.
+Use the chat composer's Review hooks button to open the current definitions,
+inspect Details, and let the user approve them. A modified definition is skipped
+until reviewed. Never auto-approve, write trusted_hash, or add duplicate project
+Hooks. Do not add projects just to make the review possible when the composer
+entry is available. Verify real delivery after the user reviews once. Only
+investigate a reload when the actual configuration is missing, and never
+interrupt active work to restart the host.
 Cloud orchestration does not support local/plugin command Hooks even when tools
 execute locally; check the actual mode before attributing missing events to
 trust or installing duplicate project Hooks. See the official Hooks docs at

@@ -39,4 +39,4 @@ if ($Device -or $AutoReconnect) {
     }
 }
 & $codex plugin list --marketplace xueqiu-local --json
-Write-Output 'Plugin registered. Setup/trust is not per-chat. Check Settings > Hooks in the running Desktop. If it lists no Hooks, fully reload only after active work finishes, then verify real events. Review changed definitions and run Setup to verify the account Pet; hardware connection is checked separately.'
+Write-Output 'Plugin registered. Setup/trust is not per-chat. Use the current chat composer Review hooks button. The global Settings page may show no Hooks when there are no projects; this does not imply missing installation. Verify real events after user review. Review changed definitions and run Setup to verify the account Pet; hardware connection is checked separately.'
