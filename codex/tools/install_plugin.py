@@ -142,7 +142,7 @@ def install(codex, market):
             finally:
                 for sig, handler in handlers.items():
                     signal.signal(sig, handler)
-    print('Snowball Companion installed. Setup/trust is not per-chat. Use the current chat composer Review hooks button; the global Settings page may show no Hooks when there are no projects. An empty Settings list is not proof of missing Hooks. Verify real events after user review. Run Setup to install/activate the Pet and review changed Hooks if requested; installation alone does not create a Pet.')
+    print('Snowball Companion installed. Setup/trust is not per-chat. Use the current chat composer Review hooks button; the global Settings page may show no Hooks without a project; File > Open folder can add this fixed repository once. An empty Settings list is not proof of missing Hooks. Verify real events after user review. Run Setup to install/activate the Pet and review changed Hooks if requested; installation alone does not create a Pet.')
 
 
 def main():

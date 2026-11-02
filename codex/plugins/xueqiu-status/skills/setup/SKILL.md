@@ -89,8 +89,12 @@ failed to load Hooks; do not prescribe repeated restarts or per-chat setup.
 Use the chat composer's Review hooks button to open the current definitions,
 inspect Details, and let the user approve them. A modified definition is skipped
 until reviewed. Never auto-approve, write trusted_hash, or add duplicate project
-Hooks. Do not add projects just to make the review possible when the composer
-entry is available. Verify real delivery after the user reviews once. Only
+Hooks. Prefer the composer entry for ordinary setup. If the user specifically wants
+the global Settings list, add the existing fixed-location repository once via
+File > Open folder, then verify Settings > Hooks lists Snowball Companion and
+the actual pending count. This works around the no-project-roots query issue;
+do not create a project per chat, change app installation resources, or approve
+the definitions on the user's behalf. Verify real delivery after the user reviews once. Only
 investigate a reload when the actual configuration is missing, and never
 interrupt active work to restart the host.
 Cloud orchestration does not support local/plugin command Hooks even when tools
