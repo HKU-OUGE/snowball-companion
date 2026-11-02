@@ -17,6 +17,11 @@ spec=importlib.util.spec_from_file_location('windows_install_under_test',TOOLS/'
 installer=importlib.util.module_from_spec(spec);spec.loader.exec_module(installer)
 
 class WindowsInstall(unittest.TestCase):
+    def interpreter(self, folder):
+        if sys.platform=='win32':return Path(sys.executable)
+        # Command generation validates an existing .exe path; no fixture is executed.
+        path=Path(folder)/'Python 中文'/ 'python.exe';path.parent.mkdir(exist_ok=True)
+        path.write_bytes(b'fixture');return path
     def fixture(self, root):
         (root/'.codex-plugin').mkdir(parents=True)
         (root/'.codex-plugin/plugin.json').write_text(json.dumps({'name':'xueqiu-status'}))
@@ -28,7 +33,7 @@ class WindowsInstall(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)/'plugin with spaces';self.fixture(root)
             trust=Path(folder)/'trust';trust.write_bytes(b'untouched')
-            self.assertEqual(configure(root,sys.executable),1)
+            self.assertEqual(configure(root,self.interpreter(folder)),1)
             value=json.loads((root/'hooks/hooks.json').read_text())['hooks']['SessionStart'][0]['hooks'][0]
             self.assertTrue(value['commandWindows'].startswith('powershell.exe '));self.assertEqual(value['timeout'],2)
             self.assertIn('${PLUGIN_ROOT}',value['command']);self.assertEqual(trust.read_bytes(),b'untouched')
@@ -39,7 +44,7 @@ class WindowsInstall(unittest.TestCase):
             target=root/'hooks/hooks.json';value=json.loads(target.read_text())
             value['hooks']['SessionStart'][0]['hooks'][0]['command']='unrelated command'
             target.write_text(json.dumps(value));before=target.read_bytes()
-            with self.assertRaises(ValueError):configure(root,sys.executable)
+            with self.assertRaisesRegex(ValueError,'Unexpected|Unsupported|Unknown|hook|Hook'):configure(root,self.interpreter(folder))
             self.assertEqual(target.read_bytes(),before)
 
     @unittest.skipUnless(sys.platform=='win32','Windows installer branch')
