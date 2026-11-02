@@ -10,6 +10,7 @@ import socket
 import stat
 import struct
 import uuid
+import time
 
 READ_ONLY={'list_projects','list_threads','read_thread'}
 ALLOWED=READ_ONLY|{'send_message_to_thread','create_thread'}
@@ -19,7 +20,9 @@ class AppToolError(ValueError):
 class AppTools:
     def __init__(self,home=None):self.home=Path(home or Path.home())
     def pipe(self):
-        if os.name == "nt": return None  # Unix IPC is unavailable; fail closed.
+        if os.name == "nt":
+            from windows_app_pipe import endpoint
+            return endpoint() if self.home == Path.home() else None
         candidates=[]
         if self.home==Path.home():
             if os.environ.get('CODEX_APP_TOOLS_PIPE_PATH'):candidates.append(os.environ['CODEX_APP_TOOLS_PIPE_PATH'])
@@ -52,14 +55,33 @@ class AppTools:
                 if path.is_absolute() and stat.S_ISSOCK(st.st_mode) and st.st_uid==os.getuid() and not st.st_mode&0o022:return path
             except (OSError,ValueError):continue
         return None
-    def available(self):return self.pipe() is not None
+    def available(self):
+        if os.name != 'nt': return self.pipe() is not None
+        now = time.monotonic()
+        if now-getattr(self,'_probe_at',float('-inf')) > 5:
+            self._probe_at = now
+            try:
+                catalog = self.rpc('tools/list',{'threadStartKind':'all'})
+                self._probe_ok = any(x.get('name')=='send_message_to_thread' and x.get('namespace')=='codex_app'
+                    for x in catalog.get('tools',[]))
+            except (AppToolError,AttributeError,TypeError): self._probe_ok = False
+        return bool(getattr(self,'_probe_ok',False))
     def rpc(self,method,params,write=False):
         path=self.pipe()
         if path is None:raise AppToolError('desktop_app_unavailable')
         sent=False
         try:
-            with socket.socket(socket.AF_UNIX) as sock:
-                sock.settimeout(20);sock.connect(str(path))
+            if os.name == 'nt':
+                from windows_app_pipe import WindowsAppPipe
+                connection = WindowsAppPipe(path)
+            else:
+                connection = socket.socket(socket.AF_UNIX)
+                try:
+                    connection.settimeout(20);connection.connect(str(path))
+                except BaseException:
+                    connection.close()
+                    raise
+            with connection as sock:
                 body=json.dumps({'jsonrpc':'2.0','id':1,'method':method,'params':params},ensure_ascii=False).encode()
                 if len(body)>16384:raise AppToolError('invalid_app_request')
                 sent=True;sock.sendall(struct.pack('<I',len(body))+body)

@@ -506,15 +506,8 @@ def pair_usb(port, config_path):
             config = json.loads(raw[idx+7:])
             if config.get('v') != 1 or len(bytes.fromhex(config['key'])) != 32:
                 raise ValueError('Invalid pairing response')
-            config_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-            os.chmod(config_path.parent, 0o700)
-            temporary = config_path.with_suffix('.tmp')
-            fd = os.open(temporary, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600)
-            with os.fdopen(fd, 'w') as f:
-                json.dump(config, f)
-                f.write('\n')
-            os.chmod(temporary, 0o600)
-            temporary.replace(config_path)
+            from private_files import private_write
+            private_write(config_path,(json.dumps(config)+'\n').encode('utf-8'))
             print(f'USB identity bound: {config["device"]}; private pairing file saved.', flush=True)
             return
         raise TimeoutError('No pairing response. Check the USB data cable and port, enable Start pairing on the device connection page, then retry.')
@@ -922,6 +915,8 @@ def main():
     if args.command == 'send' and args.hold <= 0:
         p.error('--hold must be positive')
     if args.command == 'control':
+        if sys.platform != 'linux':
+            p.error('control requires the Linux process manager; use windows-services.ps1 on Windows')
         import manage
         from user_services import owned,control
         if owned('bridge'):control('bridge','stop')

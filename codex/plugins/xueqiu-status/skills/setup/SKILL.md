@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Set up, install, upgrade, inspect, or uninstall the Snowball Companion Codex plugin; list, install, or switch its bundled ChatGPT Pets. Shared device services and account Pets have separate removal scopes.
+description: Set up, install, upgrade, inspect, or uninstall Snowball Companion; configure device speech or diagnose an unavailable recording button; list, install, or switch its bundled ChatGPT Pets. Shared services and account Pets have separate removal scopes.
 ---
 
 # Snowball Companion setup and character switching
@@ -45,12 +45,28 @@ A web or ESP32 selection alone cannot activate the desktop Pet through a filesys
 
 ## Optional hardware companion
 
+For physical-device initialization, distinguish status-only use from recording,
+transcription and confirmed task delivery. Before declaring initialization complete,
+report each requested capability separately. Pet activation, BLE authentication and
+real status acknowledgements do not prove speech readiness. For “布置任务”,
+“开始录音” disabled, or “电脑语音服务未就绪”, read
+[speech setup and diagnosis](references/speech-setup.md). Check the optional worker,
+local model and authenticated health endpoint before suspecting the microphone.
+On native Windows, read [confirmed message delivery](references/windows-send.md)
+before enabling task delivery. Verify the host-injected named pipe and installed app;
+do not promise delivery from speech health alone. Windows async answers use the same
+pipe with the exact pending-question envelope; recheck identity before delivery.
+
 The Pet works without an ESP32 or Bluetooth device. Configure the local status Hub and BLE bridge only when requested; use the package README and existing companion tools. Preserve pairing, session priorities, and hook trust. Do not start duplicate services, auto-approve hooks, restart the host, or send conversation/tool bodies.
 
 Recipient state belongs only under the recipient's CODEX_HOME state directory, never plugin assets. Never package credentials, pairing keys, account IDs, or local session records. A new character becomes available only after its full v2 atlas and manifest have passed the artwork pipeline and the catalog is updated to ready; account installation still requires the live Pets validator.
 
 
 ## Native Windows setup and reconnect
+
+When checking Windows compatibility, file permissions, OTA preparation or service
+entry points, read [Windows file and service compatibility](references/windows-compatibility.md).
+Use native ACL verification rather than POSIX modes and reject Unix fallback paths.
 
 On Windows use `python -X utf8` for this skill's Python commands; do not run
 `install.sh`, `manage_hub.py`, `manage.py`, or Linux/systemd service commands.
@@ -73,8 +89,11 @@ stop unrelated Python processes. Existing paired-device lookup still requires
 HMAC authentication. Separately verify task registration, real Hook delivery,
 Hub health, BLE authentication and fresh device acknowledgements/telemetry.
 Do not claim reboot verification without rebooting or interrupt active chats to
-perform it. Windows Unix IPC/reverse actions and independent idle proof are not
-implemented; keep these unavailable rather than inventing live activity or OTA
+perform it. The legacy Unix IPC transport is unavailable on Windows; confirmed
+messages and new-chat requests can instead use the verified app-tools named pipe
+described in references/windows-send.md.
+Question replies acknowledge delivery, not dismissal of the Desktop question card.
+Independent idle proof remains unavailable; do not invent OTA
 eligibility. See the full package's `docs/INSTALLATION.md` Windows section.
 
 

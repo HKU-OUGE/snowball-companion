@@ -22,6 +22,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from attention_model import projection, question_rows, valid_questions, SNOOZE_SECONDS, QID, clean_question
 from codex_desktop import CodexDesktop, DeliveryError
+from private_files import private_dir as secure_private_dir, private_file
 
 VERSION = 1
 PROVIDERS = ('Codex', 'Claude', 'Cursor')
@@ -45,6 +46,7 @@ class Invalid(ValueError):
 
 
 def private_dir(path):
+    if os.name == 'nt': return secure_private_dir(path)
     path = Path(path)
     path.mkdir(parents=True, mode=0o700, exist_ok=True)
     os.chmod(path, 0o700)
@@ -80,7 +82,7 @@ def load_token(path=TOKEN_PATH):
             stream.write(secrets.token_urlsafe(32) + '\n')
     if path.is_symlink() or not path.is_file():
         raise ValueError('Token must be a regular private file')
-    os.chmod(path, 0o600)
+    private_file(path)
     token = path.read_text().strip()
     if len(token) < 32 or len(token) > 128 or not re.fullmatch(r'[A-Za-z0-9_-]+', token):
         raise ValueError('Invalid token file; do not print its contents')

@@ -18,6 +18,11 @@ import struct
 import tempfile
 from pathlib import Path
 
+if os.name == 'nt':
+    _private_spec = importlib.util.spec_from_file_location('snowball_private_files', Path(__file__).with_name('private_files.py'))
+    _private_files = importlib.util.module_from_spec(_private_spec)
+    _private_spec.loader.exec_module(_private_files)
+
 ROOT = Path(__file__).resolve().parents[1]
 FRAMES = [6, 8, 8, 4, 5, 8, 6, 6, 6, 8, 8]
 ID = re.compile(r'[a-z][a-z0-9-]{0,63}')
@@ -106,7 +111,8 @@ def record(pet_id, meta, path, selected=False):
         raise ValueError('Invalid character ID')
     safe_path(path.parent, path.name)
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    path.parent.chmod(0o700)
+    if os.name == 'nt': _private_files.private_dir(path.parent)
+    else: path.parent.chmod(0o700)
     lock = safe_path(path.parent, path.name + '.lock')
     lock_fd = os.open(lock, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     try:

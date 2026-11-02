@@ -58,6 +58,13 @@ claude plugin install snowball-companion@snowball-local --scope user
 
 ## 4. 分四层确认成功
 
+需要「布置任务」「追加指令」或语音回答时，还需独立配置语音能力。普通安装和
+USB/BLE 绑定不包含语音模型；「开始录音」不可点击或提示「电脑语音服务未就绪」时，
+先按[语音初始化与排错](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md)
+安装并验收本地服务，再在设备试录。Windows 确认发送还需
+[验证当前宿主的应用命名管道](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)，
+普通异步问题回答需核对准确问题及投递回执。只需桌宠或状态同步时无需下载语音模型。
+
 1. 软件的插件管理页显示已启用。
 2. 你实际运行任务后，插件收到真实事件。
 3. 本机 Hub 会话状态发生变化。

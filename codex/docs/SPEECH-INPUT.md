@@ -21,6 +21,13 @@
 
 ## 插件电脑端
 
+首次设备初始化不要跳过语音服务检查。Pet、Hooks、Hub 和 BLE 状态同步成功不代表
+语音就绪。普通 `install-windows.ps1` 不安装语音模型；按钮不可点击或提示电脑服务
+未就绪时，见[语音初始化与排错](../plugins/xueqiu-status/skills/setup/references/speech-setup.md)。
+Windows 确认发送和建聊使用[已验证的应用命名管道](../plugins/xueqiu-status/skills/setup/references/windows-send.md)，
+要求继承当前宿主端点；异步问题回答使用准确问题 envelope 走同一通道。即使本地识别健康检查通过，
+仍需用户确认后的真实送达回执。下文的历史性能数据与完整送达实测是 Linux 验证结果。
+
 新增 `desktop/speech_service.py`、`speech_relay.py`、`setup-speech.py`；分发插件中对应 `companion/`。初次配置运行：
 
 ```sh
@@ -31,7 +38,8 @@ python3 companion/setup-speech.py
 
 默认自动判断输入语言，并将中文字符转换成简体。模型与 Python 依赖不塞入固件或 SD 卡。安装完成后，电脑 BLE 桥接器会按配置启动语音服务。服务监听 `127.0.0.1:4191`，使用已有私有 Hub token；网页服务器代理请求，不把 token 暴露给浏览器。端口不对局域网开放。
 
-开发和当前运行验证在本机 Linux 完成。依赖安装脚本保留通用路径处理，但 Windows/macOS 的设备接入没有在本版完成实机验证。
+历史开发与性能验证在 Linux 完成。Windows 已补做设备录音、上传和显示识别文字的用户实测；
+命名管道的真实任务送达须单独验收，不从本地模型或只读工具通过推断。macOS 未做实机验证。
 
 ## 录音、传输和节电
 

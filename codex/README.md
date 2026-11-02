@@ -28,6 +28,11 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 
 ## 本地安装与升级
 
+Windows 安全文件读写、ACL、OTA 缓存及 Linux 入口拦截见
+[兼容说明](plugins/xueqiu-status/skills/setup/references/windows-compatibility.md)。
+这些修复保留配对和密钥，不执行设备固件更新。
+Windows 原生回归、USB/BLE 实机测试和未验收范围见[验证记录](docs/WINDOWS-QA-2026-11-02.md)。
+
 安装、升级或卸载的 Agent 操作规范见 [插件生命周期说明](plugins/xueqiu-status/skills/setup/references/plugin-lifecycle.md)。普通卸载只移除 Codex 适配器，账号 Pet、共享服务与配对数据分别管理。
 实体雪球的首次连接和完整重置见[Windows 逐步引导](plugins/xueqiu-status/skills/setup/references/windows-first-run.md)。
 向导会先准备依赖，再提示连接 USB 数据线、核对串口并启用设备**「开始配对」**，随后完成绑定和真实状态验收。
@@ -58,6 +63,13 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 若需要同步到已配置的本机 Hub，设置技能在桌宠启用成功后可调用 `pet_setup.py sync --character <id>`，向固定的本机 `/v1/pet` 发送角色 ID。它会核对 Hub 的确认，但不将确认当作设备已经载入资源的证据；离线、尚未支持该端点或设备缺少资源时应明确说明。网页或设备自行切换，不会绕过 Pets 服务改变桌面宠物。
 
 ## 可选设备连接
+
+首次配置需要区分状态同步和语音任务。普通安装不会下载本地语音模型；需要
+「布置任务」「追加指令」或「语音回答」时，按[语音初始化与排错](plugins/xueqiu-status/skills/setup/references/speech-setup.md)
+检查并安装服务，分别验证录音、识别和确认后的送达。Windows 确认发送使用
+[经过身份校验的应用命名管道](plugins/xueqiu-status/skills/setup/references/windows-send.md)，
+需继承当前宿主端点；普通异步问题回答带准确问题标识走同一管道，需独立验收。
+蓝牙或识别就绪不代表任务已送达，回答接收不代表桌面问题卡片已收起。
 
 不连接 ESP32 也能使用雪球 Pet。只有需要桌面圆屏上的实时会话状态时，才启动 companion 内的 Hub 和 BLE 服务。连接步骤、字段隐私、排序与心跳规则见 [设备状态说明](docs/DEVICE_STATUS.md)。当前会话名称属于用户授权的显示元数据，仅额外支持用户授权的显式提问标题，不发送答案、对话历史、代码或其他工具正文。
 

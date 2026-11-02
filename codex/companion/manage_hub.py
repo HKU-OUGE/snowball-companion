@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Manage this install's status hub, using its user service when installed."""
 import argparse
+import sys
+if sys.platform != 'linux':
+    raise SystemExit('Use windows-services.ps1 on Windows; manage_hub.py requires Linux')
 import fcntl
 import json
 import os
@@ -8,7 +11,6 @@ from pathlib import Path
 import signal
 import socket
 import subprocess
-import sys
 import time
 import urllib.error
 import urllib.request

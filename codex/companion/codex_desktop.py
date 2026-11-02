@@ -181,6 +181,8 @@ class CodexDesktop:
         except (OSError, ValueError, KeyError, TypeError): return None
 
     def available(self):
+        if os.name == 'nt':
+            return self.app_tools.available()
         try:
             s = self.socket_path.lstat()
             return stat.S_ISSOCK(s.st_mode) and s.st_uid == os.getuid() and not s.st_mode & 0o022
@@ -224,6 +226,7 @@ class CodexDesktop:
             # Success is a host acknowledgement. Never replay after a timeout.
             if result.get('status') in ('error','failed') or result.get('success') is False:raise DeliveryError('delivery_unconfirmed',True)
             return {'status':'accepted'}
+        if os.name == 'nt': raise DeliveryError('desktop_unavailable')
         try:ipc=self.ipc_factory(self.socket_path)
         except (OSError,ValueError,KeyError) as exc:raise DeliveryError('desktop_unavailable') from exc
         try:
@@ -277,6 +280,20 @@ class CodexDesktop:
     def deliver(self, session, question, answer, request_id):
         route = self.route(session, question)
         if not route: raise DeliveryError('question_no_longer_pending')
+        if os.name == 'nt':
+            if not self.app_tools.available(): raise DeliveryError('desktop_unavailable')
+            # The pending question may change while the read-only probe runs.
+            current = self.route(session, question)
+            if not current or any(current.get(k)!=route.get(k) for k in ('thread','call','index','question','options','kind')):
+                raise DeliveryError('question_changed')
+            text = reply_envelope(current, answer)
+            try:
+                result = self.app_tools.call('send_message_to_thread',
+                    {'threadId':current['thread'],'hostId':'local','prompt':text},current['thread'],request_id)
+            except AppToolError as exc: raise DeliveryError(exc.code,exc.uncertain) from exc
+            if result.get('status') in ('error','failed') or result.get('success') is False:
+                raise DeliveryError('delivery_unconfirmed',True)
+            return {'status':'accepted'}
         try:
             ipc = self.ipc_factory(self.socket_path)
         except (OSError,ValueError,KeyError) as exc:

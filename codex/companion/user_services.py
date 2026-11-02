@@ -13,12 +13,14 @@ UNITS=Path.home()/'.config/systemd/user'
 def unit_name(kind):return f'snowball-{kind}.service'
 def marker(kind):return f'# Snowball managed install: {ROOT / SCRIPTS[kind]}'
 def owned(kind):
+    if sys.platform != 'linux': return False
     path=UNITS/unit_name(kind)
     try:return not path.is_symlink() and path.stat().st_uid==os.getuid() and path.read_text().splitlines()[0]==marker(kind)
     except (OSError,IndexError):return False
 
 def control(kind,command):
     """Call only after owned(); never affect another installation's unit."""
+    if sys.platform != 'linux':raise ValueError('Use windows-services.ps1 on Windows; systemd management requires Linux')
     if not owned(kind):raise ValueError('Service is not owned by this install')
     if command=='status':
         result=subprocess.run(['systemctl','--user','is-active',unit_name(kind)],capture_output=True,text=True,timeout=10)
@@ -63,5 +65,6 @@ def install(python):
         subprocess.run(['systemctl','--user','is-active','--quiet',unit_name(kind)],check=True,timeout=10)
 
 if __name__=='__main__':
+    if sys.platform!='linux':raise SystemExit('Use windows-services.ps1 on Windows; systemd management requires Linux')
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('command',choices=['install']);p.add_argument('--python',default=sys.executable)
     a=p.parse_args();install(a.python)

@@ -10,6 +10,7 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+from private_files import private_dir, private_file
 
 ROOT = Path(__file__).resolve().parent
 STATE = Path.home() / '.local/state/xueqiu/windows'
@@ -47,7 +48,7 @@ def main():
     if sys.platform != 'win32':
         raise SystemExit('Use user_services.py on Linux; this supervisor is for Windows.')
     from windows_file_lock import flock, LOCK_EX, LOCK_NB
-    STATE.mkdir(parents=True, exist_ok=True)
+    private_dir(STATE)
     lock = open(STATE / 'supervisor.lock', 'a+b')
     try:
         flock(lock, LOCK_EX | LOCK_NB)
@@ -62,6 +63,7 @@ def main():
         if path.exists() and path.stat().st_size > 5_000_000:
             os.replace(path, path.with_suffix('.previous.log'))
         logs[name] = open(path, 'ab', buffering=0)
+        private_file(path)
         children[name] = subprocess.Popen(
             [sys.executable, '-X', 'utf8', str(ROOT / (name + '.py')), *child_arguments(name)],
             cwd=ROOT, stdout=logs[name], stderr=subprocess.STDOUT,

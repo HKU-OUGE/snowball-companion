@@ -2,6 +2,7 @@
 """Install the optional local speech worker and pinned multilingual model."""
 from pathlib import Path
 import json,os,subprocess,sys,venv,shutil
+from private_files import private_write
 
 def main():
     root=Path.home()/'.cache/xueqiu';env=root/'speech-venv'
@@ -23,7 +24,7 @@ print(json.dumps({'model':p}))
     result=subprocess.run([str(python),'-c',code],check=True,capture_output=True,text=True)
     model=json.loads(result.stdout.strip().splitlines()[-1])['model']
     config=Path.home()/'.config/xueqiu/speech.json';config.parent.mkdir(parents=True,exist_ok=True,mode=0o700)
-    config.write_text(json.dumps({'model':model,'language':'auto','python':str(python)},indent=2)+'\n');config.chmod(0o600)
+    private_write(config,(json.dumps({'model':model,'language':'auto','python':str(python)},indent=2)+'\n').encode('utf-8'))
     from speech_relay import ensure_service
     ensure_service()
     print('Local speech installed. The companion will enable recording when the service is ready. No cloud API key is required.')

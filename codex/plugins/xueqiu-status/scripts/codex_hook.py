@@ -25,6 +25,11 @@ import urllib.request
 import urllib.error
 import uuid
 
+if os.name == 'nt':
+    _private_spec = importlib.util.spec_from_file_location('snowball_private_files', Path(__file__).with_name('private_files.py'))
+    _private_files = importlib.util.module_from_spec(_private_spec)
+    _private_spec.loader.exec_module(_private_files)
+
 HOOKS = ('SessionStart', 'UserPromptSubmit', 'PreToolUse', 'PermissionRequest',
          'PostToolUse', 'Stop', 'Interrupt', 'SessionEnd', 'PreCompact', 'PostCompact')
 MAX_INPUT = 2 * 1024 * 1024
@@ -308,7 +313,8 @@ def hook_phase(payload, current):
 @contextmanager
 def locked_record(root, session):
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(root, 0o700)
+    if os.name == 'nt': _private_files.private_dir(root)
+    else: os.chmod(root, 0o700)
     path = root / (session + '.json')
     fd = os.open(root / (session + '.lock'), os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     with os.fdopen(fd, 'a') as lock:

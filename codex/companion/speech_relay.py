@@ -1,6 +1,7 @@
 """Bounded authenticated microphone upload; only explicit device confirmation sends."""
 import asyncio,base64,hashlib,hmac,http.client,json,os,struct,subprocess,time,zlib
 from pathlib import Path
+from private_files import private_dir, private_file
 VOICE='9e7a0005-6ed4-4b6b-bf37-43dc42838c20'
 WRITE='9e7a0003-6ed4-4b6b-bf37-43dc42838c20'
 HUB_TARGET_ERRORS=frozenset({'question_no_longer_pending','answer_already_submitted',
@@ -45,10 +46,11 @@ def ensure_service():
     try:
         settings=json.loads(config.read_text());python=Path(settings['python']);model=Path(settings['model'])
         if not python.is_file() or not (model/'model.bin').is_file():return False
-        folder=Path.home()/'.local/state/xueqiu/speech';folder.mkdir(parents=True,exist_ok=True,mode=0o700)
+        folder=private_dir(Path.home()/'.local/state/xueqiu/speech')
         with (folder/'service.log').open('ab') as log:
-            os.chmod(folder/'service.log',0o600)
-            subprocess.Popen([str(python),str(Path(__file__).with_name('speech_service.py')),'--config',str(config)],stdin=subprocess.DEVNULL,stdout=log,stderr=log,start_new_session=True)
+            private_file(folder/'service.log')
+            options={'creationflags':subprocess.CREATE_NO_WINDOW} if os.name=='nt' else {'start_new_session':True}
+            subprocess.Popen([str(python),'-X','utf8',str(Path(__file__).with_name('speech_service.py')),'--config',str(config)],stdin=subprocess.DEVNULL,stdout=log,stderr=log,**options)
         return False # Health polling will report ready after the model loads.
     except (OSError,ValueError,KeyError):return False
 

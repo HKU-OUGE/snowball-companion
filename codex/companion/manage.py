@@ -14,6 +14,7 @@ BRIDGE = Path(__file__).resolve().with_name('bridge.py')
 
 
 def identity(pid, expected_script=None):
+    if sys.platform != 'linux': raise ValueError('Use windows-services.ps1 on Windows; this manager requires Linux')
     # Linux PID identity, checked before signaling to avoid PID reuse.
     p=Path('/proc')/str(pid)
     try:
@@ -31,6 +32,7 @@ def running():
 
 
 def stop(quiet=False):
+    if sys.platform != 'linux': raise ValueError('Use windows-services.ps1 on Windows; this manager requires Linux')
     rec=running()
     if rec:
         os.kill(rec['pid'],signal.SIGTERM)
@@ -43,6 +45,7 @@ def stop(quiet=False):
 
 
 def main():
+    if sys.platform != 'linux': raise SystemExit('Use windows-services.ps1 on Windows; this manager requires Linux')
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('command',choices=['start','stop','status'])
     p.add_argument('--source', type=Path, help='Explicit status JSON source, e.g. the local status hub snapshot')

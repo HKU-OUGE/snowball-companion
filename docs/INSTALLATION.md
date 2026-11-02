@@ -86,8 +86,20 @@ codex plugin marketplace remove xueqiu-local --json
 
 ## Windows 原生安装与自动重连（2026-11-02）
 
+Windows 的文件权限、安全缓存读取和服务入口约束见
+[Windows 文件与服务兼容说明](../codex/plugins/xueqiu-status/skills/setup/references/windows-compatibility.md)。
+当前源码已使用原生 ACL 并读回验证，旧 Linux 服务入口会提前拒绝 Windows；
+命名管道失效时不会再尝试 Unix IPC。源码修复不代表已发布新版安装包或完成固件安装验收。
+
 **桌宠安装与硬件连接是两条流程。** 仅安装插件、启用账号 Pet 或在 Windows
 蓝牙设置中看到“已配对”，都不会启动 Hub、桥接或登录自启。
+
+**语音是额外的配置与验收项。** 普通 Windows 安装器不下载识别模型。需要录音时，
+按[语音初始化与排错](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md)
+补装本地服务，要求认证健康检查 `ready=true`，再进行设备试录。Windows 消息和建聊
+使用[当前宿主的应用命名管道](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)，
+要求继承端点并通过服务身份与工具目录检查；普通异步问题回答带准确问题标识走同一通道。
+录音服务就绪不代表任务可送达。
 
 固定保存整个仓库或安装包，不要运行 Unix `install.sh`。PowerShell 中从 `codex/` 执行：
 
@@ -137,8 +149,10 @@ Hooks 改为本机 Python 绝对路径与 UTF-8 模式。它不修改 Hook 信�
 Windows 桥接优先按**精确名称且唯一匹配**查询已配对 BLE 设备，不要求重新公开广播；
 候选设备仍必须通过应用 HMAC 身份验证。GATT 服务采用新鲜发现，避免旧缓存导致特征缺失。
 先分别确认插件注册、真实 Hook 事件、Hub 健康、设备认证与实际回执，不把任务“Running”
-或系统“已配对”当作已同步。Windows 的 Unix IPC、设备反向回答/建聊和独立空闲证明
-尚未接通，会返回不可用；不能把它们当作固件自动安装的可靠空闲依据。
+或系统“已配对”当作已同步。Windows 确认后的指令/建聊可使用经过验证的应用命名管道；
+异步问题回答也走应用命名管道，接收回执不等于桌面问题卡片收起。
+独立空闲证明仍未接通，不能作为固件自动安装的可靠空闲依据。
+当前登录任务不会自动发现应用重启后的新端点，需在当前宿主环境重新启动 Hub 并验收。
 
 验证边界：2026-11-02 已在一台 Windows 电脑完成 USB 绑定、BLE 认证、真实设备状态写入
 与遥测。用户审阅修正后的 Hook 命令后，当前真实聊天产生适配器记录，Hub 返回 `accepted`，

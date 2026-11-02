@@ -15,6 +15,7 @@ import re
 import struct
 import time
 from urllib.parse import urlsplit
+from private_files import private_write, private_dir, private_file, safe_reader
 
 NETWORK = '9e7a0006-6ed4-4b6b-bf37-43dc42838c20'
 MAX_CONFIG = 6000
@@ -22,19 +23,6 @@ MAX_CONFIG = 6000
 
 def encode(value):
     return json.dumps(value, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
-
-
-def private_write(path, content):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    temp = path.with_name(path.name + '.tmp')
-    fd = os.open(temp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
-    os.fchmod(fd, 0o600)
-    with os.fdopen(fd, 'wb') as f:
-        f.write(content)
-        f.flush()
-        os.fsync(f.fileno())
-    os.replace(temp, path)
 
 
 def endpoint(value):
@@ -115,10 +103,13 @@ def create_gateway(root, bind, device):
     from cryptography.hazmat.primitives import hashes, serialization
     from cryptography.hazmat.primitives.asymmetric import ec
     from cryptography.x509.oid import NameOID
-    root = Path(root)
+    root = private_dir(root)
     config_path = root / 'gateway.json'
     if config_path.exists():
-        current = json.loads(config_path.read_text())
+        for name in ('gateway.json','server-key.pem','server-cert.pem'):
+            private_file(root/name)
+        with safe_reader(config_path) as stream:
+            current = json.loads(stream.read())
         if current['bind'] != bind or current['device'] != device:
             raise ValueError('Existing gateway identity differs; explicit migration required')
         return current

@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import struct
 import time
+from private_files import private_dir
 from bridge import transport_io_timeout
 
 POWER = '9e7a0004-6ed4-4b6b-bf37-43dc42838c20'
@@ -69,7 +70,7 @@ def clock_packet(key, info, epoch):
 
 
 def atomic(path, payload):
-    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    private_dir(path.parent)
     tmp = path.with_suffix('.tmp')
     fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
     with os.fdopen(fd, 'w') as stream:
