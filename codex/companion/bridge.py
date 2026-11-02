@@ -806,6 +806,14 @@ async def connected_session(args, config):
                     print(notice, flush=True)
                     source_notice = notice
                 refreshed_attention = None
+                if args.command == 'watch' and args.source:
+                    refreshed_attention = await attention.step(client, config, payload)
+                if refreshed_attention is not None:
+                    payload = refreshed_attention
+                    try:
+                        target = parse_source(payload)
+                    except SourceUnavailable:
+                        target = None
                 if bulk_due and args.command == 'watch' and args.source:
                     refreshed = await catalogue.step(client, config, payload)
                     if refreshed is not None:
@@ -816,23 +824,15 @@ async def connected_session(args, config):
                             target = parse_source(refreshed)
                         except SourceUnavailable:
                             target = None
-                if args.command == 'watch' and args.source:
-                    refreshed_attention = await attention.step(client, config, payload)
-                if refreshed_attention is not None:
-                    payload = refreshed_attention
-                    try:
-                        target = parse_source(payload)
-                    except SourceUnavailable:
-                        target = None
-                if bulk_due:
-                    await summaries.step(client, config, payload)
-                    await pets.step(client, config, payload, read_info)
                 ack = await relay.step(client, config, target)
                 if target is None:
                     previous = None
                 elif ack is not None and (target.provider, target.state) != previous:
                     print(f'Applied {target.provider}: {target.state}, seq={ack["applied"]}', flush=True)
                     previous = target.provider, target.state
+                if bulk_due:
+                    await summaries.step(client, config, payload)
+                    await pets.step(client, config, payload, read_info)
                 await power.step(client, config, read_info, payload, target)
                 try:
                     await speech.step(client, config, payload)

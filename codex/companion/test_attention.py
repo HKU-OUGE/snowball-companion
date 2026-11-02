@@ -96,3 +96,49 @@ class IdleEvidenceTests(unittest.TestCase):
     if phase in ('completed','idle'):self.assertEqual(bridge.parse_source(s,clock[0]).state,'idle');self.assertFalse(s['task_fresh'])
     else:
      with self.assertRaises(bridge.SourceUnavailable):bridge.parse_source(s,clock[0])
+
+class FastActionReceiptTests(unittest.IsolatedAsyncioTestCase):
+ async def prepare(self):
+  now=__import__('time').time()
+  rows=[{'id':f'{i+1:032x}','text':'请完整阅读问题再决定。'*16,'status':'active',
+         'answerable':True,'options':['选项甲：'+'内容'*30,'选项乙：'+'说明'*30]} for i in range(8)]
+  payload={'hub_alive':True,'generated_at':now,'sessions':[{'provider':'Codex','source':'test','session_id':'a','questions':rows}]}
+  info={'accepted':10,'nonce':'12'*8,'attention_v':2}
+  request={'seq':7,'provider':0,'generation':1,'pending':True,'id':hashlib.sha256(b'test/a').hexdigest()[:32], 'action':4,'before':rows[0]['id']}
+  read=AsyncMock(return_value=info);verify=lambda value,config: None
+  relay=AttentionRelay(read,verify);client=type('Client',(),{'write_gatt_char':AsyncMock()})();cfg={'key':'ab'*32}
+  await relay.step(client,cfg,payload)
+  initial_count=client.write_gatt_char.await_count
+  client.write_gatt_char.reset_mock();relay.verify_request=lambda value,config:request;relay.last_poll=float('-inf')
+  refreshed=json.loads(json.dumps(payload));refreshed['sessions'][0]['questions'][0]['status']='ignored'
+  return relay,client,cfg,payload,refreshed,initial_count
+ async def test_receipt_is_one_packet_before_long_options_snapshot(self):
+  relay,client,cfg,payload,refreshed,initial_count=await self.prepare()
+  with patch('attention_relay.attention_http',return_value=refreshed) as post:
+   result=await relay.step(client,cfg,payload)
+  self.assertEqual(result,refreshed);post.assert_called_once()
+  self.assertGreater(initial_count,30)
+  client.write_gatt_char.assert_awaited_once()
+  packet=client.write_gatt_char.call_args.args[1]
+  self.assertEqual(packet[:3],bytes([6,0,3]))
+  self.assertEqual(struct.unpack('<IIB',packet[15:-32]),(1,7,1))
+  self.assertEqual(packet[-32:],hmac.digest(bytes.fromhex(cfg['key']),packet[:-32],'sha256'))
+  relay.last_poll=float('-inf');relay.verify_request=lambda value,config:None;client.write_gatt_char.reset_mock()
+  await relay.step(client,cfg,refreshed)
+  self.assertGreater(client.write_gatt_char.await_count,30)
+  self.assertEqual(relay.generations[0],2)
+ async def test_failed_ack_write_retries_receipt_without_repeating_action(self):
+  relay,client,cfg,payload,refreshed,_=await self.prepare()
+  client.write_gatt_char.side_effect=OSError('transport unavailable')
+  with patch('attention_relay.attention_http',return_value=refreshed) as post:
+   with self.assertRaises(OSError):await relay.step(client,cfg,payload)
+   self.assertIsNotNone(relay.pending_ack)
+   client.write_gatt_char.side_effect=None;relay.last_poll=float('-inf')
+   await relay.step(client,cfg,refreshed)
+  post.assert_called_once();self.assertIsNone(relay.pending_ack)
+ async def test_rejected_action_never_gets_a_success_receipt(self):
+  relay,client,cfg,payload,_,_=await self.prepare()
+  with patch('attention_relay.attention_http',side_effect=ValueError('no longer pending')):
+   self.assertIsNone(await relay.step(client,cfg,payload))
+  packet=client.write_gatt_char.call_args.args[1]
+  self.assertEqual(struct.unpack('<IIB',packet[15:-32]),(1,7,2))

@@ -79,6 +79,7 @@ class AttentionRelay:
         self.last_poll = float('-inf')
         self.handled = None
         self.results = {}
+        self.pending_ack = None
 
     async def step(self, client, config, payload):
         # Production injects functions from the running bridge (__main__).
@@ -101,6 +102,7 @@ class AttentionRelay:
             self.fingerprints = [None] * 3
             self.sent.clear()
             self.handled = None
+            self.pending_ack = None
         request = verify_request(info, config)
         refreshed = None
         if (request and request['pending'] and request['action'] in range(3,12) and
@@ -137,6 +139,24 @@ class AttentionRelay:
             self.sent_at[p] = float('-inf')
             if refreshed is not None:
                 payload = refreshed
+            # Confirm the exact action using the already displayed generation.
+            # Do not hold a button hostage to a complete text/options upload.
+            # Operation 3 is supported by existing attention_v1/v2 firmware.
+            self.pending_ack = (p, self.generations[p], request['seq'], result)
+        if self.pending_ack is not None:
+            p, gen, ack, result = self.pending_ack
+            if gen:
+                info = await read_info(client, config)
+                body = struct.pack('<IIB', gen, ack, result)
+                head = struct.pack('<BBBI8s', 6, p, 3, info['accepted'] + 1,
+                                   bytes.fromhex(info['nonce'])) + body
+                await asyncio.wait_for(client.write_gatt_char(WRITE,
+                    head + hmac.digest(bytes.fromhex(config['key']), head, 'sha256'),
+                    response=True), transport_io_timeout(client))
+            self.pending_ack = None
+            # Send the authoritative full list next tick. Its atomic commit is
+            # independent of this acknowledgement; never fake updated text.
+            return refreshed
         for p, provider in enumerate(PROVIDERS):
             rows, total = rows_for(payload, provider, time.time())
             fingerprint = tuple((q['session'], q['id'], q['text'], q['status'], tuple(q.get('options',[])), bool(q.get('answerable'))) for q in rows), total
