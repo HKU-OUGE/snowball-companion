@@ -4,11 +4,27 @@ Called after the official plugin manager installs the local marketplace package.
 Does not edit trust, global Hooks, account Pets, or any other plugin.
 """
 import argparse
+import base64
+import re
 import json
 import os
 from pathlib import Path
 import sys
 import tempfile
+
+
+def windows_command(root, interpreter):
+    """Commands must survive both cmd.exe and PowerShell native launch paths."""
+    args = [Path(interpreter).as_posix(), '-X', 'utf8',
+            (Path(root) / 'scripts/codex_hook.py').as_posix(), 'hook']
+    if all(re.fullmatch(r'[A-Za-z0-9_./:\\-]+', arg) for arg in args):
+        return ' '.join(args)
+    # Only locally configured paths enter this static script, never hook input.
+    # Encoding avoids nesting shell-specific quotes around spaces/non-ASCII paths.
+    script = '& ' + ' '.join("'" + arg.replace("'", "''") + "'" for arg in args)
+    script += '; exit $LASTEXITCODE'
+    encoded = base64.b64encode(script.encode('utf-16le')).decode('ascii')
+    return 'powershell.exe -NoProfile -NonInteractive -EncodedCommand ' + encoded
 
 
 def configure(root, interpreter):
@@ -28,7 +44,7 @@ def configure(root, interpreter):
             for hook in group['hooks']:
                 if hook.get('type') != 'command' or not hook.get('command', '').endswith('/scripts/codex_hook.py" hook'):
                     raise ValueError('Unexpected Hook definition; review before changing it')
-                hook['command'] = '"' + interpreter.as_posix() + '" -X utf8 "${PLUGIN_ROOT}/scripts/codex_hook.py" hook'
+                hook['commandWindows'] = windows_command(root, interpreter)
     fd, temporary = tempfile.mkstemp(prefix='.windows-hooks-', dir=target.parent)
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as stream:

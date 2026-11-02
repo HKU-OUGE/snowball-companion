@@ -93,3 +93,9 @@ python3 plugins/xueqiu-status/scripts/pet_setup.py inspect --character snowball
 
 
 语音输入（原生 0.15.2）：可选电脑端本地识别与设备录音已加入。初次启用运行 companion/setup-speech.py，使用独立 Python 环境和本地多语言模型。发送到已有本机 Codex 会话或对应待答问题之前必须确认识别文字。约 5.7 秒真人录音实测上传 2.236 秒、模型识别 2.468 秒。完整说明及验收边界见 [语音输入](docs/SPEECH-INPUT.md)。本轮更新本目录；外层既有 ZIP 未重新打包。
+
+
+Windows 已信任但状态待同步时，还应检查原生 Shell 启动。
+`tools/configure_windows_plugin.py` 使用 `commandWindows` 生成本机调用；
+仅直接运行 Python 脚本不代表 Hook 可以被宿主启动。见
+[Windows 启动排错](../docs/INSTALLATION.md#windows-已信任但无状态记录先检查原生-shell-启动)。

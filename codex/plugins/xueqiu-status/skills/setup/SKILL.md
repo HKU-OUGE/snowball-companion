@@ -101,3 +101,16 @@ Cloud orchestration does not support local/plugin command Hooks even when tools
 execute locally; check the actual mode before attributing missing events to
 trust or installing duplicate project Hooks. See the official Hooks docs at
 https://learn.chatgpt.com/docs/hooks.
+
+
+## Windows native launch verification
+
+Use configure_windows_plugin.py to generate commandWindows, preserving the
+portable command. Raw quoted executable strings can fail through cmd /C and
+PowerShell even if invoking Python directly succeeds. Verify the configured
+command through both native shells with isolated stdin/state before requesting
+review. Path quoting regressions must cover spaces, Unicode and apostrophes.
+Never interpolate Hook payloads into the launch command. A launch-command
+change requires a fresh user review of that exact definition; never rewrite
+trusted_hash or approve on the user's behalf. Keep synthetic tests isolated
+from the live Hub and verify actual chat delivery separately after review.

@@ -285,3 +285,19 @@ Hooks；点「详情」核对来源 `xueqiu-status`、解释器和脚本路径�
 官方说明：[Hook 来源与信任规则](https://learn.chatgpt.com/docs/hooks#review-and-trust-hooks)。
 云端编排即使允许本地工具，也不支持本地配置/插件中的命令 Hooks；使用该模式时，
 反复安装和信任不能让它们生效。先核对实际模式，不能仅凭界面名或新 CLI 的结果推断。
+
+
+### Windows 已信任但无状态记录：先检查原生 Shell 启动
+
+不能只直接运行 Python 脚本来验收命令 Hook。早期 Windows 配置把带引号的 Python
+路径直接写入通用 `command`，经 `cmd /D /S /C` 或 PowerShell 的实际启动路径时会
+解析失败，表现为 Hooks 已信任、BLE 在线，但没有真实适配器记录。
+
+Windows 配置器现在保留通用命令，使用官方 `commandWindows` 覆盖：简单绝对路径
+采用无需引号的固定参数；空格、中文或单引号路径采用本机生成的 PowerShell 编码
+调用，执行相同的固定 Python 脚本并传递 stdin。绝不把事件正文拼入命令。
+回归测试经两个原生 Shell 传入隔离 JSON，覆盖简单路径及空格/中文/单引号路径。
+
+更新启动命令后需要用户再审阅一次变化的定义；不修改保存的信任哈希，也不自动批准。
+之后再检查真实 Hook → Hub → BLE 设备回执，不能把直接调用 Python 的成功结果
+或隔离测试当作真实聊天已同步。
