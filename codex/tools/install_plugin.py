@@ -142,7 +142,7 @@ def install(codex, market):
             finally:
                 for sig, handler in handlers.items():
                     signal.signal(sig, handler)
-    print('Snowball Companion installed. Reload the plugin when convenient; run its Setup action to install/activate Snowball Pet. Review new or changed hooks in /hooks if requested. Package installation alone does not create an account Pet.')
+    print('Snowball Companion installed. Setup/trust is not per-chat. Check Hooks in the running Desktop, not only a fresh CLI. If the host has not loaded them, fully reload only after active work finishes, then verify real events. Run Setup to install/activate the Pet and review changed Hooks if requested; installation alone does not create a Pet.')
 
 
 def main():

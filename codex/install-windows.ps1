@@ -39,4 +39,4 @@ if ($Device -or $AutoReconnect) {
     }
 }
 & $codex plugin list --marketplace xueqiu-local --json
-Write-Output 'Plugin registered. Review changed Hooks and open a new chat. Run Setup to verify/activate the account Pet. Hardware requires separate authenticated connection checks.'
+Write-Output 'Plugin registered. Setup/trust is not per-chat. Check Settings > Hooks in the running Desktop. If it lists no Hooks, fully reload only after active work finishes, then verify real events. Review changed definitions and run Setup to verify the account Pet; hardware connection is checked separately.'

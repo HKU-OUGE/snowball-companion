@@ -75,3 +75,20 @@ A chat created before plugin installation may need a new chat or host reload
 when no active work is interrupted. A fresh configuration inspection is not
 proof that an existing chat loaded it. If no real events arrive, report pending
 status verification; never inject fake busy/idle events to make the screen green.
+
+
+## One-time setup versus live host loading
+
+User-scope plugin installation and trust of an unchanged definition are not
+per-chat setup. Do not ask users to configure Hooks again for every chat.
+Inspect the running Desktop's Settings > Hooks page separately from a fresh
+CLI app-server's hooks/list response. A fresh CLI returning ten trusted Hooks
+cannot prove that the already-running Desktop loaded them. If the live host
+lists no Hooks and real adapter records are absent even in a new chat, report
+that loading discrepancy. After all active work finishes, a full host reload
+may be required; do not interrupt active work, force-restart the host, or claim
+that reopening a chat alone will solve it. Verify loading and real events again.
+Cloud orchestration does not support local/plugin command Hooks even when tools
+execute locally; check the actual mode before attributing missing events to
+trust or installing duplicate project Hooks. See the official Hooks docs at
+https://learn.chatgpt.com/docs/hooks.
