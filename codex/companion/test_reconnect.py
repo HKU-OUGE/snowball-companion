@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -33,6 +34,7 @@ class CachedReconnect(unittest.IsolatedAsyncioTestCase):
         await relay.close()
         self.assertIsNone(relay.job);self.assertIsNone(relay.task)
 
+@unittest.skipUnless(sys.platform=='linux','Linux systemd service; Windows supervisor has its own tests')
 class LoginService(unittest.TestCase):
     def test_owner_guard_and_explicit_recovery(self):
         with tempfile.TemporaryDirectory() as d,patch.object(user_services,'UNITS',Path(d)):

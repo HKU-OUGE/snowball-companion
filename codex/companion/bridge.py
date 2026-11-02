@@ -14,6 +14,7 @@ import sys
 import time
 import unicodedata
 import http.client
+from private_files import read_text as read_snapshot_text
 
 SERVICE = '9e7a0001-6ed4-4b6b-bf37-43dc42838c20'
 INFO = '9e7a0002-6ed4-4b6b-bf37-43dc42838c20'
@@ -767,7 +768,7 @@ async def connected_session(args, config):
                 if now-last_ota_service<1:return False
                 last_ota_service=now;current=None;current_target=None
                 try:
-                    current=json.loads(args.source.read_text()) if args.source else None
+                    current=json.loads(read_snapshot_text(args.source)) if args.source else None
                     current_target=parse_source(current)
                 except (OSError,ValueError,TypeError):pass
                 await attention.step(client,config,current)
@@ -794,7 +795,7 @@ async def connected_session(args, config):
                 if bulk_due:last_bulk=time.monotonic()
                 if args.command == 'watch' and args.source:
                     try:
-                        payload = json.loads(args.source.read_text())
+                        payload = json.loads(read_snapshot_text(args.source))
                         target = parse_source(payload)
                         notice = ('Live status-hub source; BLE refreshes do not change task timestamps'
                                   if target.mode == 'hub' else notice)

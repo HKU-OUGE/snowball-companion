@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import stat
 import tempfile
+import time
 
 
 def checked_path(path):
@@ -120,13 +121,23 @@ def private_file(path):
 
 @contextmanager
 def safe_reader(path):
-    path = checked_path(path)
     if os.name == 'nt':
         import _winapi
         import ctypes as c
         from ctypes import wintypes as w
         import msvcrt
-        handle = _winapi.CreateFile(str(path),0x80000000,1,0,3,0x00200000,0)
+        # READ|DELETE sharing keeps an open snapshot valid across atomic replace.
+        # Retry only transient Windows sharing/access failures, with a hard bound;
+        # reparse-point checks still run on every attempt and on the final handle.
+        deadline = time.monotonic() + .25
+        while True:
+            try:
+                path = checked_path(path)
+                handle = _winapi.CreateFile(str(path),0x80000000,5,0,3,0x00200000,0)
+                break
+            except OSError as error:
+                if getattr(error,'winerror',None) not in (5,32,33) or time.monotonic()>=deadline:raise
+                time.sleep(.005)
         try:
             k = c.WinDLL('kernel32',use_last_error=True)
             k.GetFileInformationByHandleEx.argtypes = [w.HANDLE,c.c_int,w.LPVOID,w.DWORD]
@@ -139,10 +150,17 @@ def safe_reader(path):
         finally:
             if handle is not None: _winapi.CloseHandle(handle)
     else:
+        path = checked_path(path)
         fd = os.open(path,os.O_RDONLY|os.O_NOFOLLOW)
     with os.fdopen(fd,'rb') as stream:
         if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode): raise OSError('Not a regular file')
         yield stream
+
+
+def read_text(path):
+    """UTF-8 snapshot read using the platform's atomic-replacement sharing rules."""
+    with safe_reader(path) as stream:
+        return stream.read().decode('utf-8')
 
 
 def private_write(path, content):

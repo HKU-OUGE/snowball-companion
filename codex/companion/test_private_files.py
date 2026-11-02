@@ -41,6 +41,18 @@ class PrivateFilesTests(unittest.TestCase):
                 self.assertEqual(file.read_bytes(),b'original')
             finally:os.rmdir(link)
 
+    def test_open_snapshot_survives_atomic_replacement(self):
+        from status_hub import atomic_json
+        from private_files import read_text
+        import json
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'状态.json'
+            atomic_json(path,{'revision':1})
+            with safe_reader(path) as old:
+                atomic_json(path,{'revision':2})
+                self.assertEqual(json.loads(old.read())['revision'],1)
+                self.assertEqual(json.loads(read_text(path))['revision'],2)
+
     def test_missing_pipe_never_attempts_unix_fallback(self):
         from codex_desktop import CodexDesktop,DeliveryError
         desktop=CodexDesktop();desktop.instruction_route=Mock(return_value={'thread':'fixture'})

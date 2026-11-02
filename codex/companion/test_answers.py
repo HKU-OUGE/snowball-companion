@@ -1,4 +1,5 @@
 import json
+import os
 import tempfile
 import time
 from pathlib import Path
@@ -84,6 +85,7 @@ class OptionsWire(NativeAttentionTests):
 
 
 class DesktopContract(unittest.TestCase):
+ @unittest.skipIf(os.name=='nt','Unix IPC contract; Windows named-pipe delivery is tested separately')
  def test_steer_supplies_restoration_context_and_targets_exact_owner(self):
   calls=[]
   class IPC:

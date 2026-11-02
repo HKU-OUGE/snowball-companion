@@ -1,5 +1,6 @@
 """Retirement uses isolated private state, never live chats or hardware."""
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -42,7 +43,9 @@ class SessionCapacityTests(unittest.TestCase):
         self.assertEqual(len(self.hub.records), 3)
         self.assertNotIn('test/a', self.hub.records)
         path = self.hub.history_path('test/a')
-        self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+        if os.name!='nt':self.assertEqual(path.stat().st_mode & 0o777, 0o600)
+        # Windows DACL readback and inherited-directory isolation are covered by
+        # test_private_files; POSIX mode bits cannot represent a Windows ACL.
         history = json.loads(path.read_text())
         self.assertEqual(history['record']['display_name'], 'First task')
         self.assertNotIn('test/a', value['priority_order'])

@@ -178,7 +178,8 @@ class HubTest(unittest.TestCase):
         atomic_json(path, {'index':0, 'padding':'x'*1000})
         def reader():
             for _ in range(250):
-                value = json.loads(path.read_text())
+                from private_files import read_text
+                value = json.loads(read_text(path))
                 assert len(value['padding']) == 1000
         with concurrent.futures.ThreadPoolExecutor() as pool:
             readers = [pool.submit(reader) for _ in range(3)]
