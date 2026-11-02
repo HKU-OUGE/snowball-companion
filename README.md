@@ -6,14 +6,14 @@
 
 **第一次使用，请从 [新手指南](docs/START-HERE.md) 开始。** 已安装用户请先看 [升级与卸载](docs/INSTALLATION.md)，保留已有配对与共享服务。
 
-本次准备 **v0.5.1** 安装包；请先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 确认该版本已发布。下列链接在资产发布后可用，源码或本地构建完成不代表已经发布。
+当前安装包为 **v0.5.3**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
 
 | 软件 | 下载 | 说明 |
 | --- | --- | --- |
-| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Codex.zip) | [Codex 0.5.1](codex/README.md) |
-| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
-| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Claude.zip) | [Claude 0.2.1](claude/README.md) |
-| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.1/Snowball-Cursor.zip) | [Cursor 0.2.1](cursor/README.md) |
+| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Codex.zip) | [Codex 0.5.3](codex/README.md) |
+| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
+| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Claude.zip) | [Claude 0.2.1](claude/README.md) |
+| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Cursor.zip) | [Cursor 0.2.1](cursor/README.md) |
 
 每个 ZIP 有配套 `.sha256` 文件，Release 同时提供 `SHA256SUMS`。解压后保留完整目录，不要只复制单个 Hook。Core 构建时强制小于 8,000,000 字节。若要从设备 USB 安装盘复制这些包，需要相应设备固件；本仓库不声称已经部署该固件。
 
@@ -23,9 +23,9 @@
 
 | 平台 | 安装与功能 | 验证范围 |
 | --- | --- | --- |
-| Codex Desktop / CLI | [Codex 插件说明](codex/README.md) | Linux 本机插件和设备集成曾测试；不同版本与系统的兼容性需自行验证 |
-| Claude Code Desktop / CLI | [Claude 插件说明](claude/README.md) | 官方插件结构与隔离环境测试通过；真实登录会话和设备联动尚未端到端测试 |
-| Cursor | [Cursor 插件说明](cursor/README.md) | Linux 隔离测试通过；Cursor 实际加载和设备联动尚未端到端测试 |
+| Codex Desktop / CLI | [Codex 插件说明](codex/README.md) | Linux 本机设备集成已验证；Windows 原生安装与 Hook／BLE 验证记录、自动测试和剩余限制见 [Windows 支持](codex/docs/WINDOWS-QA-2026-11-03.md) |
+| Claude Code Desktop / CLI | [Claude 插件说明](claude/README.md) | Linux／macOS 适配器；原生 Windows 不支持。隔离测试通过，设备联动仍需单独验收 |
+| Cursor | [Cursor 插件说明](cursor/README.md) | Linux 隔离测试通过；原生 Windows 不支持。实际加载和设备联动需单独验收 |
 
 统一的安装、升级、卸载和共享服务清理步骤见 [安装与卸载](docs/INSTALLATION.md)；由 Agent 执行时先读 [AGENTS.md](AGENTS.md)。
 电脑缓存、蓝牙发送、设备安装前提与限制见 [自动更新说明](docs/UPDATES.md)。可靠空闲证据目前仅覆盖本机 Codex Desktop；不能将其解释成所有软件或 CLI 都已空闲。Claude／Cursor 的独立 Hub 保持各自入口，不启动 Codex 轮询。

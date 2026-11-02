@@ -31,3 +31,9 @@ Windows 使用 `companion/windows-services.ps1` 和 Windows supervisor。
 隔离回归包括真实 DACL 读回、撤销临时 Everyone 权限、中文路径、目录联接拒绝、
 缓存损坏重验、Windows 禁止 Unix 回退、旧入口执行前拒绝及并发 JSON 发布。
 通过这些测试不等于已在真实设备执行 Wi-Fi 配网或固件更新。
+
+## 0.5.3 并发快照修复
+
+Windows 读快照允许删除共享，写端使用 `ReplaceFileW` 保留已有读取句柄；仅首次创建使用移动操作。替换瞬间的缺失、共享冲突和访问冲突最多重试 250ms，真实错误仍返回，不改 ACL、不过滤损坏 JSON。读取前和打开句柄后继续拒绝重解析点。原生并发测试覆盖 3 个读取线程、50 次替换，以及打开旧快照时发布新版。此处依据 [Microsoft ReplaceFileW 文档](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-replacefilew) 匹配 Windows 文件语义，不套用 Unix 的重命名假设。
+
+源码自动回归入口为 `python tools/check_codex_portable.py`（完整仓库，安装固定测试依赖后），CI 矩阵为 Windows／Ubuntu、Python 3.12／3.13。它不连接实体蓝牙、不操作用户聊天、不安装服务；硬件验收边界保持不变。

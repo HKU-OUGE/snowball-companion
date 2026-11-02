@@ -2,7 +2,7 @@
 
 本文适用于本仓库的 Codex、Claude Code 和 Cursor 适配器。命令以 Linux 为例；
 先在当前机器查看 CLI 的 `--help`。Claude 和 Cursor 的 macOS 设备联动、原生
-Windows 请使用下方专门流程，不要套用 Linux 命令。最后核对日期：2026-11-02。
+Windows 请使用下方专门流程，不要套用 Linux 命令。最后核对日期：2026-11-03。
 
 ## 先分清三层
 
@@ -84,7 +84,9 @@ codex plugin marketplace remove xueqiu-local --json
 已创建的账号 Pet、其他 MCP 连接、设备配对和共享后台服务不由这个命令一并清理。
 
 
-## Windows 原生安装与自动重连（2026-11-02）
+## Windows 原生安装与自动重连（2026-11-03）
+
+Codex 请使用 0.5.3 或更新版本；并发快照修复、原生测试和支持边界见 [Windows 检查](../codex/docs/WINDOWS-QA-2026-11-03.md)。Claude／Cursor 独立包目前不支持原生 Windows。
 
 Windows 的文件权限、安全缓存读取和服务入口约束见
 [Windows 文件与服务兼容说明](../codex/plugins/xueqiu-status/skills/setup/references/windows-compatibility.md)。
