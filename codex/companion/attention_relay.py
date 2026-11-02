@@ -154,6 +154,7 @@ class AttentionRelay:
                     head + hmac.digest(bytes.fromhex(config['key']), head, 'sha256'),
                     response=True), transport_io_timeout(client))
             self.pending_ack = None
+            self.last_poll = float('-inf')  # The updated list may follow on the next scheduler turn.
             # Send the authoritative full list next tick. Its atomic commit is
             # independent of this acknowledgement; never fake updated text.
             return refreshed

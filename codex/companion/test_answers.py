@@ -110,3 +110,42 @@ class DesktopContract(unittest.TestCase):
   desktop=CodexDesktop(ipc_factory=IPC);desktop.route=Mock(return_value={'thread':'a'})
   with self.assertRaises(DeliveryError) as result:desktop.deliver('test/a',Q,'A','2'*32)
   self.assertFalse(result.exception.uncertain)
+
+class SettledAnswerTests(unittest.TestCase):
+ setUp=Answers.setUp
+ def test_confirmed_answer_disappears_before_next_hook(self):
+  before=self.hub.snapshot();raw=self.hub.records['test/a'];stamp=raw['task_event_at']
+  result=self.hub.answer(self.req);snap=result['snapshot']
+  self.assertEqual(snap['questions'],[]);self.assertEqual(snap['pending_input'],0);self.assertEqual(snap['pending_total'],0)
+  self.assertEqual(len(raw['questions']),1);self.assertEqual(raw['task_event_at'],stamp)
+  self.assertEqual(snap['task_updated_at'],before['task_updated_at']);self.assertNotEqual(snap.get('state'),'waiting')
+  # Repeating the same still-pending source observation cannot resurrect it.
+  event=dict(version=1,provider='Codex',source='test',session_id='a',seq=2,event_id='next',timestamp=time.time(),kind='task',phase='waiting',pending_input=1,questions=raw['questions'])
+  self.hub.accept(event);self.assertEqual(self.hub.snapshot()['questions'],[])
+  restarted=StatusHub(Path(self.temp.name),desktop=self.desktop)
+  self.assertEqual(restarted.snapshot()['questions'],[])
+ def test_uncertain_and_rejected_answers_remain_visible(self):
+  for uncertain in [True,False]:
+   self.hub.answers.clear();self.desktop.deliver.side_effect=DeliveryError('not_confirmed',uncertain)
+   r=self.hub.answer(self.req);self.assertEqual(len(r['snapshot']['questions']),1)
+   self.assertEqual(r['snapshot']['pending_input'],1)
+ def test_settles_only_exact_revision_and_counts_unknown_pending(self):
+  record=self.hub.records['test/a'];record['pending_input']=3
+  self.hub.answer(self.req);self.assertEqual(self.hub.snapshot()['pending_input'],2)
+  record['questions'][0]={**record['questions'][0],'text':'这是同 ID 的修订问题'}
+  self.assertEqual(len(self.hub.snapshot()['questions']),1)
+  self.assertEqual(self.hub.snapshot()['pending_input'],3)
+ def test_one_answer_leaves_other_question_actionable(self):
+  record=self.hub.records['test/a'];record['pending_input']=2
+  record['questions'].append({'id':'a'*32,'text':'接下来怎样做？','options':['先看方案','继续执行']})
+  r=self.hub.answer(self.req)
+  self.assertEqual([q['id'] for q in r['snapshot']['questions']],['a'*32]);self.assertEqual(r['snapshot']['pending_input'],1)
+
+ def test_changed_revision_cannot_reuse_old_success_receipt(self):
+  self.hub.answer(self.req)
+  q=self.hub.records['test/a']['questions'][0];q['text']='新的修订问题'
+  with self.assertRaises(Invalid):self.hub.answer({**self.req,'request_id':'a'*32})
+  self.assertEqual(self.desktop.deliver.call_count,1)
+  self.desktop.route.return_value={**self.desktop.route.return_value,'question':q['text']}
+  self.assertEqual(self.hub.answer({**self.req,'request_id':'a'*32})['snapshot']['questions'],[])
+  self.assertEqual(self.desktop.deliver.call_count,2)

@@ -1,5 +1,7 @@
 """Question metadata and reminder policy. Never answers or approves a request."""
 import re
+import hashlib
+import json
 import unicodedata
 
 QUESTION_MAX = 64
@@ -49,14 +51,22 @@ def question_rows(record, now):
     return result
 
 
-def projection(record, now):
-    rows = question_rows(record, now)
-    total = record.get('pending_input', 0)
+def question_digest(question):
+    # A receipt for a prior revision must never dismiss a changed question.
+    value = {'text': question.get('text'), 'options': question.get('options', [])}
+    return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                    separators=(',', ':')).encode()).hexdigest()
+
+
+def projection(record, now, settled=()):
+    original = question_rows(record, now)
+    rows = [q for q in original if q['id'] not in settled]
+    total = max(0, record.get('pending_input', 0) - (len(original) - len(rows)))
     pending = max(0, total - len(rows)) + sum(q['status'] == 'active' for q in rows)
     phase = record.get('phase')
     if pending:
         phase = 'waiting'
-    elif total and phase == 'waiting':
+    elif record.get('pending_input', 0) and phase == 'waiting':
         fresh = min(record.get('expires_at', 0), record.get('task_expires_at') or 0) > now
         activity = record.get('activity_phase', 'idle')
         phase = activity if fresh and activity != 'waiting' else 'idle'

@@ -20,7 +20,7 @@ import time
 import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from attention_model import projection, question_rows, valid_questions, SNOOZE_SECONDS, QID, clean_question
+from attention_model import projection, question_rows, valid_questions, SNOOZE_SECONDS, QID, clean_question, question_digest
 from codex_desktop import CodexDesktop, DeliveryError
 from private_files import private_dir as secure_private_dir, private_file
 
@@ -394,12 +394,14 @@ class StatusHub:
             selection={'text':request['text'].strip()}
         selection_digest=hashlib.sha256(json.dumps(selection,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
         with self.lock:
-            prior = self.answers.get(identity)
-            if prior and prior['status'] in ('accepted','sending','unconfirmed'):
-                if prior.get('selection_digest')!=selection_digest: raise Invalid('answer_already_submitted',409)
-                return {'delivery':prior['status'], 'snapshot':self.snapshot()}
             record = self.records.get(request['session'])
             question = next((q for q in (record or {}).get('questions', []) if q['id']==request['question']), None)
+            prior = self.answers.get(identity)
+            same_revision = (not question or not prior or not prior.get('question_digest') or
+                             prior['question_digest'] == question_digest(question))
+            if prior and same_revision and prior['status'] in ('accepted','sending','unconfirmed'):
+                if prior.get('selection_digest')!=selection_digest: raise Invalid('answer_already_submitted',409)
+                return {'delivery':prior['status'], 'snapshot':self.snapshot()}
             if not question: raise Invalid('question_no_longer_pending', 409)
             if not self.desktop or not self.desktop.available(): raise Invalid('answer_unavailable', 503)
             route = self.desktop.route(request['session'], request['question'])
@@ -413,7 +415,7 @@ class StatusHub:
                 if not isinstance(answer, str) or not answer.strip() or len(answer)>1000 or any(unicodedata.category(c)[0]=='C' and c not in '\n\t' for c in answer): raise Invalid('invalid_answer_text')
                 answer = answer.strip()
             # Persist identity/outcome, never answer text. One pending delivery per question.
-            self.answers[identity] = {'request_id':request['request_id'], 'status':'sending', 'at':self.clock(), 'selection_digest':selection_digest}
+            self.answers[identity] = {'request_id':request['request_id'], 'status':'sending', 'at':self.clock(), 'selection_digest':selection_digest, 'question_digest':question_digest(question)}
             self.answers = dict(list(self.answers.items())[-256:])
             atomic_json(self.answer_path,self.answers)
         # Do not hold the Hub lock across IPC: real UserPromptSubmit hooks call back here.
@@ -517,7 +519,7 @@ class StatusHub:
                 if key not in self.records:
                     raise Invalid('unknown_session', 404)
                 record = self.records[key]
-                phase, pending, _, _ = projection(record, self.clock())
+                phase, pending, _, _ = self.project_questions(record, self.clock())
                 if not pending and (
                         phase not in ('thinking', 'running', 'waiting', 'failed') or
                         min(record['expires_at'], record.get('task_expires_at') or 0) <= self.clock()):
@@ -526,6 +528,22 @@ class StatusHub:
                 self.focus_provider = record['provider']
             self.persist()
             return self.publish()
+
+    def question_receipt(self, key, question):
+        receipt = self.answers.get(key+'/'+question['id'], {})
+        digest = receipt.get('question_digest')
+        if digest is not None and digest != question_digest(question):
+            return {}
+        return receipt
+
+    def project_questions(self, record, now):
+        key = self.key(record['source'], record['session_id'])
+        settled = {q['id'] for q in record.get('questions', [])
+                   if (receipt := self.question_receipt(key, q)).get('status') == 'accepted'
+                   and receipt.get('question_digest') == question_digest(q)}
+        # Keep raw source records and timestamps intact. Only a confirmed,
+        # revision-bound answer settles its display/reminder obligation.
+        return projection(record, now, settled)
 
     def auto_focus(self):
         now = self.clock()
@@ -539,7 +557,7 @@ class StatusHub:
             if record.get('catalog_only') or record['task_event_at'] is None or (self.focus_provider is not None and record['provider'] != self.focus_provider):
                 continue
             fresh = min(record['expires_at'], record.get('task_expires_at') or 0) > now
-            phase, pending, _, _ = projection(record, now)
+            phase, pending, _, _ = self.project_questions(record, now)
             # Only confirmed current evidence can preempt; durable pending input
             # remains attention even after the ordinary activity lease expires.
             rank = (0 if fresh and phase == 'failed' else
@@ -556,7 +574,7 @@ class StatusHub:
             released = False
             if self.pinned:
                 target = self.records.get(self.focus)
-                phase, pending, _, _ = projection(target, now) if target else (None, 0, 0, [])
+                phase, pending, _, _ = self.project_questions(target, now) if target else (None, 0, 0, [])
                 actionable = target and (pending > 0 or (
                     phase in ('thinking', 'running', 'waiting', 'failed') and
                     min(target.get('expires_at', 0), target.get('task_expires_at') or 0) > now))
@@ -586,10 +604,10 @@ class StatusHub:
                     'provider', 'source', 'session_id', 'phase', 'phase_at', 'updated_at',
                     'ttl_seconds', 'expires_at', 'seq')}
                 entry['priority'] = self.priority_order.index(key)
-                entry['phase'], entry['pending_input'], entry['pending_total'], entry['questions'] = projection(record, now)
+                entry['phase'], entry['pending_input'], entry['pending_total'], entry['questions'] = self.project_questions(record, now)
                 entry['summary'] = dict(self.desktop.summaries.get(key, {})) if self.desktop else {}
                 for q in entry['questions']:
-                    receipt = self.answers.get(key+'/'+q['id'], {})
+                    receipt = self.question_receipt(key, q)
                     q['answer_state'] = receipt.get('status', '')
                     route = self.desktop.route(key,q['id']) if self.desktop else None
                     q['answerable'] = bool(self.desktop and self.desktop.available() and route and
