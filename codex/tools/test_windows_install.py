@@ -65,6 +65,24 @@ class WindowsInstall(unittest.TestCase):
             self.assertTrue(' -X utf8 ' in command or '-EncodedCommand ' in command)
             self.assertEqual(len(list((home/'state/xueqiu/plugin-upgrade-backups').glob('*/manifest.json'))),1)
 
+    @unittest.skipUnless(sys.platform=='win32','Native Windows upgrade failure branch')
+    def test_native_failure_restores_missing_files_without_overwriting_or_trust_changes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            home=Path(folder);cache=home/'.codex/plugins/cache/xueqiu-local/xueqiu-status'
+            old=cache/'old/scripts/codex_hook.py';old.parent.mkdir(parents=True);old.write_bytes(b'old hook')
+            other=cache/'old/hooks/hooks.json';other.parent.mkdir();other.write_bytes(b'original hooks')
+            trust=home/'trust';trust.write_bytes(b'untouched')
+            def fake_run(args,**kwargs):
+                if args[1:3]==['plugin','add']:
+                    shutil.rmtree(cache);old.parent.mkdir(parents=True);old.write_bytes(b'new existing file')
+                    raise subprocess.CalledProcessError(23,args)
+                return subprocess.CompletedProcess(args,0)
+            with patch.dict(os.environ,CODEX_HOME=str(home/'.codex'),XDG_STATE_HOME=str(home/'state')),patch.object(installer.subprocess,'run',side_effect=fake_run):
+                with self.assertRaises(subprocess.CalledProcessError) as failure:installer.install('fake-codex',home/'market')
+            self.assertEqual(failure.exception.returncode,23)
+            self.assertEqual(old.read_bytes(),b'new existing file')
+            self.assertEqual(other.read_bytes(),b'original hooks');self.assertEqual(trust.read_bytes(),b'untouched')
+
 @unittest.skipUnless(sys.platform == 'win32', 'Real native Windows shell regressions')
 class NativeShellTests(unittest.TestCase):
     def launch(self, folder_name):

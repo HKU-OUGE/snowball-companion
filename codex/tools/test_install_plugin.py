@@ -33,6 +33,7 @@ if mode == 'failure':
 '''
 
 
+@unittest.skipIf(os.name=='nt','POSIX shell/signal fixture; native Windows upgrade tests live in test_windows_install.py')
 class UpgradeTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
