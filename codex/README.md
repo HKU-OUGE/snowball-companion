@@ -29,6 +29,9 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 ## 本地安装与升级
 
 安装、升级或卸载的 Agent 操作规范见 [插件生命周期说明](plugins/xueqiu-status/skills/setup/references/plugin-lifecycle.md)。普通卸载只移除 Codex 适配器，账号 Pet、共享服务与配对数据分别管理。
+实体雪球的首次连接和完整重置见[Windows 逐步引导](plugins/xueqiu-status/skills/setup/references/windows-first-run.md)。
+向导会先准备依赖，再提示连接 USB 数据线、核对串口并启用设备**「开始配对」**，随后完成绑定和真实状态验收。
+要求从零验证整个初始化时，同时清除本安装的服务、自启和电脑端配对，不能只卸载 Pet 与插件。
 
 保留此目录完整，在固定位置运行：
 

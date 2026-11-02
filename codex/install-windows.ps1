@@ -29,9 +29,9 @@ if ($Device -or $AutoReconnect) {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot restrict credential directory access.' }
     $pairing = Join-Path $private 'ble-pairing.json'
     if ($Device -and -not (Test-Path $pairing)) {
-        if (-not $Port) { throw 'Pass -Port COMx after verifying the connected USB device. Open its connection page first.' }
+        if (-not $Port) { throw 'Connect a USB data cable, verify the device port, enable Start pairing on its connection page, then pass -Port COMx.' }
         & $bridgePython -X utf8 (Join-Path $PSScriptRoot 'companion/bridge.py') pair-usb --port $Port
-        if ($LASTEXITCODE -ne 0) { throw 'USB binding failed. Reopen Settings > Connect computer and retry.' }
+        if ($LASTEXITCODE -ne 0) { throw 'USB binding failed. Enable Start pairing under Settings > Connect computer and retry within two minutes.' }
     }
     if ($AutoReconnect) {
         if (-not (Test-Path $pairing)) { throw 'Bind your device first with -Device -Port COMx.' }

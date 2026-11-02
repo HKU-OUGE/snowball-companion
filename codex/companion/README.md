@@ -137,6 +137,8 @@ Linux 重连优先从 BlueZ 的已连接/已绑定设备中定位精确设备名
 ## Windows 后台服务
 
 从 `codex/` 执行 `install-windows.ps1 -Device -Port COMx -AutoReconnect`；
-先核对串口并保持设备连接页面打开。仅安装桌宠不会启动硬件桥接。
+首次安装先按[逐步引导](../plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
+准备依赖，再连接 USB 数据线、核对串口，并在设备连接电脑界面启用**「开始配对」**。
+仅安装桌宠不会启动硬件桥接。
 Windows 使用 `companion/windows-services.ps1` 管理登录任务，不能运行上述 Linux shell/systemd 命令。
 [完整 Windows 安装、排错与验证边界](../../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。

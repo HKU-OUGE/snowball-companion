@@ -57,6 +57,18 @@ class WindowsReconnect(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(instances[0].sent,[b':PAIR\r\n']);self.assertTrue(instances[0].closed)
         self.assertNotIn(key,output.getvalue())
 
+    async def test_usb_binding_reports_expired_pairing_window_without_saving(self):
+        from unittest.mock import Mock
+        serial=Mock()
+        serial.readline.return_value=b'boot log XQPAIR_ERROR open_connection_page\r\n'
+        ticks=iter([0,5,6,7])
+        with tempfile.TemporaryDirectory() as folder, patch.dict(sys.modules,{'serial':types.SimpleNamespace(Serial=lambda:serial)}),patch('bridge.time.monotonic',side_effect=lambda:next(ticks)):
+            target=Path(folder)/'pair.json'
+            with self.assertRaisesRegex(RuntimeError,'Enable Start pairing'):
+                bridge.pair_usb('TEST-PORT',target)
+            self.assertFalse(target.exists())
+        serial.close.assert_called_once()
+
 class SupervisorTests(unittest.TestCase):
     def test_bridge_always_uses_real_expiring_hub_source(self):
         args=child_arguments('bridge',Path('private-state'))

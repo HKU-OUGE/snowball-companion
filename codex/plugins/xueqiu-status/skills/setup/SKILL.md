@@ -17,6 +17,13 @@ that request in the authenticated Pets workflow instead of removing software.
 
 For Pet setup or switching, continue below. Hardware services remain optional.
 
+For a physical device on Windows, read [guided first connection and full reset](references/windows-first-run.md).
+Guide the user through a USB data cable, verified serial port and enabling
+**Start pairing / 开始配对** on the device before binding. Prepare dependencies
+before opening its two-minute window. Complete-reset requests must account for
+owned background services, login autostart and both OS/app pairing; adapter-only
+removal does not validate a new computer's first connection.
+
 ## Choose a character
 
 1. Resolve the plugin root as `../..` relative to the directory containing this SKILL.md. Run `python3 <plugin-root>/scripts/pet_setup.py list`. This lists stable character IDs, names, and actual installability. For an unspecified first setup use `snowball`. If the user asks to browse, show the catalog and distinguish pending artwork from installable characters. If the user asks for a specific character, map its name to the catalog ID. Joseph Joestar is **old Joseph from Stardust Crusaders**, not young Joseph. Never claim a pending portrait is an installable animated Pet.
@@ -54,9 +61,11 @@ without exposing credentials. Pet activation does not connect a physical device.
 For requested hardware setup use the complete fixed-location Codex package:
 `install-windows.ps1 -Device -Port COMx -AutoReconnect` when login autostart is
 also requested. Verify the actual USB port first; COMx is only a placeholder.
-Existing valid pairing must be reused. Only a first USB bind requires the device's
-Settings > Connect computer page, which times out after two minutes. A response
-`open_connection_page` requires reopening that page, not resetting firmware.
+Existing valid pairing is reused for ordinary reinstalls; an authorized full
+reset clears it before first-connection validation. For a first USB bind, guide
+the user to Settings > Connect computer and enable **Start pairing / 开始配对**.
+Its window times out after two minutes. `open_connection_page` requires enabling
+Start pairing again and receiving the user's reply before retrying.
 
 `companion/windows-services.ps1` manages this installation's current-user login
 task using Install/Status/Start/Stop/Remove; never take over a different task or

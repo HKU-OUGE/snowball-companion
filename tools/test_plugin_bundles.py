@@ -3,6 +3,8 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import posixpath
+import re
 import shutil
 import subprocess
 import sys
@@ -141,3 +143,20 @@ def test_three_adapters_keep_separate_entrypoints_and_versions():
         doctor=(ROOT/platform/relative/'scripts/control.py').read_text()
         assert "'version': '"+builder.VERSIONS[platform]+"'" in doctor
     assert 'docs/OTA-DOWNLOAD-PLAN.md' not in builder.source_lists(ROOT)['common']
+
+
+@pytest.mark.parametrize('core',[False,True])
+def test_setup_skill_local_reference_graph_is_complete_in_bundle(core):
+    files=builder.bundle_inputs(ROOT,'codex',core=core)
+    pending=['codex/plugins/xueqiu-status/skills/setup/SKILL.md']
+    seen=set()
+    while pending:
+        name=pending.pop()
+        if name in seen:continue
+        seen.add(name)
+        assert name in files, 'Missing bundled skill reference: '+name
+        if not name.endswith('.md'):continue
+        for match in re.finditer(r'\[[^\]]+\]\(([^)]+)\)',files[name].decode('utf-8')):
+            target=match.group(1).split('#',1)[0]
+            if not target or '://' in target:continue
+            pending.append(posixpath.normpath(posixpath.join(posixpath.dirname(name),target)))

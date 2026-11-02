@@ -73,6 +73,13 @@ deleting its local receipt does not delete the Pet.
 
 ## Entire-product removal
 
+A request to reset the entire device setup and start from zero includes owned
+runtime/autostart and OS/app pairing cleanup. Do not present adapter-only removal
+as a clean first-time device test. On Windows follow
+[guided first connection and full reset](windows-first-run.md), including exact
+ownership/path checks and independent absence verification. This does not
+authorize deleting unrelated Pets, client dependencies or device firmware.
+
 Stop shared Hub/BLE/Wi-Fi/cloud services only when the user also requests removal
 of the entire companion service. Codex, Claude and Cursor may share them. On
 Linux, inspect existing owned `snowball-hub`, `snowball-bridge`,

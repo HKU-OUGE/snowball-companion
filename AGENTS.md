@@ -21,6 +21,10 @@ not a request to install or uninstall anything on the current machine.
 - Default uninstall scope is the requested adapter only. Hub, BLE/Wi-Fi/cloud
   services, pairing state, and account Pets have separate lifecycles. Removing
   one adapter must not silently disable another adapter's shared services.
+- When the user requests a complete reset to validate first-time device setup,
+  include the owned runtime, autostart, OS/app pairing and stale local state.
+  Adapter-only removal is not a clean first-time test. Preserve unrelated
+  clients, account Pets and device firmware; report any remaining prerequisites.
 - Inspect service `ExecStart` and foreground process arguments before removing
   a directory: a bundled `runtime/` or `companion/` may still be in use.
 - Preserve credentials, OTA signing keys, encrypted backups, firmware and SD

@@ -493,6 +493,13 @@ def pair_usb(port, config_path):
         deadline = time.monotonic() + 8
         while time.monotonic() < deadline:
             raw = s.readline()
+            error = raw.find(b'XQPAIR_ERROR ')
+            if error >= 0:
+                # Report the action needed, never arbitrary serial payloads.
+                reason = raw[error + len(b'XQPAIR_ERROR '):].strip()
+                if reason == b'open_connection_page':
+                    raise RuntimeError('Enable Start pairing on the device connection page, then retry USB binding within two minutes.')
+                raise RuntimeError('Device rejected USB binding. Enable Start pairing on its connection page and retry.')
             idx = raw.find(b'XQPAIR ')
             if idx < 0:
                 continue
@@ -510,7 +517,7 @@ def pair_usb(port, config_path):
             temporary.replace(config_path)
             print(f'USB identity bound: {config["device"]}; private pairing file saved.', flush=True)
             return
-        raise TimeoutError('No pairing response. Check firmware and USB port.')
+        raise TimeoutError('No pairing response. Check the USB data cable and port, enable Start pairing on the device connection page, then retry.')
     finally:
         s.close()
 

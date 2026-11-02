@@ -50,7 +50,11 @@ claude plugin install snowball-companion@snowball-local --scope user
 
 需要运行兼容 Snowball 固件的设备、电脑依赖及本机 Hub。插件包没有设备固件、配对密钥或 Wi-Fi 密码，也不会刷写设备。不要把任意 ESP32 的串口当成雪球。
 
-已有 Hub／蓝牙桥接服务时直接复用。新安装按本平台 README 启动配套服务，再核对实际设备名称和串口完成配对。在设备“设置 → 连接电脑”开启公开配对广播，连接后检查设备状态页。Linux 依赖位于 `companion/requirements.txt` 或 `runtime/requirements.txt`，建议使用独立 Python 虚拟环境。
+已有 Hub／蓝牙桥接服务时直接复用。首次安装先准备电脑依赖，再用 USB 数据线连接雪球、
+核对实际串口，提醒用户在设备「连接电脑」界面启用**「开始配对」**并保持开启。
+收到用户已开启的回复后及时绑定；窗口约两分钟，超时需重新启用。
+按本平台 README 启动配套服务，连接后检查设备状态页。Linux 依赖位于
+`companion/requirements.txt` 或 `runtime/requirements.txt`，建议使用独立 Python 虚拟环境。
 
 ## 4. 分四层确认成功
 
@@ -86,7 +90,7 @@ claude plugin install snowball-companion@snowball-local --scope user
 ## Windows 快速入口
 
 在固定目录的 `codex/` 中运行 `install-windows.ps1` 安装桌宠插件。
-连接 USB 圆屏并开启设备「连接电脑」页面后，使用核对后的实际串口运行
-`install-windows.ps1 -Device -Port COMx -AutoReconnect`，设置登录后自动恢复。
+实体设备首次安装按[逐步引导](../codex/plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
+先准备依赖，再连接 USB 数据线、核对串口并启用设备**「开始配对」**，完成 USB/BLE 绑定与登录自启。
 “等待已配对电脑重连”需要电脑端桥接持续运行，单独启用桌宠不会自动连接硬件。
 详见[Windows 完整说明](INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。
