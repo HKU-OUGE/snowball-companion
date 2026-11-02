@@ -127,7 +127,7 @@ def safe_reader(path):
         from ctypes import wintypes as w
         import msvcrt
         # READ|DELETE sharing keeps an open snapshot valid across atomic replace.
-        # Retry only transient Windows sharing/access failures, with a hard bound;
+        # Retry transient replacement gaps and sharing failures, with a hard bound;
         # reparse-point checks still run on every attempt and on the final handle.
         deadline = time.monotonic() + .25
         while True:
@@ -136,7 +136,7 @@ def safe_reader(path):
                 handle = _winapi.CreateFile(str(path),0x80000000,5,0,3,0x00200000,0)
                 break
             except OSError as error:
-                if getattr(error,'winerror',None) not in (5,32,33) or time.monotonic()>=deadline:raise
+                if getattr(error,'winerror',None) not in (2,5,32,33) or time.monotonic()>=deadline:raise
                 time.sleep(.005)
         try:
             k = c.WinDLL('kernel32',use_last_error=True)
