@@ -93,3 +93,16 @@ uninstalling the user's live plugin to validate documentation.
 Command reference checked 2026-11-01:
 [Codex developer commands](https://learn.chatgpt.com/docs/developer-commands),
 [plugin packaging](https://developers.openai.com/plugins/build/plugins).
+
+
+## Windows installation
+
+Use the full Codex package's `install-windows.ps1`; the Unix installer and
+Linux process/service managers do not apply. It calls the verified official
+marketplace/plugin CLI, specializes only the installed Snowball Hook commands
+for the local Python interpreter, and never edits trust. Review changed commands
+in the host. The companion's `windows-services.ps1` owns a separate current-user
+login task and uses exact script paths and owner checks. Do not silently remove
+that shared service when removing just the Codex adapter. Retain pairing files
+and Pet receipts. Complete Windows instructions and supported/unsupported
+capabilities are in `docs/INSTALLATION.md` in the full package.

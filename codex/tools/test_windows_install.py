@@ -1,0 +1,63 @@
+"""Isolated Windows installation tests; no live plugin, task, Hub or USB changes."""
+import importlib.util
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+TOOLS=Path(__file__).resolve().parent
+sys.path.insert(0,str(TOOLS))
+from configure_windows_plugin import configure
+spec=importlib.util.spec_from_file_location('windows_install_under_test',TOOLS/'install_plugin.py')
+installer=importlib.util.module_from_spec(spec);spec.loader.exec_module(installer)
+
+class WindowsInstall(unittest.TestCase):
+    def fixture(self, root):
+        (root/'.codex-plugin').mkdir(parents=True)
+        (root/'.codex-plugin/plugin.json').write_text(json.dumps({'name':'xueqiu-status'}))
+        (root/'hooks').mkdir()
+        hook={'type':'command','command':'python3 "${PLUGIN_ROOT}/scripts/codex_hook.py" hook','timeout':2}
+        (root/'hooks/hooks.json').write_text(json.dumps({'hooks':{'SessionStart':[{'hooks':[hook]}]}}))
+
+    def test_native_command_preserves_event_timeout_and_other_plugin_trust(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)/'plugin with spaces';self.fixture(root)
+            trust=Path(folder)/'trust';trust.write_bytes(b'untouched')
+            self.assertEqual(configure(root,sys.executable),1)
+            value=json.loads((root/'hooks/hooks.json').read_text())['hooks']['SessionStart'][0]['hooks'][0]
+            self.assertIn(' -X utf8 ',value['command']);self.assertEqual(value['timeout'],2)
+            self.assertIn('${PLUGIN_ROOT}',value['command']);self.assertEqual(trust.read_bytes(),b'untouched')
+
+    def test_unknown_hook_rejected_before_replacing_file(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);self.fixture(root)
+            target=root/'hooks/hooks.json';value=json.loads(target.read_text())
+            value['hooks']['SessionStart'][0]['hooks'][0]['command']='unrelated command'
+            target.write_text(json.dumps(value));before=target.read_bytes()
+            with self.assertRaises(ValueError):configure(root,sys.executable)
+            self.assertEqual(target.read_bytes(),before)
+
+    @unittest.skipUnless(sys.platform=='win32','Windows installer branch')
+    def test_native_upgrade_restores_old_scripts_and_specializes_new_hooks(self):
+        with tempfile.TemporaryDirectory() as folder:
+            home=Path(folder);cache=home/'.codex/plugins/cache/xueqiu-local/xueqiu-status'
+            old=cache/'old/scripts/codex_hook.py';old.parent.mkdir(parents=True);old.write_bytes(b'old hook')
+            new=cache/'new'
+            def fake_run(args,**kwargs):
+                if args[1:3]==['plugin','add']:
+                    shutil.rmtree(cache);self.fixture(new)
+                    return subprocess.CompletedProcess(args,0,stdout=json.dumps({'pluginId':installer.PLUGIN,'installedPath':str(new)}))
+                return subprocess.CompletedProcess(args,0)
+            with patch.dict(os.environ,CODEX_HOME=str(home/'.codex'),XDG_STATE_HOME=str(home/'state')),patch.object(installer.subprocess,'run',side_effect=fake_run):
+                installer.install('fake-codex',home/'market')
+            self.assertEqual(old.read_bytes(),b'old hook')
+            command=json.loads((new/'hooks/hooks.json').read_text())['hooks']['SessionStart'][0]['hooks'][0]['command']
+            self.assertIn(' -X utf8 ',command)
+            self.assertEqual(len(list((home/'state/xueqiu/plugin-upgrade-backups').glob('*/manifest.json'))),1)
+
+if __name__=='__main__':unittest.main()

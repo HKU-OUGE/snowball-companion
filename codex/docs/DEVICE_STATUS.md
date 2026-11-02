@@ -130,3 +130,13 @@ Linux可从固定的companion目录显式运行`python user_services.py install`
 ## 原生0.19.0：详情复用与切页绘制
 
 重复打开详情复用控件，切页复用静态画面并减少重画范围，保留180毫秒过渡及实时宠物动画。36次实机对照、像素等价、九项详情与完整教程回放通过；生产连接和设置已恢复。见[性能说明](PERFORMANCE-0.19.0.md)。
+
+## Windows 连接补充（2026-11-02）
+
+设备显示“等待已配对电脑重连”仅说明设备保存了绑定；电脑必须有应用配对密钥、运行中的
+Hub 和 BLE bridge。Codex 插件或账号 Pet 安装成功不等于硬件初始化完成。
+Windows 采用 `install-windows.ps1 -Device -Port COMx -AutoReconnect`，详见
+[安装与自动重连](../../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。
+Windows 查询已配对的精确设备并验证 HMAC，不要求反复打开公开配对；首次 USB 绑定
+出现 `open_connection_page` 时才需重新打开设备连接页面。登录后任务、桥接进程、
+设备认证与实际状态回执必须分开验证。

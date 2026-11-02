@@ -114,7 +114,7 @@ def bundle_inputs(root, platform, core=False):
         files['codex/README.md'] = (
             '# Snowball Companion · Codex Core 0.5.1\n\n'
             '本包仅含雪球基础 Pet、Codex Hooks 和电脑伴随运行时，不含其他角色、音频或网页。\n\n'
-            '进入本目录执行 `./install.sh`，新开聊天后运行插件 Setup；账号 Pet 仍需宿主 Pets 服务验证。\n\n'
+            'Linux 执行 `./install.sh`，Windows 执行 `install-windows.ps1`；新开聊天后运行插件 Setup，账号 Pet 仍需宿主 Pets 服务验证。\n\n'
             '[新手指南](../docs/START-HERE.md) · [安装与卸载](../docs/INSTALLATION.md) · [设备更新](../docs/UPDATES.md)\n\n'
             '使用更多角色时，用完整版升级同一个 `xueqiu-status@xueqiu-local` 插件，不并排安装两份。\n'
         ).encode()

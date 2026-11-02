@@ -79,7 +79,11 @@ def test_missing_file_or_symlink_fails_without_clobbering_old_zip(source,tmp_pat
     p=source/'codex/README.md';p.unlink()
     with pytest.raises(ValueError):builder.build(source,out,'codex')
     outside=tmp_path/'outside';outside.write_text('external')
-    p.symlink_to(outside)
+    try:p.symlink_to(outside)
+    except OSError as error:
+        if getattr(error, 'winerror', None) == 1314:
+            pytest.skip('Windows symlink privilege is unavailable')
+        raise
     with pytest.raises(ValueError):builder.build(source,out,'codex')
     assert (out/first['file']).read_bytes()==before
     assert outside.read_text()=='external'
@@ -120,7 +124,7 @@ def test_real_core_extracts_installs_no_state_and_validates_snowball(tmp_path):
     package=tmp_path/'extract/Snowball-Codex-Core'
     script=package/'codex/plugins/xueqiu-status/scripts/pet_setup.py'
     private=tmp_path/'isolated-codex';env=dict(os.environ,CODEX_HOME=str(private),PYTHONDONTWRITEBYTECODE='1')
-    reply=subprocess.run([sys.executable,str(script),'list'],capture_output=True,text=True,check=True,env=env)
+    reply=subprocess.run([sys.executable,'-X','utf8',str(script),'list'],capture_output=True,text=True,encoding='utf-8',check=True,env=env)
     data=json.loads(reply.stdout)
     assert [c['id'] for c in data['characters']]==['snowball']
     assert data['characters'][0]['status']=='ready'

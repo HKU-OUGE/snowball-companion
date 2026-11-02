@@ -40,7 +40,7 @@ python3 bridge.py control
 
 首次先在设备进入「设置 → 连接电脑」，再通过 USB 读取该设备的应用配对密钥，保存在 `~/.config/xueqiu/ble-pairing.json`（目录 0700，文件 0600）。脚本不在终端打印密钥。**配对文件不要加入项目、ZIP 或共享给其他人。** 开发包本身不包含设备密钥；另一块板或另一台电脑需自行绑定。
 
-Linux 工具只为选定的雪球注册临时配对 Agent，不改变系统默认 Agent、不操作其他设备。当前这台 Linux 桌面已实测；Windows/macOS 路径保留 Bleak 原生配对能力，但尚未实测。
+Linux 工具只为选定的雪球注册临时配对 Agent，不改变系统默认 Agent、不操作其他设备。当前这台 Linux 桌面已实测；Windows 已完成单机 USB 绑定、BLE 认证与遥测，macOS 路径保留但尚未实测。
 
 ## 命令与后续软件接入
 
@@ -133,3 +133,10 @@ python user_services.py install
 `manage.py` 和 `manage_hub.py` 的 start/status/stop 会识别本安装拥有的服务。手动 stop 不会自动重启，因此烧录、串口维护仍可可靠暂停同步。不会接管别的安装或同名外部服务。安装失败可修正后重试；安装命令验证两个服务均 active。
 
 Linux 重连优先从 BlueZ 的已连接/已绑定设备中定位精确设备名，再验证应用 HMAC；不再要求设备重新公开广播。缓存没有匹配时才扫描。系统蓝牙「已连接」仍不代表 AI 状态已同步，需同时有新鲜 Hub 数据和设备应用回执。
+
+## Windows 后台服务
+
+从 `codex/` 执行 `install-windows.ps1 -Device -Port COMx -AutoReconnect`；
+先核对串口并保持设备连接页面打开。仅安装桌宠不会启动硬件桥接。
+Windows 使用 `companion/windows-services.ps1` 管理登录任务，不能运行上述 Linux shell/systemd 命令。
+[完整 Windows 安装、排错与验证边界](../../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。

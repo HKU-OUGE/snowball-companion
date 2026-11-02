@@ -2,7 +2,7 @@
 
 本文适用于本仓库的 Codex、Claude Code 和 Cursor 适配器。命令以 Linux 为例；
 先在当前机器查看 CLI 的 `--help`。Claude 和 Cursor 的 macOS 设备联动、原生
-Windows 安装不能仅凭这些命令视为已验证。最后核对日期：2026-11-01。
+Windows 请使用下方专门流程，不要套用 Linux 命令。最后核对日期：2026-11-02。
 
 ## 先分清三层
 
@@ -82,6 +82,63 @@ codex plugin marketplace remove xueqiu-local --json
 ```
 
 已创建的账号 Pet、其他 MCP 连接、设备配对和共享后台服务不由这个命令一并清理。
+
+
+## Windows 原生安装与自动重连（2026-11-02）
+
+**桌宠安装与硬件连接是两条流程。** 仅安装插件、启用账号 Pet 或在 Windows
+蓝牙设置中看到“已配对”，都不会启动 Hub、桥接或登录自启。
+
+固定保存整个仓库或安装包，不要运行 Unix `install.sh`。PowerShell 中从 `codex/` 执行：
+
+```powershell
+.\install-windows.ps1
+```
+
+脚本通过当前 Codex CLI 注册本地市场，安装同一个稳定 ID，并仅将已安装插件的
+Hooks 改为本机 Python 绝对路径与 UTF-8 模式。它不修改 Hook 信任或账号 Pet；
+更新后需按宿主提示审阅变化的 Hooks，再开新聊天运行 Setup。保留旧会话引用的
+旧版本脚本；Windows 不使用 Linux 的 `/proc`、systemd 或 shell 安装器。
+
+要连接圆屏，先核对 USB 串口，在设备进入「设置 → 连接电脑」，然后立即执行：
+
+```powershell
+# COMx 是占位符，请用设备管理器核对后的实际串口替换。
+.\install-windows.ps1 -Device -Port COMx -AutoReconnect
+```
+
+脚本在 `codex/.venv/` 安装固定依赖；已存在应用配对文件时直接复用，不重新绑定。
+新绑定通过 USB 的 DTR 与 CRLF 命令读取设备密钥，凭据只存用户私有目录，禁止打印
+密钥或提交文件。`XQPAIR_ERROR open_connection_page` 表示连接页面/两分钟配对窗口已关闭，
+应重新进入页面后重试；不需要擦除固件或重置蓝牙绑定。
+
+自动重连使用当前用户、普通权限的 Windows 计划任务
+`Snowball Companion Auto Reconnect`，在**登录后**运行，无需管理员或保存密码。
+后台监督器维护真实 Hub 和桥接；桥接断线后按 2～20 秒退避重试，进程退出后由监督器
+恢复，监督器异常退出由任务计划程序重启。它不会注入演示状态。睡眠/关机期间不能同步。
+
+```powershell
+.\companion\windows-services.ps1 -Action Status
+.\companion\windows-services.ps1 -Action Stop
+.\companion\windows-services.ps1 -Action Start
+# 仅在用户要求移除本安装的自启与后台服务时：
+.\companion\windows-services.ps1 -Action Remove
+```
+
+管理器核对任务归属；同名但属于另一安装的任务会拒绝接管。Stop/Remove 只停止当前用户
+且参数包含本安装精确脚本路径的进程，保留配对和账号 Pet。默认 Python 位于
+`codex/.venv/Scripts/pythonw.exe`；使用其他已安装环境时，Install 可显式传 `-Python`。
+日志在 `~/.local/state/xueqiu/windows/`，凭据在 `~/.config/xueqiu/`，不要共享这些运行数据。
+
+Windows 桥接优先按**精确名称且唯一匹配**查询已配对 BLE 设备，不要求重新公开广播；
+候选设备仍必须通过应用 HMAC 身份验证。GATT 服务采用新鲜发现，避免旧缓存导致特征缺失。
+先分别确认插件注册、真实 Hook 事件、Hub 健康、设备认证与实际回执，不把任务“Running”
+或系统“已配对”当作已同步。Windows 的 Unix IPC、设备反向回答/建聊和独立空闲证明
+尚未接通，会返回不可用；不能把它们当作固件自动安装的可靠空闲依据。
+
+验证边界：已在一台 Windows 电脑完成 USB 绑定、BLE 认证、真实设备状态写入与遥测；
+已验证登录任务注册与停止/启动后台服务后的自动重连。未以本次结果声称所有 Windows 版本兼容，也未重启电脑
+做冷启动验收。代码更新不代表新 Release 或安装包已发布。
 
 ## Claude Code Desktop / CLI
 
@@ -192,3 +249,9 @@ systemctl --user disable --now snowball-cloud.service snowball-network.service \
 [Codex 插件打包](https://developers.openai.com/plugins/build/plugins)、
 [Claude Code 插件](https://code.claude.com/docs/en/discover-plugins)、
 [Cursor 插件](https://cursor.com/docs/plugins)。
+
+
+状态待同步：BLE 已连接与 Codex 真实事件送达是两项独立检查。核对实际 Hooks 列表和
+私有适配器记录的更新时间。安装前创建的聊天可能需要新开聊天，或在没有活动任务时
+重载宿主；新配置检查通过不能证明已有聊天已加载。没有真实事件时应报告待验证，
+不要注入假的忙碌/空闲状态。

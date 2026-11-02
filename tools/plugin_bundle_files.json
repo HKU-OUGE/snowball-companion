@@ -50,6 +50,9 @@
       "codex/companion/status-schema.json",
       "codex/companion/status_hub.py",
       "codex/companion/user_services.py",
+      "codex/companion/windows-services.ps1",
+      "codex/companion/windows_file_lock.py",
+      "codex/companion/windows_supervisor.py",
       "codex/docs/ATTENTION-DETAILS.md",
       "codex/docs/ATTENTION-RETURN-0.18.2.md",
       "codex/docs/ATTENTION-SWIPE-0.18.1.md",
@@ -62,6 +65,7 @@
       "codex/docs/SIDEBAR-TASKS.md",
       "codex/docs/SPEECH-INPUT.md",
       "codex/docs/TUTORIAL-0.18.0.md",
+      "codex/install-windows.ps1",
       "codex/install.sh",
       "codex/plugins/xueqiu-status/.app.json",
       "codex/plugins/xueqiu-status/.codex-plugin/plugin.json",
@@ -152,7 +156,9 @@
       "codex/plugins/xueqiu-status/plugin.agent-plugins.json",
       "codex/plugins/xueqiu-status/scripts/codex_hook.py",
       "codex/plugins/xueqiu-status/scripts/pet_setup.py",
+      "codex/plugins/xueqiu-status/scripts/windows_file_lock.py",
       "codex/plugins/xueqiu-status/skills/setup/SKILL.md",
+      "codex/tools/configure_windows_plugin.py",
       "codex/tools/install_plugin.py"
     ],
     "claude": [

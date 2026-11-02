@@ -1,0 +1,42 @@
+param(
+    [string]$Python = 'python',
+    [switch]$Device,
+    [string]$Port,
+    [switch]$AutoReconnect
+)
+$ErrorActionPreference = 'Stop'
+if ($env:OS -ne 'Windows_NT') { throw 'Use install.sh on Linux.' }
+$codex = (Get-Command codex -ErrorAction Stop).Source
+$pythonExe = (Get-Command $Python -ErrorAction Stop).Source
+# Verify this host's commands rather than rewriting registration or Hook trust.
+& $codex plugin marketplace list --json
+if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect installed Snowball plugins.' }
+& $pythonExe -X utf8 (Join-Path $PSScriptRoot 'tools/install_plugin.py') --codex $codex --market-root $PSScriptRoot
+if ($LASTEXITCODE -ne 0) { throw 'Plugin installation failed; old Hook restoration was attempted.' }
+if ($Device -or $AutoReconnect) {
+    $venv = Join-Path $PSScriptRoot '.venv'
+    if (-not (Test-Path (Join-Path $venv 'Scripts/python.exe'))) {
+        & $pythonExe -m venv $venv
+        if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation failed.' }
+    }
+    $bridgePython = Join-Path $venv 'Scripts/python.exe'
+    & $bridgePython -m pip install -r (Join-Path $PSScriptRoot 'companion/requirements.txt')
+    if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed.' }
+    $private = Join-Path $env:USERPROFILE '.config/xueqiu'
+    New-Item -ItemType Directory -Path $private -Force | Out-Null
+    $sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    & icacls $private /inheritance:r /grant:r ('*' + $sid + ':(OI)(CI)F') '*S-1-5-18:(OI)(CI)F' | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot restrict credential directory access.' }
+    $pairing = Join-Path $private 'ble-pairing.json'
+    if ($Device -and -not (Test-Path $pairing)) {
+        if (-not $Port) { throw 'Pass -Port COMx after verifying the connected USB device. Open its connection page first.' }
+        & $bridgePython -X utf8 (Join-Path $PSScriptRoot 'companion/bridge.py') pair-usb --port $Port
+        if ($LASTEXITCODE -ne 0) { throw 'USB binding failed. Reopen Settings > Connect computer and retry.' }
+    }
+    if ($AutoReconnect) {
+        if (-not (Test-Path $pairing)) { throw 'Bind your device first with -Device -Port COMx.' }
+        & (Join-Path $PSScriptRoot 'companion/windows-services.ps1') -Action Install -Python (Join-Path $venv 'Scripts/pythonw.exe')
+    }
+}
+& $codex plugin list --marketplace xueqiu-local --json
+Write-Output 'Plugin registered. Review changed Hooks and open a new chat. Run Setup to verify/activate the account Pet. Hardware requires separate authenticated connection checks.'

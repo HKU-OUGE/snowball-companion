@@ -2,7 +2,14 @@
 """Codex hook adapter. Only status, names and explicitly posted question titles; never reads transcripts."""
 import argparse
 from contextlib import contextmanager, closing
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    import importlib.util
+    from pathlib import Path as _Path
+    _spec = importlib.util.spec_from_file_location('snowball_windows_file_lock', _Path(__file__).with_name('windows_file_lock.py'))
+    fcntl = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(fcntl)
 import hashlib
 import json
 import os
@@ -303,19 +310,19 @@ def locked_record(root, session):
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(root, 0o700)
     path = root / (session + '.json')
-    fd = os.open(root / (session + '.lock'), os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    fd = os.open(root / (session + '.lock'), os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     with os.fdopen(fd, 'a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         try:
-            record = json.loads(path.read_text()) if path.exists() else {}
+            record = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
         except (ValueError, OSError):
             record = {}
         yield record
         handle, temporary = tempfile.mkstemp(prefix='.codex-', dir=root)
         try:
-            with os.fdopen(handle, 'w') as output:
+            with os.fdopen(handle, 'w', encoding='utf-8') as output:
                 json.dump(record, output, separators=(',', ':'))
-            os.replace(temporary, path)
+            getattr(fcntl, 'replace', os.replace)(temporary, path)
         finally:
             if os.path.exists(temporary):
                 os.unlink(temporary)
@@ -325,7 +332,7 @@ def send_event(event, token_path, endpoint):
     """Fixed loopback transport, proxies disabled, never print token or payload."""
     if endpoint != 'http://127.0.0.1:4190/v1/events':
         raise ValueError('Only the local Snowball hub endpoint is allowed')
-    token = token_path.read_text().strip()
+    token = token_path.read_text(encoding="utf-8").strip()
     if not token or len(token) > 512:
         raise ValueError('Invalid hub token')
     body = json.dumps(event, ensure_ascii=False, separators=(',', ':')).encode()

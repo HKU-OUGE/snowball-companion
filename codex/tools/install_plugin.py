@@ -2,7 +2,15 @@
 """Install only Snowball through Codex, preserving missing old hook cache files."""
 import argparse
 import datetime
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    import importlib.util
+    from pathlib import Path as _Path
+    _helper = _Path(__file__).resolve().parents[1] / 'plugins/xueqiu-status/scripts/windows_file_lock.py'
+    _spec = importlib.util.spec_from_file_location('snowball_windows_install_lock', _helper)
+    fcntl = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(fcntl)
 import hashlib
 import json
 import os
@@ -113,7 +121,17 @@ def install(codex, market):
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM)}
         try:
             subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True)
-            subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True)
+            if sys.platform == 'win32':
+                installed = subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'],
+                    check=True, capture_output=True, text=True, encoding='utf-8')
+                result = json.loads(installed.stdout)
+                if result.get('pluginId') != PLUGIN or not result.get('installedPath'):
+                    raise RuntimeError('Unexpected Snowball installation result')
+                from configure_windows_plugin import configure
+                count = configure(result['installedPath'], sys.executable)
+                print(f'Configured {count} Windows Hooks; review changed commands in the host.', flush=True)
+            else:
+                subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True)
         finally:
             # Run in this same outer process: missing PreToolUse hooks must not prevent repair.
             for sig in handlers:

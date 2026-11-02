@@ -49,3 +49,10 @@ python3 -m pytest -q tools/test_plugin_bundles.py
 构建器只读取 [明确源码清单](tools/plugin_bundle_files.json)，生成确定性 ZIP 与逐文件 SHA-256 清单，默认输出到仓库外的同级构建目录。它不会安装插件、修改设备或发布 GitHub Release。打包和主机测试不等于宿主、真实 Hook 或设备端到端验收。
 
 本仓库尚未指定软件分发许可证；第三方依赖和角色素材的权利分别属于各自权利人。
+
+
+### Windows 连接说明
+
+Codex 原生 Windows 可使用 `codex/install-windows.ps1`；硬件绑定和登录自动重连
+参见[Windows 安装流程](docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。
+仅安装插件/启用桌宠不会启动硬件服务。本次源码修复不代表已发布新版 Release 或安装包。

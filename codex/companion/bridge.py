@@ -481,14 +481,14 @@ def pair_usb(port, config_path):
     import serial
     s = serial.Serial()
     s.port, s.baudrate, s.timeout = port, 115200, .2
-    s.dtr = s.rts = False
+    s.dtr, s.rts = sys.platform == 'win32', False
     s.open()
     try:
         # This board may reset on opening USB. Never print the pairing response.
         deadline = time.monotonic() + 4
         while time.monotonic() < deadline:
             s.read(8192)
-        s.write(b':PAIR\n')
+        s.write(b':PAIR\r\n')
         s.flush()
         deadline = time.monotonic() + 8
         while time.monotonic() < deadline:
@@ -545,10 +545,39 @@ async def cached_linux_device(config):
     finally:bus.disconnect()
 
 
+async def cached_windows_device(config):
+    """Reconnect to one exact paired name without requiring public advertising.
+
+    OS pairing only locates a candidate; read_info still verifies its HMAC.
+    Duplicate names fail closed instead of falling back to an arbitrary peer.
+    """
+    if sys.platform != 'win32':
+        return None
+    from winrt.windows.devices.bluetooth import BluetoothLEDevice
+    from winrt.windows.devices.enumeration import DeviceInformation
+    from bleak.backends.device import BLEDevice
+    peers = await DeviceInformation.find_all_async_aqs_filter(BluetoothLEDevice.get_device_selector_from_pairing_state(True))
+    matches = [peer for peer in peers if peer.name == config['device']]
+    if len(matches) == 1:
+        peer = await BluetoothLEDevice.from_id_async(matches[0].id)
+        if peer:
+            address = ':'.join(f'{peer.bluetooth_address:012X}'[i:i+2] for i in range(0,12,2))
+            peer.close()
+            return BLEDevice(address, config['device'], None)
+        raise RuntimeError("Paired Bluetooth device is unavailable")
+    if len(matches) > 1:
+        raise ValueError("Multiple paired devices have the requested name")
+    return None
+
+
 async def find_device(config=None):
     if config:
         device=await cached_linux_device(config)
         if device is not None:return device
+    if config:
+        device = await cached_windows_device(config)
+        if device is not None:
+            return device
     from bleak import BleakScanner
     found = await BleakScanner.discover(timeout=8, return_adv=True)
     candidates = []
@@ -682,7 +711,8 @@ async def connected_session(args, config):
     speech = None
     ota = None
     try:
-        async with BleakClient(device, timeout=20, pair=sys.platform != 'linux') as client:
+        async with BleakClient(device, timeout=30, pair=sys.platform != 'linux',
+                               **({'winrt': {'use_cached_services': False}} if sys.platform == 'win32' else {})) as client:
             await read_info(client, config)
             print(f'Connected and authenticated: {config["device"]}', flush=True)
             if args.command == 'demo':

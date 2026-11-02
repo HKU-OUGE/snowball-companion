@@ -19,6 +19,7 @@ class AppToolError(ValueError):
 class AppTools:
     def __init__(self,home=None):self.home=Path(home or Path.home())
     def pipe(self):
+        if os.name == "nt": return None  # Unix IPC is unavailable; fail closed.
         candidates=[]
         if self.home==Path.home():
             if os.environ.get('CODEX_APP_TOOLS_PIPE_PATH'):candidates.append(os.environ['CODEX_APP_TOOLS_PIPE_PATH'])

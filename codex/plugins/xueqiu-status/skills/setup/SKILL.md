@@ -41,3 +41,37 @@ A web or ESP32 selection alone cannot activate the desktop Pet through a filesys
 The Pet works without an ESP32 or Bluetooth device. Configure the local status Hub and BLE bridge only when requested; use the package README and existing companion tools. Preserve pairing, session priorities, and hook trust. Do not start duplicate services, auto-approve hooks, restart the host, or send conversation/tool bodies.
 
 Recipient state belongs only under the recipient's CODEX_HOME state directory, never plugin assets. Never package credentials, pairing keys, account IDs, or local session records. A new character becomes available only after its full v2 atlas and manifest have passed the artwork pipeline and the catalog is updated to ready; account installation still requires the live Pets validator.
+
+
+## Native Windows setup and reconnect
+
+On Windows use `python -X utf8` for this skill's Python commands; do not run
+`install.sh`, `manage_hub.py`, `manage.py`, or Linux/systemd service commands.
+The script supports Windows locks and UTF-8 metadata. Inspect the current host,
+plugin registration, Hub, bridge processes and private pairing-file existence
+without exposing credentials. Pet activation does not connect a physical device.
+
+For requested hardware setup use the complete fixed-location Codex package:
+`install-windows.ps1 -Device -Port COMx -AutoReconnect` when login autostart is
+also requested. Verify the actual USB port first; COMx is only a placeholder.
+Existing valid pairing must be reused. Only a first USB bind requires the device's
+Settings > Connect computer page, which times out after two minutes. A response
+`open_connection_page` requires reopening that page, not resetting firmware.
+
+`companion/windows-services.ps1` manages this installation's current-user login
+task using Install/Status/Start/Stop/Remove; never take over a different task or
+stop unrelated Python processes. Existing paired-device lookup still requires
+HMAC authentication. Separately verify task registration, real Hook delivery,
+Hub health, BLE authentication and fresh device acknowledgements/telemetry.
+Do not claim reboot verification without rebooting or interrupt active chats to
+perform it. Windows Unix IPC/reverse actions and independent idle proof are not
+implemented; keep these unavailable rather than inventing live activity or OTA
+eligibility. See the full package's `docs/INSTALLATION.md` Windows section.
+
+
+状态待同步 / Awaiting status: a verified BLE connection is separate from live
+Codex events. Check the actual Hooks list and private adapter record timestamps.
+A chat created before plugin installation may need a new chat or host reload
+when no active work is interrupted. A fresh configuration inspection is not
+proof that an existing chat loaded it. If no real events arrive, report pending
+status verification; never inject fake busy/idle events to make the screen green.

@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 """Inspect a bundled character and remember account-verified Pets; no network calls."""
 import argparse
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    import importlib.util
+    from pathlib import Path as _Path
+    _spec = importlib.util.spec_from_file_location('snowball_windows_file_lock', _Path(__file__).with_name('windows_file_lock.py'))
+    fcntl = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(fcntl)
 import hashlib
 import http.client
 import json
@@ -28,7 +35,7 @@ def safe_path(folder, relative):
 
 
 def catalog(root=ROOT):
-    value = json.loads((root / 'assets/pet/catalog.json').read_text())
+    value = json.loads((root / 'assets/pet/catalog.json').read_text(encoding="utf-8"))
     if value.get('schema_version') != 1:
         raise ValueError('Unsupported character catalog')
     ids = set()
@@ -56,7 +63,7 @@ def asset(root=ROOT, character='snowball'):
     if entry['status'] != 'ready':
         raise ValueError('Character artwork is pending; no installable atlas: ' + character)
     manifest = safe_path(root / 'assets/pet', entry['manifest'])
-    meta = json.loads(manifest.read_text())
+    meta = json.loads(manifest.read_text(encoding="utf-8"))
     image = safe_path(manifest.parent, meta['file'])
     data = image.read_bytes()
     if hashlib.sha256(data).hexdigest() != meta['sha256']:
@@ -80,7 +87,7 @@ def read_state(path):
     safe_path(path.parent, path.name)
     if not path.exists():
         return {'schema_version': 2, 'characters': {}, 'selected_character': None, 'selected_revision': 0}
-    value = json.loads(path.read_text())
+    value = json.loads(path.read_text(encoding="utf-8"))
     # A v0.3 single-Pet receipt is Snowball. Migration is in memory on reads;
     # the first authenticated record writes v2 without losing this receipt.
     if 'schema_version' not in value and 'pet_id' in value:
@@ -101,7 +108,7 @@ def record(pet_id, meta, path, selected=False):
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     path.parent.chmod(0o700)
     lock = safe_path(path.parent, path.name + '.lock')
-    lock_fd = os.open(lock, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    lock_fd = os.open(lock, os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0), 0o600)
     try:
         fcntl.flock(lock_fd, fcntl.LOCK_EX)
         result = read_state(path)
@@ -115,13 +122,13 @@ def record(pet_id, meta, path, selected=False):
             result['selected_character'] = character
         fd, tmp = tempfile.mkstemp(prefix='.pet-', dir=path.parent)
         try:
-            with os.fdopen(fd, 'w') as stream:
+            with os.fdopen(fd, 'w', encoding='utf-8') as stream:
                 json.dump(result, stream, ensure_ascii=False, indent=2)
                 stream.write('\n')
                 stream.flush()
                 os.fsync(stream.fileno())
             os.chmod(tmp, 0o600)
-            os.replace(tmp, path)
+            getattr(fcntl, 'replace', os.replace)(tmp, path)
         finally:
             if os.path.exists(tmp):
                 os.unlink(tmp)
@@ -148,7 +155,7 @@ def sync(character, root=ROOT, token_path=None):
     asset(root, character)
     path = token_path or Path.home() / '.config/xueqiu/hub-token'
     safe_path(path.parent, path.name)
-    token = path.read_text().strip()
+    token = path.read_text(encoding="utf-8").strip()
     if not re.fullmatch(r'[A-Za-z0-9_-]{32,128}', token):
         raise ValueError('Invalid Hub token file')
     connection = http.client.HTTPConnection('127.0.0.1', 4190, timeout=2)

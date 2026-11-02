@@ -82,3 +82,11 @@ claude plugin install snowball-companion@snowball-local --scope user
 ### 使用旧离线安装包后
 
 设备 SD 安装盘可能仍保存较早的离线包。本次电脑插件源码更新不会自动替换这份安装盘。完成离线安装后，请联网检查 GitHub Release，并按 [安装与升级](INSTALLATION.md) 更新对应插件；确认电脑桥接服务已使用新版运行时，再在新固件上使用手动蓝牙更新。不要删除旧配对或重复启动 Hub。
+
+## Windows 快速入口
+
+在固定目录的 `codex/` 中运行 `install-windows.ps1` 安装桌宠插件。
+连接 USB 圆屏并开启设备「连接电脑」页面后，使用核对后的实际串口运行
+`install-windows.ps1 -Device -Port COMx -AutoReconnect`，设置登录后自动恢复。
+“等待已配对电脑重连”需要电脑端桥接持续运行，单独启用桌宠不会自动连接硬件。
+详见[Windows 完整说明](INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。

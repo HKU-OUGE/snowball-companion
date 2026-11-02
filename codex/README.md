@@ -36,7 +36,7 @@ A little company while AI works. 雪球陪你工作，也可以连接桌面圆�
 ./install.sh
 ```
 
-本安装器需要 Python 3 和 Codex CLI，使用 Unix 文件锁，已在本机 Linux 验证。Windows 用户应通过宿主支持的本地市场流程安装，不能直接运行此 shell 安装器；尚未完成 Windows/macOS 实机验证。
+本安装器需要 Python 3 和 Codex CLI，使用 Unix 文件锁，已在本机 Linux 验证。Windows 使用 `install-windows.ps1`，需要硬件与登录后自动重连时加 `-Device -Port COMx -AutoReconnect`；详见[安装说明](../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。Windows 已完成单机 USB/BLE 验证，macOS 尚未实机验证。
 
 稳定技术 ID 仍为 `xueqiu-status@xueqiu-local`，以保留现有安装、设备配对和私有状态。显示名称为 **Snowball Companion**。升级器保留旧会话仍引用的 Hook 脚本，不改写 Hook 信任。若宿主要求审阅新的/变化的 Hooks，请在 `/hooks` 中按提示完成；重新加载插件后运行设置。不要为了加载插件中断正在运行的任务。
 

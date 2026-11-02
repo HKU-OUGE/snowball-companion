@@ -33,14 +33,20 @@ class PetSetupTests(IsolatedPetTest):
  def test_record_is_private_idempotent_and_separate_from_assets(self):
   with tempfile.TemporaryDirectory() as d:
    p=Path(d)/'state/pet-install.json';a=m.asset();r=m.record('pet_test-owned',a,p);m.record('pet_test-owned',a,p)
-   self.assertEqual(m.read_state(p),r);self.assertEqual(p.stat().st_mode&0o777,0o600);self.assertEqual(p.parent.stat().st_mode&0o777,0o700)
+   self.assertEqual(m.read_state(p),r)
+   if os.name != 'nt':
+    self.assertEqual(p.stat().st_mode&0o777,0o600);self.assertEqual(p.parent.stat().st_mode&0o777,0o700)
  def test_builtins_and_invalid_ids_rejected(self):
   with tempfile.TemporaryDirectory() as d:
    for val in ['codex','../../other','',None]:
     with self.assertRaises((ValueError,TypeError)):m.record(val,m.asset(),Path(d)/'state.json')
  def test_symlink_state_refused(self):
   with tempfile.TemporaryDirectory() as d:
-   p=Path(d);other=p/'other';other.mkdir();link=p/'link';link.symlink_to(other,target_is_directory=True)
+   p=Path(d);other=p/'other';other.mkdir();link=p/'link'
+   try:link.symlink_to(other,target_is_directory=True)
+   except OSError as error:
+    if getattr(error,'winerror',None)==1314:self.skipTest('Windows symlink privilege is unavailable')
+    raise
    with self.assertRaises(ValueError):m.record('pet_test',m.asset(),link/'state.json')
    self.assertEqual(list(other.iterdir()),[])
 

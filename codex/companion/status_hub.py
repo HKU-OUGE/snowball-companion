@@ -2,7 +2,10 @@
 """Local status and posted-question hub; reminder actions never answer or approve."""
 import argparse
 import hashlib
-import fcntl
+try:
+    import fcntl
+except ImportError:
+    import windows_file_lock as fcntl
 import hmac
 import json
 import math
@@ -59,7 +62,7 @@ def atomic_json(path, data):
             stream.write('\n')
             stream.flush()
             os.fsync(stream.fileno())
-        os.replace(temporary, path)
+        getattr(fcntl, 'replace', os.replace)(temporary, path)
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)

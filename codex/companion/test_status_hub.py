@@ -54,8 +54,9 @@ class HubTest(unittest.TestCase):
         data = json.loads(self.hub.snapshot_path.read_text())
         self.assertEqual(data['state'], 'running')
         self.assertTrue(data['source_fresh'])
-        self.assertEqual(os.stat(self.hub.snapshot_path).st_mode & 0o777, 0o600)
-        self.assertEqual(os.stat(self.hub.state_dir).st_mode & 0o777, 0o700)
+        if os.name != 'nt':
+            self.assertEqual(os.stat(self.hub.snapshot_path).st_mode & 0o777, 0o600)
+            self.assertEqual(os.stat(self.hub.state_dir).st_mode & 0o777, 0o700)
 
     def test_timeout_is_unknown_not_failure_or_idle(self):
         self.hub.accept(self.event())
@@ -190,7 +191,8 @@ class HubTest(unittest.TestCase):
         path = Path(self.tmp.name) / 'config' / 'token'
         token = load_token(path)
         self.assertEqual(token, load_token(path))
-        self.assertEqual(os.stat(path).st_mode & 0o777, 0o600)
+        if os.name != 'nt':
+            self.assertEqual(os.stat(path).st_mode & 0o777, 0o600)
 
 
 class HttpTest(unittest.TestCase):
