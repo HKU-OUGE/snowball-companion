@@ -180,3 +180,14 @@ def test_setup_skill_local_reference_graph_is_complete_in_bundle(core):
             target=match.group(1).split('#',1)[0]
             if not target or '://' in target:continue
             pending.append(posixpath.normpath(posixpath.join(posixpath.dirname(name),target)))
+
+@pytest.mark.parametrize('platform,runtime',[
+    ('codex','codex/companion'),
+    ('claude','claude/plugins/snowball-companion/runtime'),
+    ('cursor','cursor/snowball-companion/runtime'),
+])
+def test_each_adapter_imports_its_own_complete_ota_dependencies(platform,runtime,tmp_path):
+    code='import sys;sys.path.insert(0,sys.argv[1]);import ota_relay;from speech_relay import subscribe_notifications,unsubscribe_notifications;assert callable(subscribe_notifications) and callable(unsubscribe_notifications)'
+    env=dict(os.environ,PYTHONUTF8='1',HOME=str(tmp_path),USERPROFILE=str(tmp_path))
+    result=subprocess.run([sys.executable,'-X','utf8','-c',code,str(ROOT/runtime)],cwd=tmp_path,env=env,capture_output=True,text=True,encoding='utf-8',timeout=15)
+    assert result.returncode==0,(platform,result.stderr)

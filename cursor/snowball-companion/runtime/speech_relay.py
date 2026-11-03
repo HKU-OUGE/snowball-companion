@@ -3,6 +3,33 @@ import asyncio,base64,hashlib,hmac,http.client,json,os,struct,subprocess,time,zl
 from pathlib import Path
 VOICE='9e7a0005-6ed4-4b6b-bf37-43dc42838c20'
 WRITE='9e7a0003-6ed4-4b6b-bf37-43dc42838c20'
+async def subscribe_notifications(client,uuid,callback):
+    """One transport subscription, independent audio/OTA consumers."""
+    registry=getattr(client,'_snowball_notify',None)
+    if registry is None:
+        registry={};client._snowball_notify=registry
+    slot=registry.setdefault(uuid,{'lock':asyncio.Lock(),'callbacks':set(),'started':False})
+    async with slot['lock']:
+        if callback in slot['callbacks']:return
+        slot['callbacks'].add(callback)
+        if not slot['started']:
+            def dispatch(sender,data):
+                for consumer in tuple(slot['callbacks']):consumer(sender,data)
+            try:await client.start_notify(uuid,dispatch)
+            except BaseException:
+                slot['callbacks'].discard(callback);raise
+            slot['started']=True
+
+async def unsubscribe_notifications(client,uuid,callback):
+    slot=getattr(client,'_snowball_notify',{}).get(uuid)
+    if slot is None:return
+    async with slot['lock']:
+        slot['callbacks'].discard(callback)
+        if not slot['callbacks'] and slot['started']:
+            try:await client.stop_notify(uuid)
+            except Exception:pass
+            slot['started']=False
+
 HUB_TARGET_ERRORS=frozenset({'question_no_longer_pending','answer_already_submitted',
     'answer_unavailable','message_unavailable'})
 
@@ -101,7 +128,7 @@ def bound_target(payload,meta,now=None):
 
 class SpeechRelay:
     def __init__(self,read_info):
-        self.read_info=read_info;self.attached=False;self.unsupported=False;self.ready=False
+        self.read_info=read_info;self._notification_client=None;self.attached=False;self.unsupported=False;self.ready=False
         self.last_meta=0;self.last_health=0;self.last_lease=0;self.last_poll=0;self.health_task=None;self.nonce=None
         self.collector=None;self.job=None;self.task=None;self.window_end=0;self.pull_at=0;self.receive_error=False
     async def close(self):
@@ -112,6 +139,9 @@ class SpeechRelay:
             if not task.done():task.cancel()
         if tasks:await asyncio.gather(*tasks,return_exceptions=True)
         self.health_task=self.task=None;self.collector=None;self.job=None
+        if self._notification_client is not None:
+            await unsubscribe_notifications(self._notification_client,VOICE,self.notify)
+            self._notification_client=None;self.attached=False
     @property
     def transferring(self):return self.collector is not None
     @property
@@ -123,6 +153,7 @@ class SpeechRelay:
         head=struct.pack('<BBBI8s',8,0,op,info['accepted']+1,bytes.fromhex(self.nonce))+payload
         await asyncio.wait_for(client.write_gatt_char(WRITE,head+hmac.digest(bytes.fromhex(config['key']),head,'sha256'),response=True),8)
     def notify(self,_,data):
+        if bytes(data[:4]) in (b'XQA1',b'XQA2'):return
         if self.collector:
             try:
                 packet=bytes(data)
@@ -149,7 +180,7 @@ class SpeechRelay:
         self.last_poll=now
         if not self.attached:
             if not client.services.get_characteristic(VOICE):self.unsupported=True;return
-            await client.start_notify(VOICE,self.notify);self.attached=True
+            await subscribe_notifications(client,VOICE,self.notify);self.attached=True;self._notification_client=client
             await asyncio.to_thread(ensure_service)
         if self.health_task and self.health_task.done():
             try:self.ready=bool(self.health_task.result().get('ready'))
