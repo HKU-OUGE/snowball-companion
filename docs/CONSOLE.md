@@ -68,6 +68,11 @@ Windows 会显示 UAC 确认；取消不会被写成成功。规则仅允许本�
 
 ## 验证范围
 
+2026-11-03 的[原生 Windows / Linux 检查](https://github.com/HKU-OUGE/snowball-companion/actions/runs/41594730819)
+四组均通过：两个系统分别使用 Python 3.12 和 3.13。每组 Windows 为 398 项通过、20 项按平台条件跳过；
+每组 Linux 为 380 项通过、38 项按平台条件跳过。Windows 实际执行了带中文、空格和单引号的路径启动，
+以及中文快捷方式的创建和读回。快捷方式使用 Unicode Shell 接口，不依赖系统 ANSI 代码页。
+
 自动回归覆盖真实本机 HTTP/TLS、跨站请求拒绝、凭据不泄露、重复服务锁、首次向导和安装包
 内容。Windows 专用用例在原生 Windows 上验证 PowerShell/CMD 启动、包含空格/中文/单引号的
 路径、桌面快捷方式读回，以及不修改系统的防火墙规则计划。实际 UAC、蓝牙硬件、Wi-Fi
