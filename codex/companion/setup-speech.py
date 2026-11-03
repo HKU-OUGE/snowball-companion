@@ -59,7 +59,6 @@ def main():
         activate(config,old,old)
         return
     selected='base' if args.model=='auto' else args.model
-    profile=PROFILES[selected]
     root=Path.home()/'.cache/xueqiu';env=root/'speech-venv'
     python=env/('Scripts/python.exe' if os.name=='nt' else 'bin/python')
     packages=['faster-whisper==1.2.1','huggingface-hub>=0.25,<3','opencc-python-reimplemented==0.1.7','socksio==1.0.0']
@@ -67,7 +66,7 @@ def main():
     uv=shutil.which('uv')
     if not python.exists():venv.EnvBuilder(with_pip=True).create(env)
     from offline_resources import pip_args
-    offline=pip_args(python,'speech',packages)
+    offline=pip_args(python,'speech',packages,progress=progress)
     if offline:
         if subprocess.run([str(python),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
             subprocess.run([str(python),'-m','ensurepip','--upgrade'],check=True)
@@ -78,22 +77,9 @@ def main():
             subprocess.run([str(python),'-m','ensurepip','--upgrade'],check=True)
         subprocess.run([str(python),'-m','pip','install',*packages],check=True)
     progress('speech_model')
-    code='''from huggingface_hub import snapshot_download
-from pathlib import Path
-import json,sys
-p=snapshot_download(sys.argv[1],revision=sys.argv[2],cache_dir=str(Path.home()/'.cache/xueqiu/speech-models'),allow_patterns=['model.bin','config.json','tokenizer.json','vocabulary.*','preprocessor_config.json'],token=False)
-from faster_whisper import WhisperModel
-m=WhisperModel(p,device='cpu',compute_type='int8',num_workers=1,local_files_only=True)
-print(json.dumps({'model':p}))
-'''
-    from speech_offline import import_available
-    model=import_available(selected)
-    if model:
-        progress('speech_sd_imported')
-        subprocess.run([str(python),'-c',"from faster_whisper import WhisperModel;import sys;WhisperModel(sys.argv[1],device='cpu',compute_type='int8',num_workers=1,local_files_only=True)",str(model)],check=True)
-    else:
-        result=subprocess.run([str(python),'-c',code,profile['repo'],profile['revision']],check=True,capture_output=True,text=True)
-        model=json.loads(result.stdout.strip().splitlines()[-1])['model']
+    from speech_offline import prepare_model
+    model=prepare_model(selected,progress=progress)
+    subprocess.run([str(python),'-c',"from faster_whisper import WhisperModel;import sys;WhisperModel(sys.argv[1],device='cpu',compute_type='int8',num_workers=1,local_files_only=True)",str(model)],check=True)
     updated={'model':str(model),'language':old.get('language','auto'),'python':str(python),'profile':selected}
     progress('speech_starting')
     activate(config,old,updated)

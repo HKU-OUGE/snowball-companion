@@ -13,7 +13,7 @@
 | Claude / Cursor | `console/` | 双击 `Open-Snowball.cmd` | 运行 `./open-console.sh` |
 
 Codex 的 Windows 安装器还会创建桌面 **雪球控制台** 快捷方式。已安装 Codex 插件时，
-也可以运行 Setup 并说“打开雪球控制台”。普通双击入口只打开页面；通过 Skill 的 `--setup` 入口会自动开始配置，账号 Pet 由 agent 的真实 Pets 接口完成。网页不能批准 Hooks，也不重置配对或安装固件。新电脑仍需先安装 Python 3.12 / 3.13；首次准备依赖需要联网。
+也可以运行 Setup 并说“打开雪球控制台”。普通双击入口只打开页面；通过 Skill 的 `--setup` 入口会自动开始配置，账号 Pet 由 agent 的真实 Pets 接口完成。网页不能批准 Hooks，也不重置配对或安装固件。新电脑仍需先安装 Python 3.12 / 3.13；首次准备可使用互联网和已挂载的 SD 资源。
 
 完整仓库中的控制台源码和入口在 `codex/`。Claude / Cursor 分发包由同一份已列入白名单的
 公共运行时代码生成 `console/`，不会覆盖各适配器原有的 `runtime/`。
@@ -82,10 +82,10 @@ Windows 会显示 UAC 确认；取消不会被写成成功。规则仅允许本�
 
 通过插件 Setup 打开时自动开始；普通桌面入口不擅自安装，用户可在页面点「开始自动配置」。中断后保留已完成项，失败项可以单独重试，进度不会把下载完成等同于服务可用。Pet 的网页状态只接受 agent 经真实 Pets 服务核验后的回执；如果 agent 已离开，网页显示等待 agent 接入，不显示虚假的安装成功。
 
-新安装默认 Base（约 148 MB），Tiny（约 78 MB）和 Small（约 486 MB）可选；已有 Small 沿用。SD 卡上的固定 Tiny / Base / Small 模型经 SHA-256 校验后优先导入电脑缓存。模型与 Python 环境分别计大小；卡拔出后识别仍可用。旧版已运行的语音进程若不支持安全热加载，会明确报告需要更新，不会强杀正在识别的进程。
+新安装默认 Base（约 148 MB），Tiny（约 78 MB）和 Small（约 486 MB）可选；已有 Small 沿用。模型先复用电脑缓存，大文件优先联网，小文件优先 SD；网络不可用时回退 SD，所有来源均经 SHA-256 校验。模型与 Python 环境分别计大小；卡拔出后识别仍可用。旧版已运行的语音进程若不支持安全热加载，会明确报告需要更新，不会强杀正在识别的进程。
 
 ## SD 卡离线依赖
 
-整卡资源包可同时保存 Windows x64、Linux x64、macOS Apple Silicon/Intel 的 Python 3.12/3.13 依赖。网页按真实系统、芯片和 Python 版本选择，校验每个文件后先导入电脑缓存，再使用 `--no-index --require-hashes` 安装；卡拔出后识别和同步仍可使用。没有匹配且完整的资源时才走联网准备。Linux 的 BlueZ、系统动态库及各系统蓝牙驱动由操作系统提供；AI 软件登录和宿主授权不包含在资源包内。
+整卡资源包可同时保存 Windows x64、Linux x64、macOS Apple Silicon/Intel 的 Python 3.12/3.13 依赖。网页按真实系统、芯片和 Python 版本选择，校验每个文件后先导入电脑缓存，再使用 `--no-index --require-hashes` 安装；卡拔出后识别和同步仍可使用。插件 ZIP、安装说明优先从 SD 获取；先复用电脑上已校验的缓存。其余不超过 1 MiB 的小文件优先 SD，模型、Python 和较大依赖优先互联网，网络不可用或连续无数据时回退 SD。持续有数据的下载不受固定总时长中断。仅获取当前系统、Python 版本和当前步骤需要的依赖；语音模型只获取选中项。Linux 的 BlueZ、系统动态库及各系统蓝牙驱动由操作系统提供；AI 软件登录和宿主授权不包含在资源包内。
 
 `offline/python/` 提供经上游摘要核验的 CPython 3.13.18 独立运行时。系统 Python 缺失或缺少 venv/ensurepip 时，agent 可运行 `companion/offline_resources.py --prepare-python` 准备到当前用户私有目录，再使用返回的解释器继续配置，不修改系统 Python。Mac 登录自启动仍显示不适用。

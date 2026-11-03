@@ -10,7 +10,7 @@ COMPANION = [
     'test_info_transport', 'test_pet_hub', 'test_pet_sync', 'test_power_telemetry',
     'test_priority_queue', 'test_private_files', 'test_protocol', 'test_reconnect',
     'test_session_capacity', 'test_sidebar_tasks', 'test_speech',
-    'test_speech_relay', 'test_speech_offline', 'test_speech_scheduling', 'test_status_hub',
+    'test_speech_relay', 'test_speech_offline', 'test_resource_fetch', 'test_speech_scheduling', 'test_status_hub',
     'test_windows', 'test_windows_app_pipe', 'test_portable_imports',
     'test_console', 'test_console_setup', 'test_network', 'test_network_tls', 'test_console_windows', 'test_windows_app_endpoint',
 ]

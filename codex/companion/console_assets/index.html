@@ -14,16 +14,16 @@
 <div class="status-strip"><span id="hub-chip">电脑服务 · 检查中</span><span id="device-chip">雪球 · 检查中</span><span id="route-chip">连接 · 检查中</span></div>
 <div class="where-card" aria-live="polite"><span id="where-label">现在看电脑控制台</span><p id="where-action">自动配置在本页开始，涉及设备操作时会明确提示。</p></div>
 <div id="notice" role="status" aria-live="polite" hidden></div>
-<article data-panel="0"><p class="eyebrow">FIRST, YOUR COMPUTER</p><h2>配置交给我，在这里看进度</h2><p class="lead">通过插件 Setup 打开后，自动准备语音、桌宠和登录自启动。已有配置会先检查并复用；首次下载需要联网。</p>
+<article data-panel="0"><p class="eyebrow">FIRST, YOUR COMPUTER</p><h2>配置交给我，在这里看进度</h2><p class="lead">通过插件 Setup 打开后，自动准备语音、桌宠和登录自启动。已有配置会先检查并复用；插件包优先从 SD 获取，大文件优先联网，网络不可用时从 SD 导入。</p>
 <div class="setup-summary" role="status"><b id="setup-heading">准备开始</b><p id="setup-detail">从插件 Setup 打开时会自动开始，也可以在这里启动。</p></div>
 <label id="adapter-field">使用的软件<select id="setup-adapter"><option value="codex">Codex</option><option value="claude">Claude Code</option><option value="cursor">Cursor</option></select></label>
 <div class="checks setup-checks" id="setup-checks"></div>
-<div class="setup-options"><label>本地语音模型<select id="setup-model"><option value="auto">沿用已有模型 · 新用户默认 Base</option><option value="base">Base · 约 148 MB · 轻量</option><option value="tiny">Tiny · 约 78 MB · 最小</option><option value="small">Small · 约 486 MB · 较大</option></select></label><p class="quiet">SD 卡内的模型与当前系统依赖会优先校验并导入电脑，拔线后仍可使用。以上是模型下载体积，不含 Python 依赖。更小模型的中文和专有名词识别需要实际试听；录音保留在电脑本地。</p><label id="pet-choice-field">账号桌宠<select id="setup-character"><option value="auto">沿用当前宠物 · 首次使用雪球</option></select></label><p class="quiet">桌宠由 agent 使用当前账号的 Pets 接口安装，网页实时显示回执。需要授权时会在这里提示。</p></div>
+<div class="setup-options"><label>本地语音模型<select id="setup-model"><option value="auto">沿用已有模型 · 新用户默认 Base</option><option value="base">Base · 约 148 MB · 轻量</option><option value="tiny">Tiny · 约 78 MB · 最小</option><option value="small">Small · 约 486 MB · 较大</option></select></label><p class="quiet">先复用电脑缓存。插件包和说明优先 SD；模型和大依赖优先联网，网络不可用时回退 SD。只获取当前系统及所选模型，导入后拔线仍可使用。以上是模型下载体积，不含 Python 依赖。更小模型的中文和专有名词识别需要实际试听；录音保留在电脑本地。</p><label id="pet-choice-field">账号桌宠<select id="setup-character"><option value="auto">沿用当前宠物 · 首次使用雪球</option></select></label><p class="quiet">桌宠由 agent 使用当前账号的 Pets 接口安装，网页实时显示回执。需要授权时会在这里提示。</p></div>
 <button class="primary" id="setup-start">开始自动配置</button>
 <details><summary>手动检查连接环境</summary>
 <div class="checks" id="dependency-checks"></div><p class="hint">如果这台电脑已有雪球服务，会优先复用已有连接和配对。</p>
 <div class="actions"><button class="primary" id="prepare">准备连接环境</button><button class="secondary" id="start-services">启动连接服务</button></div>
-<p class="quiet">首次准备需要联网下载 Python 依赖，可能需要几分钟。无需安装 Node.js。</p>
+<p class="quiet">首次准备只获取当前系统的连接依赖；小文件优先 SD，大文件优先联网，网络不可用时尝试 SD。无需安装 Node.js。</p>
 </details><div class="next-row"><span>连接服务就绪后即可绑定设备，语音可以继续在后台准备。</span><button class="text-button" data-next="1">下一步：连接雪球 →</button></div></article>
 <article data-panel="1" hidden><p class="eyebrow">HELLO, SNOWBALL</p><h2>连接你的雪球</h2><p class="lead">第一次通过 USB 确认设备身份，以后由蓝牙自动连接。</p>
 <div id="bound-card" class="soft-card" hidden><span class="card-label">已绑定的设备</span><strong id="device-name"></strong><p>这次可以复用配对信息。</p><button class="primary" id="connect-existing">连接已绑定的雪球</button></div>

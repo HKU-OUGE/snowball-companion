@@ -1,4 +1,4 @@
-"""Copy a hash-pinned wheel set from SD to private PC cache before installation."""
+"""Prepare pinned platform resources; small SD files and large network downloads."""
 import hashlib,json,os,platform,shutil,subprocess,sys,tempfile
 from pathlib import Path
 from private_files import private_dir
@@ -21,7 +21,7 @@ def target_key(python):
     return f'{system}-{cpu}-py{major}{minor}'
 
 
-def prepare_wheels(python,group,roots=None,cache=None):
+def prepare_wheels(python,group,roots=None,cache=None,progress=None):
     if group not in ('connection','speech'):raise ValueError('unknown offline group')
     key=target_key(python)
     if not key:return None
@@ -29,12 +29,37 @@ def prepare_wheels(python,group,roots=None,cache=None):
     if not manifest_path.is_file():return None
     manifest=json.loads(manifest_path.read_text(encoding='utf-8')).get('platforms',{}).get(key)
     if not manifest:return None
-    files=manifest['files'];digest=hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()[:16]
+    all_files=manifest['files']
+    digest=hashlib.sha256(json.dumps({'files':all_files},sort_keys=True).encode()).hexdigest()[:16]
+    selected=manifest.get('groups',{}).get(group)
+    files={n:all_files[n] for n in [*selected['files'],group+'.txt']} if selected else all_files
     cache=private_dir(cache or Path.home()/'.cache/xueqiu/offline-wheels')
-    target=cache/(key+'-'+digest)
+    legacy=cache/(key+'-'+digest)
+    target=cache/(key+'-'+digest+'-'+group) if selected else legacy
     def verified(folder):
         return not folder.is_symlink() and all(checked_file(folder/name,entry) for name,entry in files.items())
-    if verified(target):return target
+    for existing in dict.fromkeys((target,legacy)):
+        if verified(existing):
+            if progress:progress('resources_cache')
+            return existing
+    if selected:
+        from resource_fetch import ResourceFetcher,wheel_url
+        fetcher=ResourceFetcher(roots=roots,cache=cache.parent/'resources',progress=progress)
+        temp=Path(tempfile.mkdtemp(prefix='.import-',dir=cache))
+        try:
+            requirements=temp/(group+'.txt')
+            requirements.write_bytes(selected['requirements'].encode('utf-8'))
+            if not checked_file(requirements,files[group+'.txt']):raise ValueError('bundled_requirements_invalid')
+            for name in selected['files']:
+                item=files[name]
+                source=fetcher.get(name,item,Path('Snowball-Setup/offline/wheels')/key/name,
+                                   lambda n=name,e=item:wheel_url(n,e))
+                shutil.copyfile(source,temp/name)
+                if not checked_file(temp/name,item):raise ValueError('resource_cache_changed')
+            if target.exists():target=cache/(target.name+'-'+temp.name[8:])
+            os.replace(temp,target);return target
+        finally:
+            if temp.exists():shutil.rmtree(temp)
     for root in mounted_roots() if roots is None else roots:
         source=Path(root)/'Snowball-Setup/offline/wheels'/key
         if not source.is_dir() or not verified(source):continue
@@ -50,16 +75,16 @@ def prepare_wheels(python,group,roots=None,cache=None):
     return None
 
 
-def pip_args(python,group,packages,requirements=None):
+def pip_args(python,group,packages,requirements=None,progress=None):
     """No untrusted wheel executes: only bundled hash manifests can enable offline mode."""
-    directory=prepare_wheels(python,group)
+    directory=prepare_wheels(python,group,progress=progress)
     if directory:
         return [str(python),'-m','pip','install','--no-index','--find-links',str(directory),
                 '--require-hashes','-r',str(directory/(group+'.txt'))]
     return None
 
 
-def prepare_python(roots=None,cache=None):
+def prepare_python(roots=None,cache=None,progress=None):
     """Optional agent fallback for a missing/incomplete system Python installation."""
     import tarfile
     machine=platform.machine().lower()
@@ -72,10 +97,12 @@ def prepare_python(roots=None,cache=None):
     relative='python/python.exe' if os.name=='nt' else 'python/bin/python3'
     executable=folder/relative
     if executable.is_file() and (folder/'SOURCE.sha256').is_file() and (folder/'SOURCE.sha256').read_text().strip()==record['sha256']:
+        if progress:progress('resources_cache')
         return executable
-    for root in mounted_roots() if roots is None else roots:
-        archive=Path(root)/'Snowball-Setup/offline/python'/record['file']
-        if not checked_file(archive,record):continue
+    from resource_fetch import ResourceFetcher
+    archive=ResourceFetcher(roots=roots,cache=cache.parent/'resources',progress=progress).get(record['file'],record,
+        Path('Snowball-Setup/offline/python')/record['file'],record['url'],kind='runtime')
+    if archive:
         temporary=Path(tempfile.mkdtemp(prefix='.python-',dir=cache))
         try:
             with tarfile.open(archive,'r:gz') as tar:

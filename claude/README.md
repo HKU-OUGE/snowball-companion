@@ -46,3 +46,7 @@ claude plugin list
 ## 设备控制台
 
 本平台 v0.2.2 分发包在最外层的 `console/` 同时提供通用设备控制台。Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`，无需安装 Codex。仓库源码入口位于 `../codex/`。详见[控制台指南](../docs/CONSOLE.md)。控制台可在原生 Windows 运行；本适配器的 Windows Hooks 支持边界不因此改变。已有 Hub、配对和服务会优先复用。
+
+## 安装资源优先级
+
+插件 ZIP、安装说明优先从 SD 获取；先复用电脑上已校验的缓存。其余不超过 1 MiB 的小文件优先 SD，模型、Python 和较大依赖优先互联网，网络不可用或连续无数据时回退 SD。持续有数据的下载不受固定总时长中断。仅获取当前系统、Python 版本和当前步骤需要的依赖；语音模型只获取选中项。 通过随包控制台配置；SD 中的安装包应先复制到电脑固定目录。

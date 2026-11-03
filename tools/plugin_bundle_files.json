@@ -61,6 +61,7 @@
       "codex/companion/power_telemetry.py",
       "codex/companion/private_files.py",
       "codex/companion/requirements.txt",
+      "codex/companion/resource_fetch.py",
       "codex/companion/runtime_lock.py",
       "codex/companion/session-metadata-validation.json",
       "codex/companion/setup-speech.py",

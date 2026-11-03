@@ -61,8 +61,8 @@ def ensure_setup_console(state,helper_root):
         not 32<=len(record['token'])<=128 or not isinstance(record.get('runtime'),str)):
         raise RuntimeError('console_owner_unverified')
     health=rpc(record,'/health')
-    if health.get('automatic_setup') is True:return
-    if health.get('app')!='snowball-console' or health.get('version') not in ('0.5.4','0.5.5','0.5.6'):
+    if health.get('automatic_setup') is True and health.get('resource_source_policy')=='sd-small-network-large-v1':return
+    if health.get('app')!='snowball-console' or health.get('version') not in ('0.5.4','0.5.5','0.5.6','0.5.7'):
         raise RuntimeError('console_restart_required')
     runtime=Path(record['runtime'])
     if not runtime.is_absolute() or not checked_path(runtime/'console_server.py').is_file():

@@ -189,7 +189,7 @@ class Backend:
     def configure_feature(self, feature, progress):
         if feature == 'environment':
             if not all(self.dependencies().get(k) for k in ('bleak', 'serial', 'cryptography')):
-                self.execute('prepare', {})
+                self.execute('prepare', {}, progress=progress)
             if not all(self.dependencies().get(k) for k in ('bleak', 'serial', 'cryptography')):
                 raise SetupError('dependencies_missing')
         elif feature == 'autostart':
@@ -218,7 +218,8 @@ class Backend:
                     if raw.startswith(b'XQSETUP '):
                         try:
                             stage = json.loads(raw[8:])['stage']
-                            if stage in ('speech_dependencies', 'speech_model', 'speech_starting', 'speech_sd_imported'):
+                            from resource_fetch import STAGES
+                            if stage in {'speech_dependencies', 'speech_model', 'speech_starting', 'speech_sd_imported', *STAGES}:
                                 progress(stage)
                         except (ValueError, KeyError, TypeError):
                             pass
@@ -352,7 +353,7 @@ class Backend:
             time.sleep(.25)
         raise SetupError('local_service_unavailable')
 
-    def execute(self, action, data):
+    def execute(self, action, data, progress=None):
         if action == 'prepare':
             target = environment(self.root)
             if not (target / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')).is_file():
@@ -361,7 +362,7 @@ class Backend:
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=120,
                                **child_options())
             from offline_resources import pip_args
-            offline=pip_args(interpreter(self.root),'connection',[],self.root/'requirements.txt')
+            offline=pip_args(interpreter(self.root),'connection',[],self.root/'requirements.txt',progress=progress)
             uv=shutil.which('uv')
             if offline:
                 has_pip=subprocess.run([interpreter(self.root),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options()).returncode==0

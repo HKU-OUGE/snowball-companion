@@ -8,6 +8,7 @@ import uuid
 
 from console_backend import SetupError
 from private_files import private_write, safe_reader
+from resource_fetch import STAGES as RESOURCE_STAGES
 
 STEPS = ('environment', 'autostart', 'connection', 'speech', 'pet')
 STATES = {'pending', 'running', 'ready', 'failed', 'needs_user', 'skipped', 'unsupported'}
@@ -16,6 +17,7 @@ CODES = {'pending', 'checking', 'ready', 'interrupted', 'operation_failed',
          'local_service_unavailable', 'speech_dependencies', 'speech_model', 'speech_starting',
          'speech_sd_imported', 'speech_failed', 'speech_not_ready', 'speech_worker_upgrade_required', 'agent_required', 'pet_working', 'pet_verified',
          'pet_auth_required', 'pet_failed', 'pet_unsupported', 'user_skipped'}
+CODES |= RESOURCE_STAGES
 
 
 class SetupPlan:

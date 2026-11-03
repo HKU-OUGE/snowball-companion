@@ -135,6 +135,49 @@
           "bytes": 2409,
           "sha256": "e69d49a56b004ef234116702e52fb17c8504c68ce8a7ffe2aa168513c18b219e"
         }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:c1453022f490d2459a11819d83ad1d586e9ff65a12ac3e705ffebd46d3685dcf\ncryptography==50.0.2 --hash=sha256:9dab55f57c74c3cad24c323bacbbd04be4705ba6eb0d92e920b1fc4837ed5079\ndbus-fast==5.2.0 --hash=sha256:236327794a5957238e83c363809903b6a47d1f4fecd64831a29fd09458d90f0e\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "dbus_fast-5.2.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+            "cffi-2.1.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+            "cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:9c1da7aad0fa6c13b4a5c1e7985be0d13f8526a96284573acaf3d55ead6d3fe8\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\nctranslate2==4.8.5 --hash=sha256:86876e8b579ef61e4d1402002f7728fca40967fe79ac2ef71a65d1b8dc5a18ee\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:29dab7c904cd1914a0439c6e1306c12c7497c8bd32290fbe563ebf51ca4b6d6d\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nnumpy==2.5.4 --hash=sha256:fbde6962867ee75b48b0ee29b2b9372ec5d617799dbaf38e82dc0596f2f7738a\nonnxruntime==1.31.1 --hash=sha256:1f3dea47f2f0e5117c2404cea7d21fd253ae7836a3bf167a501cdfbb2600d536\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:89f23aa53c24553a2416fd4fd1ec06f74fa42b14b546d8883128813f775bbfd2\nPyYAML==6.0.3 --hash=sha256:ba1cc08a7ccde2d2ec775841541641e4548226580ab850948cbfda66a1befcdc\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\ntokenizers==0.23.3 --hash=sha256:376851d22bcf9d650a5c3090bb83e6cf9e895fbf0595369fa4cd43c1f69b5f87\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl",
+            "numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "onnxruntime-1.31.1-cp312-cp312-manylinux_2_28_x86_64.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-manylinux_2_28_x86_64.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "ctranslate2-4.8.5-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "socksio-1.0.0-py3-none-any.whl"
+          ]
+        }
       }
     },
     "linux-x64-py313": {
@@ -270,6 +313,49 @@
         "speech.txt": {
           "bytes": 2409,
           "sha256": "d3379a5574851b5102a698cd1f0d03e9594482ecd78441ac8b7c54bb8909f339"
+        }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:a931079504ecc49efed7744c476a5c343a92fabf66dec2db95edb1b2fdc770e2\ncryptography==50.0.2 --hash=sha256:9dab55f57c74c3cad24c323bacbbd04be4705ba6eb0d92e920b1fc4837ed5079\ndbus-fast==5.2.0 --hash=sha256:da7835ccc6e8cb2b54516558097156da6dbf6636c27033b427135bad693317fb\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "cffi-2.1.1-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+            "dbus_fast-5.2.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+            "cryptography-50.0.2-cp311-abi3-manylinux_2_34_x86_64.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:9c1da7aad0fa6c13b4a5c1e7985be0d13f8526a96284573acaf3d55ead6d3fe8\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\nctranslate2==4.8.5 --hash=sha256:b9efe6d3a4a3bda42ac579c461d073985dc9d2796773d13a95d7d26018363807\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:29dab7c904cd1914a0439c6e1306c12c7497c8bd32290fbe563ebf51ca4b6d6d\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nnumpy==2.5.4 --hash=sha256:6ffa07666f8da0eef81d149934a626d0d95fbd6838432a33e66245423a9062c0\nonnxruntime==1.31.1 --hash=sha256:74a6a52994616c4d18b33db1e13c226333a70a6ba07480a5cab9c2a50dff1430\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:89f23aa53c24553a2416fd4fd1ec06f74fa42b14b546d8883128813f775bbfd2\nPyYAML==6.0.3 --hash=sha256:0f29edc409a6392443abf94b9cf89ce99889a1dd5376d94316ae5145dfedd5d6\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\ntokenizers==0.23.3 --hash=sha256:376851d22bcf9d650a5c3090bb83e6cf9e895fbf0595369fa4cd43c1f69b5f87\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "pyyaml-6.0.3-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "numpy-2.5.4-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "hf_xet-1.8.0-cp38-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "protobuf-7.36.2-cp310-abi3-manylinux2014_x86_64.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-manylinux_2_28_x86_64.whl",
+            "ctranslate2-4.8.5-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "onnxruntime-1.31.1-cp313-cp313-manylinux_2_28_x86_64.whl"
+          ]
         }
       }
     },
@@ -435,6 +521,56 @@
           "bytes": 2793,
           "sha256": "8abf1abb0c85a80121d5b9791567d544259f2bd2647208339989b97f29a5e3b3"
         }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:f81b3b8f3d4e343550fa4baa0e479bba9f2d29ce9c2e9b51d1ce1718d7442fcf\ncryptography==50.0.2 --hash=sha256:fa8f5efb344d6908a1ce62f4a24e2e5780f825d6f53f5f50ec5ffacac72936cb\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyobjc-core==13.0 --hash=sha256:5818e3d8cc2677a1e767968ebfe3bc0cb7f80c1f7c19c653ee25ef1cc1b3e188\npyobjc-framework-Cocoa==13.0 --hash=sha256:e1618d315939c9fae57cb858d4db496ec61f82495ce6a877398131ee494fc19d\npyobjc-framework-CoreBluetooth==13.0 --hash=sha256:be976ca6217393a5a771fbb7c3d7fd71c0a1a2ab25f30cf5328b0ecd908a0e84\npyobjc-framework-libdispatch==13.0 --hash=sha256:d0f070fc479b14eb6da96cf7cb4f8034eaa254a3f78d0fd3962bb2eded6f3a4e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "pyobjc_framework_libdispatch-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "pyobjc_framework_cocoa-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "cryptography-50.0.2-cp311-abi3-macosx_11_0_arm64.whl",
+            "cffi-2.1.1-cp312-cp312-macosx_11_0_arm64.whl",
+            "pyobjc_core-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pyobjc_framework_corebluetooth-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==15.1.0 --hash=sha256:40c5df37f4c354ab8190c6fd68dab7881d112f527906f64ca73da4c252a58cee\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncoloredlogs==15.0.1 --hash=sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934\nctranslate2==4.8.5 --hash=sha256:3165777ae547b61a7c49580076f97f0347222a2be37b89285512efaa9656ef7d\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:3e8934784425781f0f779b91044df441f3a7af4dab47375d7e3aeaecbb8eecb4\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nhumanfriendly==10.0 --hash=sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nmpmath==1.3.0 --hash=sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c\nnumpy==2.5.4 --hash=sha256:9cb18a327b49c5c337f972b03682f6a49855525faaf3c0d3e9c96cd0fd8880a8\nonnxruntime==1.23.2 --hash=sha256:b8f029a6b98d3cf5be564d52802bb50a8489ab73409fa9db0bf583eabb7c2321\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:cbc70b17ee27e28894c7fee8bb04be1abead49e936bc70eb60052531eee2079e\nPyYAML==6.0.3 --hash=sha256:fc09d0aa354569bc501d4e787133afc08552722d3ab34836a80547331bb5d4a0\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\nsympy==1.14.0 --hash=sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5\ntokenizers==0.23.3 --hash=sha256:68649e97d5b43c44c031d8d848874a6eecae8f8fe40ea989aa777a5a83aca716\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "onnxruntime-1.23.2-cp312-cp312-macosx_13_0_arm64.whl",
+            "humanfriendly-10.0-py2.py3-none-any.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "numpy-2.5.4-cp312-cp312-macosx_14_0_arm64.whl",
+            "ctranslate2-4.8.5-cp312-cp312-macosx_11_0_arm64.whl",
+            "sympy-1.14.0-py3-none-any.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-macosx_11_0_arm64.whl",
+            "mpmath-1.3.0-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-macosx_11_0_arm64.whl",
+            "pyyaml-6.0.3-cp312-cp312-macosx_11_0_arm64.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "coloredlogs-15.0.1-py2.py3-none-any.whl",
+            "av-15.1.0-cp312-cp312-macosx_13_0_arm64.whl"
+          ]
+        }
       }
     },
     "macos-arm64-py313": {
@@ -598,6 +734,56 @@
         "speech.txt": {
           "bytes": 2793,
           "sha256": "8dd7ad2905cb9e11230bec804c99f4cc21356d2d58c9534d0ad770502a9bd357"
+        }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:19ee6127ee34de7d83ce3d371ebc5ed91addbdcc39f9ab15ce4eb35a4e534971\ncryptography==50.0.2 --hash=sha256:fa8f5efb344d6908a1ce62f4a24e2e5780f825d6f53f5f50ec5ffacac72936cb\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyobjc-core==13.0 --hash=sha256:f29f7cdb3969268716017ada9516b94f6dd1c66c2e415274b5ac1169440da1a4\npyobjc-framework-Cocoa==13.0 --hash=sha256:bb0bcba2e4e9d05af875306e0e055cfc2f152fd602d5f2f1a54490adebebcd34\npyobjc-framework-CoreBluetooth==13.0 --hash=sha256:a998fc0fa7df5b7f631c8cced62c400c25eb28d1ada9538e1e127185cb0c2adb\npyobjc-framework-libdispatch==13.0 --hash=sha256:75d29e94aa56c505cc1da0763c69a6c93ba3dda8ad297948d4e491fe1d3c337c\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "pyobjc_framework_cocoa-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "cryptography-50.0.2-cp311-abi3-macosx_11_0_arm64.whl",
+            "cffi-2.1.1-cp313-cp313-macosx_11_0_arm64.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "pyobjc_framework_corebluetooth-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "pyobjc_core-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pyobjc_framework_libdispatch-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==15.1.0 --hash=sha256:2f77853c3119c59d1bff4214ccbe46e3133eccff85ed96adee51c68684443f4e\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncoloredlogs==15.0.1 --hash=sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934\nctranslate2==4.8.5 --hash=sha256:97fe1ffa5bb9576051502da62324bd59d14d7334f18b79f6529a7a317ab35416\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:3e8934784425781f0f779b91044df441f3a7af4dab47375d7e3aeaecbb8eecb4\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nhumanfriendly==10.0 --hash=sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nmpmath==1.3.0 --hash=sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c\nnumpy==2.5.4 --hash=sha256:6d6a71b9d9a97c03633aa12565ef2825ffa036cc1d99cfd50dacf0f128af4fe2\nonnxruntime==1.23.2 --hash=sha256:2ff531ad8496281b4297f32b83b01cdd719617e2351ffe0dba5684fb283afa1f\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:cbc70b17ee27e28894c7fee8bb04be1abead49e936bc70eb60052531eee2079e\nPyYAML==6.0.3 --hash=sha256:2283a07e2c21a2aa78d9c4442724ec1eb15f5e42a723b99cb3d822d48f5f7ad1\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\nsympy==1.14.0 --hash=sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5\ntokenizers==0.23.3 --hash=sha256:68649e97d5b43c44c031d8d848874a6eecae8f8fe40ea989aa777a5a83aca716\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "humanfriendly-10.0-py2.py3-none-any.whl",
+            "ctranslate2-4.8.5-cp313-cp313-macosx_11_0_arm64.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "av-15.1.0-cp313-cp313-macosx_13_0_arm64.whl",
+            "sympy-1.14.0-py3-none-any.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "pyyaml-6.0.3-cp313-cp313-macosx_11_0_arm64.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-macosx_11_0_arm64.whl",
+            "mpmath-1.3.0-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-macosx_11_0_arm64.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "onnxruntime-1.23.2-cp313-cp313-macosx_13_0_arm64.whl",
+            "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+            "numpy-2.5.4-cp313-cp313-macosx_14_0_arm64.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "coloredlogs-15.0.1-py2.py3-none-any.whl"
+          ]
         }
       }
     },
@@ -763,6 +949,56 @@
           "bytes": 2793,
           "sha256": "d9266b302cfbfaecec254a7ef69c9a70ff40a3ede62d3508b7c5ddd7740b7b1f"
         }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:c8c69575568085ba0b1b10c0249d779a214aea6f6522e949a0fc9fb0fcb449d0\ncryptography==50.0.2 --hash=sha256:dce04c8e3468d8d8e372e758faa612a77bcdeb1ede62dc77bb769a5ca93280cb\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyobjc-core==13.0 --hash=sha256:5818e3d8cc2677a1e767968ebfe3bc0cb7f80c1f7c19c653ee25ef1cc1b3e188\npyobjc-framework-Cocoa==13.0 --hash=sha256:e1618d315939c9fae57cb858d4db496ec61f82495ce6a877398131ee494fc19d\npyobjc-framework-CoreBluetooth==13.0 --hash=sha256:be976ca6217393a5a771fbb7c3d7fd71c0a1a2ab25f30cf5328b0ecd908a0e84\npyobjc-framework-libdispatch==13.0 --hash=sha256:d0f070fc479b14eb6da96cf7cb4f8034eaa254a3f78d0fd3962bb2eded6f3a4e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "pyobjc_framework_libdispatch-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "pyobjc_framework_cocoa-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "cffi-2.1.1-cp312-cp312-macosx_10_15_x86_64.whl",
+            "pyobjc_core-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "cryptography-50.0.2-cp312-abi3-macosx_15_0_x86_64.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pyobjc_framework_corebluetooth-13.0-cp312-cp312-macosx_10_13_universal2.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:f5f7bcf987567cd3f9b01f1c375c59bf59d8a5b98c9c5c154aeda7a11e0c5dce\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncoloredlogs==15.0.1 --hash=sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934\nctranslate2==4.8.5 --hash=sha256:0df05afe820f5399ad31862fc594b6812c716e4931daf21bab416c3b3985dad6\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:e00d8f60170cd3dd55d98306e41dbaf28b27ff1bcfefbfa84279d197221be83e\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nhumanfriendly==10.0 --hash=sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nmpmath==1.3.0 --hash=sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c\nnumpy==2.5.4 --hash=sha256:aec3fc4b32ff82421274f5d205c559c51c840c8df66a78efd7f3612dd005a26a\nonnxruntime==1.23.2 --hash=sha256:218295a8acae83905f6f1aed8cacb8e3eb3bd7513a13fe4ba3b2664a19fc4a6b\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:cbc70b17ee27e28894c7fee8bb04be1abead49e936bc70eb60052531eee2079e\nPyYAML==6.0.3 --hash=sha256:7f047e29dcae44602496db43be01ad42fc6f1cc0d8cd6c83d342306c32270196\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\nsympy==1.14.0 --hash=sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5\ntokenizers==0.23.3 --hash=sha256:9d2b5c97daf61688c2ad1803ca851800feaba50fb68d5821779e9ea5880d968c\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "humanfriendly-10.0-py2.py3-none-any.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-macosx_10_12_x86_64.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-macosx_11_0_x86_64.whl",
+            "sympy-1.14.0-py3-none-any.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "pyyaml-6.0.3-cp312-cp312-macosx_10_13_x86_64.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-macosx_10_12_x86_64.whl",
+            "ctranslate2-4.8.5-cp312-cp312-macosx_11_0_x86_64.whl",
+            "mpmath-1.3.0-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "numpy-2.5.4-cp312-cp312-macosx_14_0_x86_64.whl",
+            "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "coloredlogs-15.0.1-py2.py3-none-any.whl",
+            "onnxruntime-1.23.2-cp312-cp312-macosx_13_0_x86_64.whl"
+          ]
+        }
       }
     },
     "macos-x64-py313": {
@@ -926,6 +1162,56 @@
         "speech.txt": {
           "bytes": 2793,
           "sha256": "bf37e775ea059d0816d28023f6996975da658c5e9e5ef2ff6624c22d064545c4"
+        }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:9d2055050ea716bd38b7f7f1579c275386646b4894c155a3e2f3cd62ed41b7c6\ncryptography==50.0.2 --hash=sha256:dce04c8e3468d8d8e372e758faa612a77bcdeb1ede62dc77bb769a5ca93280cb\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyobjc-core==13.0 --hash=sha256:f29f7cdb3969268716017ada9516b94f6dd1c66c2e415274b5ac1169440da1a4\npyobjc-framework-Cocoa==13.0 --hash=sha256:bb0bcba2e4e9d05af875306e0e055cfc2f152fd602d5f2f1a54490adebebcd34\npyobjc-framework-CoreBluetooth==13.0 --hash=sha256:a998fc0fa7df5b7f631c8cced62c400c25eb28d1ada9538e1e127185cb0c2adb\npyobjc-framework-libdispatch==13.0 --hash=sha256:75d29e94aa56c505cc1da0763c69a6c93ba3dda8ad297948d4e491fe1d3c337c\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\n",
+          "files": [
+            "pyobjc_framework_cocoa-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "cffi-2.1.1-cp313-cp313-macosx_10_15_x86_64.whl",
+            "cryptography-50.0.2-cp312-abi3-macosx_15_0_x86_64.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "pyobjc_framework_corebluetooth-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "pyobjc_core-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "pyobjc_framework_libdispatch-13.0-cp313-cp313-macosx_10_13_universal2.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:f5f7bcf987567cd3f9b01f1c375c59bf59d8a5b98c9c5c154aeda7a11e0c5dce\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncoloredlogs==15.0.1 --hash=sha256:612ee75c546f53e92e70049c9dbfcc18c935a2b9a53b66085ce9ef6a6e5c0934\nctranslate2==4.8.5 --hash=sha256:7e14afe62f1e200dfbe939d118803f7a0eccf876378e17f363dd7e2f69f22e07\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:e00d8f60170cd3dd55d98306e41dbaf28b27ff1bcfefbfa84279d197221be83e\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nhumanfriendly==10.0 --hash=sha256:1697e1a8a8f550fd43c2865cd84542fc175a61dcb779b6fee18cf6b6ccba1477\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nmpmath==1.3.0 --hash=sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c\nnumpy==2.5.4 --hash=sha256:d8200f16437b289a5bb927c6e184eccc3e8389bc0070fea4cd5b9e13c1757959\nonnxruntime==1.23.2 --hash=sha256:162f4ca894ec3de1a6fd53589e511e06ecdc3ff646849b62a9da7489dee9ce95\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:cbc70b17ee27e28894c7fee8bb04be1abead49e936bc70eb60052531eee2079e\nPyYAML==6.0.3 --hash=sha256:8da9669d359f02c0b91ccc01cac4a67f16afec0dac22c2ad09f46bee0697eba8\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\nsympy==1.14.0 --hash=sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5\ntokenizers==0.23.3 --hash=sha256:9d2b5c97daf61688c2ad1803ca851800feaba50fb68d5821779e9ea5880d968c\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "humanfriendly-10.0-py2.py3-none-any.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-macosx_10_12_x86_64.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-macosx_11_0_x86_64.whl",
+            "ctranslate2-4.8.5-cp313-cp313-macosx_11_0_x86_64.whl",
+            "sympy-1.14.0-py3-none-any.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-macosx_10_12_x86_64.whl",
+            "mpmath-1.3.0-py3-none-any.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "onnxruntime-1.23.2-cp313-cp313-macosx_13_0_x86_64.whl",
+            "protobuf-7.36.2-cp310-abi3-macosx_10_9_universal2.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "numpy-2.5.4-cp313-cp313-macosx_14_0_x86_64.whl",
+            "coloredlogs-15.0.1-py2.py3-none-any.whl",
+            "pyyaml-6.0.3-cp313-cp313-macosx_10_13_x86_64.whl"
+          ]
         }
       }
     },
@@ -1099,6 +1385,59 @@
           "bytes": 2504,
           "sha256": "76c2d39a11296b43935ec66c3c2944e8be7a8fc0e58de3ad492239808ac90ca2"
         }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:f53e442b08449d42821fa4a4fba000095af9f62742a500f978a9f557ec44339a\ncryptography==50.0.2 --hash=sha256:7afa5a6602a9f29af1f3a2965f831bae7c9d5d597b7cbb716d41ab3b7d89879c\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\nwinrt-runtime==4.1.0 --hash=sha256:01571f68755750d17518009c00ba21c799b4eddac805bf38cb869da08d38a73f\nwinrt-Windows.Devices.Bluetooth==4!10.0.28000.2957 --hash=sha256:e39bcddf747396e2da78cb8c3d00c3e51214e5f1a9dc213fc009434c5264bbea\nwinrt-Windows.Devices.Bluetooth.Advertisement==4!10.0.28000.2957 --hash=sha256:ddf2b1bd17e92a63c892273fceb2a4aba3263123cba7be979b51e93ff7d7e32c\nwinrt-Windows.Devices.Bluetooth.GenericAttributeProfile==4!10.0.28000.2957 --hash=sha256:3e95b316a941106fd8193dead1a31e6abf9f118efceb58da2388e943fcf5f6d8\nwinrt-Windows.Devices.Enumeration==4!10.0.28000.2957 --hash=sha256:0d76f1961bede3dfaf92939ca16edb882daa97bf6481e2dadc8174fec64e7a7e\nwinrt-Windows.Devices.Radios==4!10.0.28000.2957 --hash=sha256:466c47b468c381192218a6f8744d3f2966b43acd710f004bb8a4b4e4e1bcbf88\nwinrt-Windows.Foundation==4!10.0.28000.2957 --hash=sha256:0669de7ce480806a0f9a46d005837799e37f1738911b54c4bc04788b37974e69\nwinrt-Windows.Foundation.Collections==4!10.0.28000.2957 --hash=sha256:0401c1b6ed512d1fdad8ba1571698e9000ebee6a69781db9a01994ffcc54a503\nwinrt-Windows.Storage.Streams==4!10.0.28000.2957 --hash=sha256:e113832320f2e7f8b09cedfb400cb7eaf0ac769ad1f2038ddbe88801497916c4\n",
+          "files": [
+            "winrt_windows_storage_streams-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_devices_bluetooth_genericattributeprofile-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_devices_enumeration-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_runtime-4.1.0-cp312-cp312-win_amd64.whl",
+            "winrt_windows_devices_bluetooth-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_foundation_collections-4!10.0.28000.2957-py3-none-any.whl",
+            "cffi-2.1.1-cp312-cp312-win_amd64.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "cryptography-50.0.2-cp311-abi3-win_amd64.whl",
+            "winrt_windows_devices_radios-4!10.0.28000.2957-py3-none-any.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "winrt_windows_foundation-4!10.0.28000.2957-py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "winrt_windows_devices_bluetooth_advertisement-4!10.0.28000.2957-py3-none-any.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:3ce5a1d7b916d13c16ac58f1756f0fee4af2d53f02bc1403e18550b50d375a22\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncolorama==0.4.6 --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6\nctranslate2==4.8.5 --hash=sha256:16b1478f9dccd3c6eedb7a1b2e23cb2a41f03976266b71afa1bd9019df7c7014\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:92188598dedc1e1f5609bd718d4db8687a6c89915553912571e2f587892eecec\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nnumpy==2.5.4 --hash=sha256:a7b1b6353e36a7e50de2973a38d705c88ee93adcf120673cee7f45a4a3fa223a\nonnxruntime==1.31.1 --hash=sha256:ae8a9a351efda685cc59a66226cdefaa37a126c1d66872ca23a2de9425326130\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:a300819d441e078a5608c0d3c709796bb548136058fda017ae51d425b44fd353\nPyYAML==6.0.3 --hash=sha256:5fcd34e47f6e0b794d17de1b4ff496c00986e1c83f7ab2fb8fcfe9616ff7477b\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\ntokenizers==0.23.3 --hash=sha256:1f0823bb00c5fdc98e487354d54dd55a03848d61a1a0bf29a68c77f24f3b26c3\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "colorama-0.4.6-py2.py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-win_amd64.whl",
+            "protobuf-7.36.2-cp310-abi3-win_amd64.whl",
+            "pyyaml-6.0.3-cp312-cp312-win_amd64.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "numpy-2.5.4-cp312-cp312-win_amd64.whl",
+            "hf_xet-1.8.0-cp38-abi3-win_amd64.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "ctranslate2-4.8.5-cp312-cp312-win_amd64.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-win_amd64.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "onnxruntime-1.31.1-cp312-cp312-win_amd64.whl"
+          ]
+        }
       }
     },
     "windows-x64-py313": {
@@ -1270,6 +1609,59 @@
         "speech.txt": {
           "bytes": 2504,
           "sha256": "293a2ac3aa84ab2e12375cba8add59f716ec4f0d4e6306b403771b12397dd51e"
+        }
+      },
+      "groups": {
+        "connection": {
+          "requirements": "bleak==3.0.2 --hash=sha256:39092feb9e83f1df5ad2f88e837723c7211c982ce9e9cda6235104bc2ebe0d0d\ncffi==2.1.1 --hash=sha256:1aa5645c30469b09530c4ebca77ebf8f17618293c58f8549cb1a543a50236e7d\ncryptography==50.0.2 --hash=sha256:7afa5a6602a9f29af1f3a2965f831bae7c9d5d597b7cbb716d41ab3b7d89879c\npycparser==3.12 --hash=sha256:a076f3f489b39b43ed13563a1dafe42447445bec2e294154ec5c57fcdda4c85e\npyserial==3.5 --hash=sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\nwinrt-runtime==4.1.0 --hash=sha256:d1a9b4b609bece607051b55fa234043150e233a169cd004fd9dae30331562186\nwinrt-Windows.Devices.Bluetooth==4!10.0.28000.2957 --hash=sha256:e39bcddf747396e2da78cb8c3d00c3e51214e5f1a9dc213fc009434c5264bbea\nwinrt-Windows.Devices.Bluetooth.Advertisement==4!10.0.28000.2957 --hash=sha256:ddf2b1bd17e92a63c892273fceb2a4aba3263123cba7be979b51e93ff7d7e32c\nwinrt-Windows.Devices.Bluetooth.GenericAttributeProfile==4!10.0.28000.2957 --hash=sha256:3e95b316a941106fd8193dead1a31e6abf9f118efceb58da2388e943fcf5f6d8\nwinrt-Windows.Devices.Enumeration==4!10.0.28000.2957 --hash=sha256:0d76f1961bede3dfaf92939ca16edb882daa97bf6481e2dadc8174fec64e7a7e\nwinrt-Windows.Devices.Radios==4!10.0.28000.2957 --hash=sha256:466c47b468c381192218a6f8744d3f2966b43acd710f004bb8a4b4e4e1bcbf88\nwinrt-Windows.Foundation==4!10.0.28000.2957 --hash=sha256:0669de7ce480806a0f9a46d005837799e37f1738911b54c4bc04788b37974e69\nwinrt-Windows.Foundation.Collections==4!10.0.28000.2957 --hash=sha256:0401c1b6ed512d1fdad8ba1571698e9000ebee6a69781db9a01994ffcc54a503\nwinrt-Windows.Storage.Streams==4!10.0.28000.2957 --hash=sha256:e113832320f2e7f8b09cedfb400cb7eaf0ac769ad1f2038ddbe88801497916c4\n",
+          "files": [
+            "winrt_runtime-4.1.0-cp313-cp313-win_amd64.whl",
+            "winrt_windows_storage_streams-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_devices_bluetooth_genericattributeprofile-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_devices_enumeration-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_devices_bluetooth-4!10.0.28000.2957-py3-none-any.whl",
+            "winrt_windows_foundation_collections-4!10.0.28000.2957-py3-none-any.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "cryptography-50.0.2-cp311-abi3-win_amd64.whl",
+            "cffi-2.1.1-cp313-cp313-win_amd64.whl",
+            "winrt_windows_devices_radios-4!10.0.28000.2957-py3-none-any.whl",
+            "pyserial-3.5-py2.py3-none-any.whl",
+            "winrt_windows_foundation-4!10.0.28000.2957-py3-none-any.whl",
+            "bleak-3.0.2-py3-none-any.whl",
+            "winrt_windows_devices_bluetooth_advertisement-4!10.0.28000.2957-py3-none-any.whl",
+            "pycparser-3.12-py3-none-any.whl"
+          ]
+        },
+        "speech": {
+          "requirements": "anyio==4.16.0 --hash=sha256:c66ae634e0b8228396b801741beb3294326d4b6102f7bba4041c0dfb58c29026\nav==19.0.2 --hash=sha256:3ce5a1d7b916d13c16ac58f1756f0fee4af2d53f02bc1403e18550b50d375a22\nclick==8.5.0 --hash=sha256:255bc9599cf7748b4b1a446ccc735421bd08a2ae529a8b88597d3de5664ee360\ncolorama==0.4.6 --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6\nctranslate2==4.8.5 --hash=sha256:9667fa5589dec8b57eaa31d4602935259092e4185e016afb0c7d4a5efaaaedfb\nfaster-whisper==1.2.1 --hash=sha256:79a66ad50688c0b794dd501dc340a736992a6342f7f95e5811be60b5224a26a7\nfilelock==4.2.7 --hash=sha256:d08972bbca2b8767ee552aff877b091dd111ffb1d22de7de885766ea7d719d5e\nflatbuffers==25.12.19 --hash=sha256:7634f50c427838bb021c2d66a3d1168e9d199b0607e6329399f04846d42e20b4\nfsspec==2026.9.0 --hash=sha256:8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f\nh11==0.16.0 --hash=sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86\nhf-xet==1.8.0 --hash=sha256:92188598dedc1e1f5609bd718d4db8687a6c89915553912571e2f587892eecec\nhttpcore2==2.16.0 --hash=sha256:5c4358319f2602d984ad93182c9fee5160f22e9da7babdda870a5e7c4e2dc34f\nhttpx2==2.16.0 --hash=sha256:fd2c5d7909e8d86fe92d53020c310ca0e4e431b838c207c5754b9bbf0308d49a\nhuggingface_hub==2.4.0 --hash=sha256:42ecfd93ede47bdd333daebbf66a32d7bfe2e18752754fe4d2d4f98a0179d801\nidna==3.20 --hash=sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c\nnumpy==2.5.4 --hash=sha256:8b4d2fd2d34e5f8c9235ee787de5631a37a28402b15cb80814df973d2be54129\nonnxruntime==1.31.1 --hash=sha256:0558f29d5f6ac09957390c9c5495931485ee8ae7f0ce781ccee86a0ae5c2348b\nopencc-python-reimplemented==0.1.7 --hash=sha256:41b3b92943c7bed291f448e9c7fad4b577c8c2eae30fcfe5a74edf8818493aa6\npackaging==26.3 --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c\nprotobuf==7.36.2 --hash=sha256:a300819d441e078a5608c0d3c709796bb548136058fda017ae51d425b44fd353\nPyYAML==6.0.3 --hash=sha256:79005a0d97d5ddabfeeea4cf676af11e647e41d81c9a7722a193022accdb6b7c\nsocksio==1.0.0 --hash=sha256:95dc1f15f9b34e8d7b16f06d74b8ccf48f609af32ab33c608d08761c5dcbb1f3\ntokenizers==0.23.3 --hash=sha256:1f0823bb00c5fdc98e487354d54dd55a03848d61a1a0bf29a68c77f24f3b26c3\ntqdm==4.70.1 --hash=sha256:c293e525e6fef9c20e8728fd4612df02a0aa31bb5fe91ecd93e123b1b7bffa73\ntruststore==0.10.5 --hash=sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c\ntyping_extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8\n",
+          "files": [
+            "click-8.5.0-py3-none-any.whl",
+            "fsspec-2026.9.0-py3-none-any.whl",
+            "h11-0.16.0-py3-none-any.whl",
+            "numpy-2.5.4-cp313-cp313-win_amd64.whl",
+            "opencc_python_reimplemented-0.1.7-py2.py3-none-any.whl",
+            "huggingface_hub-2.4.0-py3-none-any.whl",
+            "tqdm-4.70.1-py3-none-any.whl",
+            "anyio-4.16.0-py3-none-any.whl",
+            "colorama-0.4.6-py2.py3-none-any.whl",
+            "tokenizers-0.23.3-cp310-abi3-win_amd64.whl",
+            "onnxruntime-1.31.1-cp313-cp313-win_amd64.whl",
+            "protobuf-7.36.2-cp310-abi3-win_amd64.whl",
+            "typing_extensions-4.16.0-py3-none-any.whl",
+            "packaging-26.3-py3-none-any.whl",
+            "truststore-0.10.5-py3-none-any.whl",
+            "hf_xet-1.8.0-cp38-abi3-win_amd64.whl",
+            "pyyaml-6.0.3-cp313-cp313-win_amd64.whl",
+            "idna-3.20-py3-none-any.whl",
+            "faster_whisper-1.2.1-py3-none-any.whl",
+            "httpx2-2.16.0-py3-none-any.whl",
+            "filelock-4.2.7-py3-none-any.whl",
+            "av-19.0.2-cp312-abi3-win_amd64.whl",
+            "httpcore2-2.16.0-py3-none-any.whl",
+            "flatbuffers-25.12.19-py2.py3-none-any.whl",
+            "socksio-1.0.0-py3-none-any.whl",
+            "ctranslate2-4.8.5-cp313-cp313-win_amd64.whl"
+          ]
         }
       }
     }

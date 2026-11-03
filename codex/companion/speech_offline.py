@@ -6,8 +6,9 @@ import os
 from pathlib import Path
 import shutil
 import tempfile
+from urllib.parse import quote
 
-from private_files import private_dir
+from private_files import private_dir, checked_path
 
 
 def mounted_roots():
@@ -51,3 +52,47 @@ def import_available(profile,roots=None,cache=None):
         finally:
             if temporary.exists():shutil.rmtree(temporary)
     return None
+
+
+def prepare_model(profile,roots=None,cache=None,progress=None):
+    """Reuse the verified model, then resolve each pinned file by size/source."""
+    from resource_fetch import ResourceFetcher
+    if profile not in ('base','tiny','small'):raise ValueError('unknown model')
+    manifest=json.loads(Path(__file__).with_name('speech-'+profile+'-manifest.json').read_text(encoding='utf-8'))
+    cache=private_dir(cache or Path.home()/'.cache/xueqiu/speech-offline')
+    target=cache/(profile+'-'+manifest['revision'])
+    # Older online installations use the Hugging Face snapshot directory.
+    hf=Path.home()/'.cache/xueqiu/speech-models'/('models--'+manifest['repo'].replace('/','--'))/'snapshots'/manifest['revision']
+    if all(checked_file(target/name,item) for name,item in manifest['files'].items()):
+        if progress:progress('resources_cache')
+        return target
+    fetcher=ResourceFetcher(roots=roots,cache=cache.parent/'resources',progress=progress)
+    temp=Path(tempfile.mkdtemp(prefix='.'+profile+'-',dir=cache))
+    try:
+        for name,item in manifest['files'].items():
+            source=target/name
+            if not checked_file(source,item):source=hf_cached_file(hf,name,item)
+            if source is None:
+                url='https://huggingface.co/'+manifest['repo']+'/resolve/'+manifest['revision']+'/'+quote(name,safe='')
+                source=fetcher.get(name,item,Path('Snowball-Setup/speech-models')/profile/name,url,kind='model')
+            elif progress:progress('resources_cache')
+            shutil.copyfile(source,temp/name)
+            if not checked_file(temp/name,item):raise ValueError('resource_cache_changed')
+        if target.exists():target=cache/(target.name+'-'+temp.name[6:])
+        os.replace(temp,target);return target
+    finally:
+        if temp.exists():shutil.rmtree(temp)
+
+
+def hf_cached_file(snapshot,name,entry):
+    """Accept HF's normal blob links only inside this model's private repository."""
+    from resource_fetch import valid
+    try:
+        repository=checked_path(snapshot.parent.parent)
+        candidate=snapshot/name
+        if candidate.is_symlink():
+            candidate=candidate.resolve(strict=True)
+            if not candidate.is_relative_to(repository/'blobs'):return None
+        return candidate if valid(candidate,entry) else None
+    except OSError:
+        return None

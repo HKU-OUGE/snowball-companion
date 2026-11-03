@@ -129,3 +129,7 @@ Windows 已信任但状态待同步时，还应检查原生 Shell 启动。
 `tools/configure_windows_plugin.py` 使用 `commandWindows` 生成本机调用；
 仅直接运行 Python 脚本不代表 Hook 可以被宿主启动。见
 [Windows 启动排错](../docs/INSTALLATION.md#windows-已信任但无状态记录先检查原生-shell-启动)。
+
+## 安装资源优先级
+
+插件 ZIP、安装说明优先从 SD 获取；先复用电脑上已校验的缓存。其余不超过 1 MiB 的小文件优先 SD，模型、Python 和较大依赖优先互联网，网络不可用或连续无数据时回退 SD。持续有数据的下载不受固定总时长中断。仅获取当前系统、Python 版本和当前步骤需要的依赖；语音模型只获取选中项。 通过随包控制台配置；SD 中的安装包应先复制到电脑固定目录。
