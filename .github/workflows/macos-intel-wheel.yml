@@ -1,0 +1,38 @@
+name: macOS Intel offline wheel
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15-intel
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build static cryptography wheel from the pinned upstream release
+        env:
+          MACOSX_DEPLOYMENT_TARGET: '15.0'
+          OPENSSL_STATIC: '1'
+        run: |
+          export OPENSSL_DIR="$(brew --prefix openssl@3)"
+          python -m pip wheel --no-deps --no-binary cryptography cryptography==50.0.2 --wheel-dir wheels
+          python -m pip install --no-index --no-deps --find-links wheels cryptography==50.0.2
+          python -m pip install cffi pytest numpy bleak==3.0.2 pyserial==3.5
+      - name: Validate crypto, authentication and local TLS
+        working-directory: codex/companion
+        run: python -m unittest test_network test_network_tls
+      - name: Check wheel dynamic dependencies and hashes
+        run: |
+          python -m zipfile -e wheels/*.whl unpacked
+          find unpacked -name '*.so' -exec otool -L {} \; > wheels/linkage.txt
+          cat wheels/linkage.txt
+          if grep -E 'lib(ssl|crypto).*dylib|/usr/local/|/opt/homebrew/' wheels/linkage.txt; then exit 1; fi
+          shasum -a 256 wheels/*.whl > wheels/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-intel-cryptography-50.0.2
+          path: wheels/
+          retention-days: 7
