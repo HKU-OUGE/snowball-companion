@@ -17,7 +17,7 @@ Pet Setup 流程；Claude / Cursor 主要同步状态，不能把它们安装成
 
 ## 设备配置入口
 
-分发包 v0.5.4 随包提供[雪球控制台](CONSOLE.md)。Codex 包位于 `codex/`，Claude / Cursor 包位于 `console/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。Codex Windows 安装器会创建桌面入口，插件 Setup 也可以打开已登记的控制台。先完成依赖准备，再通过 USB 绑定、蓝牙连接和 Wi-Fi 配网。
+从分发包 v0.5.4 起随包提供[雪球控制台](CONSOLE.md)。Codex 包位于 `codex/`，Claude / Cursor 包位于 `console/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。Codex Windows 安装器会创建桌面入口，插件 Setup 也可以打开已登记的控制台。主线统一为「准备电脑 → 连接雪球 → 确认同步 → 可选功能」。先确认蓝牙同步，再回设备做手势练习；Wi-Fi 按需配置。首次使用看 [同一份入门指南](START-HERE.md)。
 
 控制台本身支持 Windows；Claude / Cursor 适配器的原生 Windows Hooks 仍保持各自已有的支持边界。普通适配器卸载保留共享控制台及服务；完整移除时才核对本安装的快捷方式、登录任务和可选防火墙规则。
 
@@ -122,7 +122,7 @@ Hooks 改为本机 Python 绝对路径与 UTF-8 模式。它不修改 Hook 信�
 
 第一次连接请按[Windows 逐步引导](../codex/plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
 提前准备依赖，再提醒用户连接 USB 数据线、核对串口，并在设备「连接电脑」界面启用
-**「开始配对」**。环境已准备好的快捷命令为：
+**「开启配对」**。环境已准备好的快捷命令为：
 
 ```powershell
 # COMx 是占位符，请用设备管理器核对后的实际串口替换。
@@ -130,11 +130,11 @@ Hooks 改为本机 Python 绝对路径与 UTF-8 模式。它不修改 Hook 信�
 ```
 
 脚本在 `codex/.venv/` 安装固定依赖；首次下载可能超过两分钟，因此逐步引导会先准备环境，
-等用户启用「开始配对」后直接执行 USB 绑定。普通重装遇到已有有效配对时复用；
+等用户启用「开启配对」后直接执行 USB 绑定。普通重装遇到已有有效配对时复用；
 用户要求从零测试整个设备初始化时，按下方完整重置流程先清除旧连接状态。
 新绑定通过 USB 的 DTR 与 CRLF 命令读取设备密钥，凭据只存用户私有目录，禁止打印
 密钥或提交文件。`XQPAIR_ERROR open_connection_page` 表示连接页面/两分钟配对窗口已关闭，
-应提示用户重新启用**「开始配对」**，收到回复后在窗口内重试；不需要擦除固件。
+应提示用户重新启用**「开启配对」**，收到回复后在窗口内重试；不需要擦除固件。
 
 自动重连使用当前用户、普通权限的 Windows 计划任务
 `Snowball Companion Auto Reconnect`，在**登录后**运行，无需管理员或保存密码。
@@ -160,7 +160,7 @@ Windows 桥接优先按**精确名称且唯一匹配**查询已配对 BLE 设备
 或系统“已配对”当作已同步。Windows 确认后的指令/建聊可使用经过验证的应用命名管道；
 异步问题回答也走应用命名管道，接收回执不等于桌面问题卡片收起。
 独立空闲证明仍未接通，不能作为固件自动安装的可靠空闲依据。
-当前登录任务不会自动发现应用重启后的新端点，需在当前宿主环境重新启动 Hub 并验收。
+v0.5.5 起，新的真实 Hook / Setup 会交接应用重启后的新端点，Hub 自动重新探测；从旧版升级时仍需核对运行目录并重启旧后台一次。
 
 验证边界：2026-11-02 已在一台 Windows 电脑完成 USB 绑定、BLE 认证、真实设备状态写入
 与遥测。用户审阅修正后的 Hook 命令后，当前真实聊天产生适配器记录，Hub 返回 `accepted`，

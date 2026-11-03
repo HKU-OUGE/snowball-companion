@@ -181,6 +181,34 @@ class ConsoleBackend(unittest.TestCase):
             (directory / 'latest.json').write_text(json.dumps(dict(value, **changes)), encoding='utf-8')
             self.assertEqual(self.backend.telemetry()['connected'], expected)
 
+    def test_capabilities_report_running_hub_without_private_question_content(self):
+        directory = self.state / 'hub'
+        directory.mkdir(parents=True)
+        value = {'generated_at': time.time(), 'hub_alive': True, 'can_create': True,
+                 'sessions': [{'session_id': 'private-session', 'title': 'private-title',
+                               'instruction_available': True,
+                               'questions': [{'text': 'private-question', 'answerable': True},
+                                             {'status': 'ignored', 'answerable': True},
+                                             {'answerable': False}]}]}
+        backend.private_write(directory / 'snapshot.json', json.dumps(value).encode())
+        self.assertEqual(self.backend.capabilities(), {'fresh': True, 'can_create': True,
+                         'can_instruct': True, 'pending': 2, 'answerable': 1})
+        self.assertNotIn('private-', json.dumps(self.backend.capabilities()))
+        for change in ({'generated_at': time.time() - 60}, {'generated_at': time.time() + 60},
+                       {'hub_alive': False}, {'sessions': None}, {'sessions': ['invalid']}):
+            backend.private_write(directory / 'snapshot.json', json.dumps(dict(value, **change)).encode())
+            self.assertFalse(self.backend.capabilities()['fresh'])
+
+    def test_healthy_hub_without_answer_channel_is_not_reported_as_answerable(self):
+        directory = self.state / 'hub'
+        directory.mkdir(parents=True)
+        value = {'generated_at': time.time(), 'hub_alive': True, 'can_create': False,
+                 'sessions': [{'instruction_available': False,
+                               'questions': [{'answerable': False}]}]}
+        backend.private_write(directory / 'snapshot.json', json.dumps(value).encode())
+        self.assertEqual(self.backend.capabilities(), {'fresh': True, 'can_create': False,
+                         'can_instruct': False, 'pending': 1, 'answerable': 0})
+
     def test_unknown_job_and_overlapping_jobs_are_rejected(self):
         with self.assertRaisesRegex(backend.SetupError, 'unknown_action'):
             self.backend.submit('shell', {})

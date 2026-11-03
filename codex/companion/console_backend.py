@@ -14,7 +14,7 @@ import threading
 import time
 import uuid
 
-from private_files import private_dir, private_file, private_write, read_text
+from private_files import private_dir, private_file, private_write, read_text, safe_reader
 
 ROOT = Path(__file__).resolve().parent
 CONFIG = Path.home() / '.config/xueqiu'
@@ -153,9 +153,39 @@ class Backend:
                 'device': bound, 'paired': bool(bound), 'hub': hub_health(self.config),
                 'dependencies': self.dependencies(), 'network': safe_network,
                 'telemetry': self.telemetry(bound),
+                'capabilities': self.capabilities(),
                 'addresses': lan_addresses(), 'job': job,
                 'autostart_supported': os.name == 'nt',
                 'gateway_configured': (self.config / 'network/gateway.json').is_file()}
+
+    def capabilities(self):
+        """Summarize the running Hub, not the console process's own app channel.
+
+        Never return session IDs, titles, question contents or host endpoints.
+        A stale snapshot cannot make an unavailable answer channel look ready.
+        """
+        empty = {'fresh': False, 'can_create': False, 'can_instruct': False,
+                 'pending': 0, 'answerable': 0}
+        try:
+            with safe_reader(self.state / 'hub/snapshot.json') as stream:
+                raw = stream.read(8 * 1024 * 1024 + 1)
+            if len(raw) > 8 * 1024 * 1024:
+                return empty
+            value = json.loads(raw)
+            age = time.time() - value.get('generated_at', 0)
+            if value.get('hub_alive') is not True or not 0 <= age < 20:
+                return empty
+            rows = value.get('sessions', [])
+            if not isinstance(rows, list) or any(not isinstance(r, dict) for r in rows):
+                return empty
+            questions = [q for row in rows for q in row.get('questions', [])
+                         if isinstance(q, dict) and q.get('status') != 'ignored']
+            return {'fresh': True, 'can_create': value.get('can_create') is True,
+                    'can_instruct': any(r.get('instruction_available') is True for r in rows),
+                    'pending': len(questions),
+                    'answerable': sum(q.get('answerable') is True for q in questions)}
+        except (OSError, ValueError, TypeError, AttributeError):
+            return empty
 
     def telemetry(self, device=None):
         try:

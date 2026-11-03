@@ -1,79 +1,48 @@
 # 第一次使用 Snowball Companion
 
-先选你实际使用的软件。**只想使用 Codex 的桌宠时，不需要连接 ESP32。** Claude Code 和 Cursor 插件主要同步工作状态，不会在 ChatGPT 账号里自动创建 Pet。
+**配置时看电脑的「雪球控制台」，连接后回雪球练习。** AI 会话只在安装插件、审阅宿主 Hooks 或排错时使用。无需同时跟着三份教程；控制台每一步会告诉你现在看哪里、完成后回哪里。
 
-## 1. 下载对应插件
+只想用 Codex 账号桌宠时，安装后说“安装雪球桌宠”即可，不需要 USB、蓝牙或实体设备。Claude Code / Cursor 插件主要同步状态，不会创建 ChatGPT Pet。
 
-先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 核对 v0.5.4 是否已发布，再下载对应 ZIP；也可以克隆源码。解压后保留全部目录。新固件的手动蓝牙更新需要 Codex 0.5.1 或 Claude／Cursor 0.2.1 插件；新版仍兼容老设备 v1 协议。
+## 先在电脑安装，打开控制台
 
-| 软件 | 安装包 | 解压后进入 |
+从 [最新正式 Release](https://github.com/HKU-OUGE/snowball-companion/releases/latest) 下载对应 ZIP，复制到电脑固定目录后解压全部文件。不要长期从 USB 安装盘、ZIP 预览或临时目录运行。Core 只包含雪球基础 Pet，完整 Codex 包有更多角色；两者选一个即可。
+
+| 使用的软件 | 安装插件 | 随包控制台入口 |
 | --- | --- | --- |
-| Codex Desktop / CLI | `Snowball-Codex.zip` 或 `Snowball-Codex-Core.zip` | `codex/` |
-| Claude Code Desktop / CLI | `Snowball-Claude.zip` | `claude/` |
-| Cursor | `Snowball-Cursor.zip` | `cursor/` |
+| Codex / Codex Core，Windows | 在 `codex/` 运行 `install-windows.ps1` | 双击 `codex/Open-Snowball.cmd`，或桌面「雪球控制台」 |
+| Codex，Linux / macOS | 在 `codex/` 执行 `./install.sh` | 执行 `codex/open-console.sh` |
+| Claude Code，本地 Linux / macOS | 按 `claude/README.md` 安装，运行 `/snowball-companion:setup` | `console/open-console.sh` |
+| Cursor | 按 `cursor/README.md` 安装本地插件并运行 Setup | 完整包的 `console/` 启动器 |
 
-Core 只包含雪球基础 Pet，完整包提供更多角色。两者使用同一个 Codex 插件 ID，选一份安装即可。将安装包复制到电脑固定目录再解压，不要长期从临时目录、下载缓存或可拔出的 USB 安装盘运行共享服务。
+Windows 请预装 Python 3.12 / 3.13，使用原生 PowerShell 流程，不执行 Unix shell 命令。已有服务先看 [安装与升级](INSTALLATION.md)，避免启动重复后台。Claude / Cursor 控制台可在 Windows 运行，不表示各适配器已支持原生 Windows Hooks。
 
-下载配套 `.sha256` 文件后，在 ZIP 所在目录核对：
+安装后让宿主加载插件；若宿主提示审阅 Hooks，由你确认一次。已有聊天尚未加载插件时才用新聊天验证，不要每个聊天重复安装。Codex Setup 可以说“连接我的雪球，打开控制台”；无需记端口或启动开发服务器。
 
-```sh
-sha256sum -c Snowball-Codex.zip.sha256
-```
+## 跟着同一条主线
 
-macOS 可使用 `shasum -a 256 -c`。替换为实际下载的文件名。
+| 阶段 | 现在看哪里 | 做完去哪里 |
+| --- | --- | --- |
+| **01 准备电脑** | 控制台：准备连接环境，再启动连接服务。先下载依赖。 | 留在控制台，进入「连接雪球」 |
+| **02 连接雪球** | 接 USB 数据线并核对串口。看雪球「连接电脑」，核对蓝牙名称，点「开启配对」。 | **回电脑控制台**，勾选确认并绑定；等待实际蓝牙认证 |
+| **03 确认同步** | 控制台：分别看后台、身份、蓝牙和状态回执。必要时回 AI 会话正常使用一次，再回控制台检查。 | **看雪球**：上滑核对会话；首次教程点「继续练习」 |
+| **设备练习** | 只看雪球：摸摸、吃西瓜、设置、会话、待答、状态。做对后会开心回应并自动继续。 | 回到表盘日常使用，或按需要回控制台 |
+| **04 可选功能** | 控制台：Wi-Fi 可跳过；语音、账号桌宠按需配置。 | 配完回「确认同步」查看结果 |
 
-## 2. 安装电脑插件
+设备普通路径是「设置 → 更多 → 连接电脑」。首次教程已在连接页面时，不必退出重找。
+「开启配对」窗口约两分钟，旧固件可能写「开始配对」。过期时，电脑准备好后重新开启即可。
+**只在电脑系统蓝牙里看到“已配对”不算完成绑定。** USB 用于首次确认身份，日常状态同步不必一直连 USB。
 
-以下命令以 Linux 为例。先安装对应软件并确认终端能找到其 CLI；原生 Windows 不适用这些 shell 命令。已有 Snowball 服务时先看 [安装、升级与卸载](INSTALLATION.md)，避免启动第二套服务。
+教程可选择「暂不连接，先练习」，但这只完成操作练习，不代表设备已连接。开发用圆屏网页演示中的“模拟连接”同样不连接实体设备；真实配置使用随包控制台。
 
-**Codex：**进入解压目录中的 `codex/`，执行：
+## 完成到哪一步，分别看结果
 
-```sh
-./install.sh
-codex plugin list --json
-```
+- 插件启用、真实事件到达、后台服务健康、设备收到状态是不同层次。正常连接且没有任务时，显示「等待新任务」是正常的。
+- 基础蓝牙同步不要求 Wi-Fi。需要时再看 [控制台配网说明](CONSOLE.md)。密码在本机页面输入，不必发到会话里。
+- 想在设备回答问题或追加任务，还要检查投递通道。Windows 已连接但只有「稍后处理／忽略提醒」时，看 [回答通道排错](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)。
+- 需要语音时，在 Codex 说“配置雪球语音”，按 [语音说明](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md) 安装本地服务和模型。识别文字正确后仍需在设备确认发送；教程回答不验证真实投递。
 
-确认启用了 `xueqiu-status@xueqiu-local`。新开聊天，运行插件 Setup／设置，或说“设置 Snowball Companion 并启用雪球”。Pet 由宿主 Pets 服务创建；如需连接服务或审阅 Hooks，按提示完成。安装 ZIP 本身不会静默写入账号 Pet 库。
-
-**Claude Code：**进入 `claude/`，执行：
-
-```sh
-claude plugin marketplace add .
-claude plugin install snowball-companion@snowball-local --scope user
-```
-
-新开本地 Code 会话后运行 `/snowball-companion:setup`。普通 Claude 聊天、远程 Code 会话和本地 Code 插件不是同一个接入目标。
-
-**Cursor：**进入 `cursor/`，按目录内 README 将 `snowball-companion/` 安装到 `~/.cursor/plugins/local/`。目标存在时先核对并备份，不混合覆盖新旧文件。等任务结束后重载窗口，在插件设置页核对加载。
-
-## 3. 可选：连接雪球圆屏
-
-推荐打开随包提供的[雪球控制台](CONSOLE.md)，按四步向导完成准备、连接、Wi-Fi 配网与检查。Codex 包中的入口位于 `codex/`；Claude / Cursor 包位于 `console/`。Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。这项设备设置不需要安装 Codex，也不要求启动开发服务器。
-
-
-需要运行兼容 Snowball 固件的设备、电脑依赖及本机 Hub。插件包没有设备固件、配对密钥或 Wi-Fi 密码，也不会刷写设备。不要把任意 ESP32 的串口当成雪球。
-
-已有 Hub／蓝牙桥接服务时直接复用。首次安装先准备电脑依赖，再用 USB 数据线连接雪球、
-核对实际串口，提醒用户在设备「连接电脑」界面启用**「开始配对」**并保持开启。
-收到用户已开启的回复后及时绑定；窗口约两分钟，超时需重新启用。
-按本平台 README 启动配套服务，连接后检查设备状态页。Linux 依赖位于
-`companion/requirements.txt` 或 `runtime/requirements.txt`，建议使用独立 Python 虚拟环境。
-
-## 4. 分四层确认成功
-
-需要「布置任务」「追加指令」或语音回答时，还需独立配置语音能力。普通安装和
-USB/BLE 绑定不包含语音模型；「开始录音」不可点击或提示「电脑语音服务未就绪」时，
-先按[语音初始化与排错](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md)
-安装并验收本地服务，再在设备试录。Windows 确认发送还需
-[验证当前宿主的应用命名管道](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)，
-普通异步问题回答需核对准确问题及投递回执。只需桌宠或状态同步时无需下载语音模型。
-
-1. 软件的插件管理页显示已启用。
-2. 你实际运行任务后，插件收到真实事件。
-3. 本机 Hub 会话状态发生变化。
-4. 如果连接了设备，设备在线并显示相应变化。
-
-`doctor` 成功或 Hub 可达只证明部分链路。Claude／Cursor 的可观察状态与 Codex 不完全相同，按本平台 README 判断支持范围。
+若任一步中断，重新打开桌面「雪球控制台」或包内启动器，接着当前阶段继续；不用重置配对。包不含设备固件和个人密钥，也不会自动刷机。
 
 ## USB 安装盘与后续更新
 
@@ -96,11 +65,3 @@ USB/BLE 绑定不包含语音模型；「开始录音」不可点击或提示「
 ### 使用旧离线安装包后
 
 设备 SD 安装盘可能仍保存较早的离线包。本次电脑插件源码更新不会自动替换这份安装盘。完成离线安装后，请联网检查 GitHub Release，并按 [安装与升级](INSTALLATION.md) 更新对应插件；确认电脑桥接服务已使用新版运行时，再在新固件上使用手动蓝牙更新。不要删除旧配对或重复启动 Hub。
-
-## Windows 快速入口
-
-在固定目录的 `codex/` 中运行 `install-windows.ps1` 安装桌宠插件。
-实体设备首次安装按[逐步引导](../codex/plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
-先准备依赖，再连接 USB 数据线、核对串口并启用设备**「开始配对」**，完成 USB/BLE 绑定与登录自启。
-“等待已配对电脑重连”需要电脑端桥接持续运行，单独启用桌宠不会自动连接硬件。
-详见[Windows 完整说明](INSTALLATION.md#windows-原生安装与自动重连2026-11-03)。

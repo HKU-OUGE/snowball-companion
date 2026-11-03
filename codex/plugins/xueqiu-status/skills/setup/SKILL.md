@@ -1,148 +1,77 @@
 ---
 name: setup
-description: Set up, install, upgrade, inspect, or uninstall Snowball Companion; configure device speech or diagnose an unavailable recording button; list, install, or switch its bundled ChatGPT Pets. Shared services and account Pets have separate removal scopes.
+description: Set up, install, upgrade, inspect, or uninstall Snowball Companion; guide first device use through the bundled console, configure speech, or install and switch bundled ChatGPT Pets. Shared services and account Pets have separate removal scopes.
 ---
 
-# Snowball Companion setup and character switching
+# Snowball Companion setup
 
-Use this workflow when the user runs Setup or asks to list, install, or switch a companion. The host exposes this skill as the plugin setup action; it is not a silent installation hook. The user's explicit switch request authorizes selecting that character; do not ask for the same permission again.
+The host exposes this skill as Setup, not a silent installation hook. Infer the
+requested path from the user's context: physical Snowball, account Pet, or a
+specific repair. Do not make a device owner complete Pet activation first. A
+Pet-only request needs no hardware. Preserve existing authorization and progress.
 
-## Software installation and removal
+## Physical device: one continuous guide
 
-For plugin package installation, upgrade, inspection, uninstall, or cleanup,
-read [plugin lifecycle](references/plugin-lifecycle.md). Use its discovery and
-scope checks before changing a host installation. A documentation-only request
-must not perform installation or removal. If the user names only a Pet, keep
-that request in the authenticated Pets workflow instead of removing software.
+Read [first-use flow](references/first-use.md). **The computer console owns the
+setup journey**: 准备电脑 → 连接雪球 → 确认同步 → 可选功能. The device owns physical
+pairing confirmation and hands-on gesture practice. The AI chat owns plugin
+installation, host Hook review and troubleshooting; it must not narrate a second
+competing setup wizard.
 
-For Pet setup or switching, continue below. Hardware services remain optional.
+Start by discovering the actual installed plugin, shared runtime and pairing
+state. Do not overwrite a newer runtime or launch a duplicate Hub. For install,
+upgrade or removal read [lifecycle](references/plugin-lifecycle.md) first.
+A documentation request authorizes edits, not live installation/removal.
 
-For a physical device on Windows, read [guided first connection and full reset](references/windows-first-run.md).
-Guide the user through a USB data cable, verified serial port and enabling
-**Start pairing / 开始配对** on the device before binding. Prepare dependencies
-before opening its two-minute window. Complete-reset requests must account for
-owned background services, login autostart and both OS/app pairing; adapter-only
-removal does not validate a new computer's first connection.
+Open the real console with `python3 <plugin-root>/scripts/open_console.py`;
+on Windows use `python -X utf8`. Resolve plugin-root as `../..` from this
+SKILL.md directory. Read [console entry](references/local-console.md) if it
+cannot open. Never guess a localhost port or direct a recipient to the developer
+round-screen demo. Keep the complete package in a fixed folder.
 
-## Open device setup or Wi-Fi provisioning
+Give one current action and destination: “现在看电脑控制台…”, “现在看雪球…”,
+or “回到 Codex 会话…”. Say where to return. Prepare dependencies before the
+2-minute pairing window. Use actual device button **开启配对** (older firmware:
+开始配对), then return to console for binding. Do not instruct the user to
+complete everything in OS Bluetooth Settings. Reuse valid existing bindings.
 
-For a hardware connection, Wi-Fi setup or “打开雪球控制台”, read [local console](references/local-console.md) and use `scripts/open_console.py`. The full package includes the console and launcher; do not require a Vite server or tell recipients to use a developer-only localhost port. Pet-only requests continue with the workflow below.
+Leave Wi-Fi, speech and account Pets optional. After BLE and real status work,
+let the user practice on the device. Tutorial success means a learned gesture,
+not real authentication, message delivery or speech readiness. Resume the current
+stage when interrupted instead of restarting setup.
 
-## Choose a character
+## Repair only the missing capability
 
-1. Resolve the plugin root as `../..` relative to the directory containing this SKILL.md. Run `python3 <plugin-root>/scripts/pet_setup.py list`. This lists stable character IDs, names, and actual installability. For an unspecified first setup use `snowball`. If the user asks to browse, show the catalog and distinguish pending artwork from installable characters. If the user asks for a specific character, map its name to the catalog ID. Joseph Joestar is **old Joseph from Stardust Crusaders**, not young Joseph. Never claim a pending portrait is an installable animated Pet.
-2. Run `python3 <plugin-root>/scripts/pet_setup.py inspect --character <id>`. A ready asset has its hash, v2 dimensions, and animation-row contract checked. If the asset is absent or invalid, stop this character's installation and report the real availability. Do not silently substitute Snowball, regenerate art, fabricate animation rows, or change the active Pet. Use the absolute bundled PNG path and metadata returned by this command.
+- Windows first binding, port discovery or an explicit complete-reset test:
+  [Windows first run](references/windows-first-run.md). Prefer console; commands
+  are fallbacks for diagnosed failures. Do not use Unix install/service scripts.
+- Connected but no current status, Hook trust or launch problems:
+  [real Hook loading](references/host-hooks.md). Approvals belong to the user;
+  never write trusted_hash, inject fake events or create duplicate project Hooks.
+- Windows shows only 稍后处理 / 忽略提醒, or cannot send/create:
+  [Windows delivery](references/windows-send.md). Check the running Hub's channel,
+  not only this tool process. Host handoff uses recipient-private endpoint state.
+- Disabled recording or requested speech: [speech setup](references/speech-setup.md).
+  Model/worker readiness and message delivery are separate checks.
+- Windows ACL, service ownership or portability:
+  [native compatibility](references/windows-compatibility.md).
 
-## Install or switch the selected Pet
+Report verified layers separately: plugin loaded, real events, Hub, device
+authentication, fresh status, optional answer/voice delivery. A Hub receipt does
+not prove the Desktop question card dismissed. Do not send test chats or answers
+without authorization. Do not interrupt active chats or firmware transfers to
+reload documentation. On Windows do not claim independent idle proof/automatic
+OTA eligibility from a healthy service alone.
 
-3. Use the registered ChatGPT Pets tools (`list_pets`, `validate_pet_spritesheet`, `prepare_pet_upload`, `create_pet`, `select_pet`). The required service is declared in `.app.json`. If unavailable, tell the user to complete the host's Pets connection flow and rerun setup. Do not use private APIs, scrape authentication, or write the host's Pet library/configuration directly.
-4. List all the current account's pets, following cursors. An unambiguous ID for **this character** already established by the user in this conversation may be reused after ownership verification. Otherwise reuse this character's saved receipt only when its asset key/hash match the bundled asset and the ID is a custom Pet owned by the current account. Old single-Pet receipts automatically migrate to Snowball; do not bind them to another character. A stale receipt from a different account is never proof of ownership.
-5. If no receipt matches, look for exactly one custom Pet whose description contains the exact `[Snowball Companion: <hash-prefix>]` marker from this character's bundled description. Multiple marked matches require a choice. Same-name unmarked Pets may be older or unrelated: show the candidate and ask whether to reuse it before binding. Never update or delete another Pet to avoid a collision.
-6. For a status-only request, report installed/active/missing after ownership verification and stop without creating, recording, or selecting. For installation/switching, create only if no existing Pet matches. Call `validate_pet_spritesheet` on the exact bundled PNG and require `valid=true`; then `prepare_pet_upload` with the same file and `create_pet` with its upload session and bundled name/description. Each recipient gets an owned copy; never embed the distributor's Pet ID or expiring image URL. On a transient/unknown create result, retry with the same upload session and metadata, at most twice. Never prepare a fresh upload blindly after an unknown creation result. Stop and report unresolved outcomes.
-7. Call `select_pet` for the selected/created Pet and verify the returned active ID. Only then run `python3 <plugin-root>/scripts/pet_setup.py record --character <id> --pet-id <verified-id> --selected`. If a Pet was created but activation failed, you may record the verified owned ID without `--selected` so retrying does not create another copy. Report the actual result; do not claim activation after a failed call.
+## Account Pet or character switching
 
-## Companion synchronization boundary
+Read [Pet workflow](references/pets.md) only for requested desktop Pet setup,
+listing, inspection or switching. It preserves asset validation, current-account
+ownership, idempotent creation and authenticated selection. Use Snowball for an
+unspecified first Pet. An explicit character switch authorizes selection without
+another confirmation. Pending art is not installable.
 
-The product is **Snowball Companion**; Snowball is one character in its library. Private receipt state remembers the last verified desktop selection, not the host's live state. Always recheck the Pets service for current activation. Host applications control desktop animation triggers/timing.
-
-A web or ESP32 selection alone cannot activate the desktop Pet through a filesystem preference: activation must use authenticated `select_pet`. When the user requests all surfaces, run `python3 <plugin-root>/scripts/pet_setup.py sync --character <id>` after successful desktop selection. It sends only the character ID to the authenticated local Hub at `/v1/pet` and verifies the returned ID/revision. A Hub acknowledgement does not prove ESP32 asset loading; verify the device response separately. If that tool or the hardware is unavailable, report desktop and device results separately; do not claim cross-device synchronization. Do not invent an endpoint or write the host Pet database to simulate it.
-
-## Optional hardware companion
-
-For physical-device initialization, distinguish status-only use from recording,
-transcription and confirmed task delivery. Before declaring initialization complete,
-report each requested capability separately. Pet activation, BLE authentication and
-real status acknowledgements do not prove speech readiness. For “布置任务”,
-“开始录音” disabled, or “电脑语音服务未就绪”, read
-[speech setup and diagnosis](references/speech-setup.md). Check the optional worker,
-local model and authenticated health endpoint before suspecting the microphone.
-On native Windows, read [confirmed message delivery](references/windows-send.md)
-before enabling task delivery. Verify the host-injected named pipe and installed app;
-do not promise delivery from speech health alone. Windows async answers use the same
-pipe with the exact pending-question envelope; recheck identity before delivery.
-
-The Pet works without an ESP32 or Bluetooth device. Configure the local status Hub and BLE bridge only when requested; use the package README and existing companion tools. Preserve pairing, session priorities, and hook trust. Do not start duplicate services, auto-approve hooks, restart the host, or send conversation/tool bodies.
-
-Recipient state belongs only under the recipient's CODEX_HOME state directory, never plugin assets. Never package credentials, pairing keys, account IDs, or local session records. A new character becomes available only after its full v2 atlas and manifest have passed the artwork pipeline and the catalog is updated to ready; account installation still requires the live Pets validator.
-
-
-## Native Windows setup and reconnect
-
-When checking Windows compatibility, file permissions, OTA preparation or service
-entry points, read [Windows file and service compatibility](references/windows-compatibility.md).
-Use native ACL verification rather than POSIX modes and reject Unix fallback paths.
-
-On Windows use `python -X utf8` for this skill's Python commands; do not run
-`install.sh`, `manage_hub.py`, `manage.py`, or Linux/systemd service commands.
-The script supports Windows locks and UTF-8 metadata. Inspect the current host,
-plugin registration, Hub, bridge processes and private pairing-file existence
-without exposing credentials. Pet activation does not connect a physical device.
-
-For requested hardware setup use the complete fixed-location Codex package:
-`install-windows.ps1 -Device -Port COMx -AutoReconnect` when login autostart is
-also requested. Verify the actual USB port first; COMx is only a placeholder.
-Existing valid pairing is reused for ordinary reinstalls; an authorized full
-reset clears it before first-connection validation. For a first USB bind, guide
-the user to Settings > Connect computer and enable **Start pairing / 开始配对**.
-Its window times out after two minutes. `open_connection_page` requires enabling
-Start pairing again and receiving the user's reply before retrying.
-
-`companion/windows-services.ps1` manages this installation's current-user login
-task using Install/Status/Start/Stop/Remove; never take over a different task or
-stop unrelated Python processes. Existing paired-device lookup still requires
-HMAC authentication. Separately verify task registration, real Hook delivery,
-Hub health, BLE authentication and fresh device acknowledgements/telemetry.
-Do not claim reboot verification without rebooting or interrupt active chats to
-perform it. The legacy Unix IPC transport is unavailable on Windows; confirmed
-messages and new-chat requests can instead use the verified app-tools named pipe
-described in references/windows-send.md.
-Question replies acknowledge delivery, not dismissal of the Desktop question card.
-Independent idle proof remains unavailable; do not invent OTA
-eligibility. See the full package's `docs/INSTALLATION.md` Windows section.
-
-
-状态待同步 / Awaiting status: a verified BLE connection is separate from live
-Codex events. Check the actual Hooks list and private adapter record timestamps.
-A chat created before plugin installation may need a new chat or host reload
-when no active work is interrupted. A fresh configuration inspection is not
-proof that an existing chat loaded it. If no real events arrive, report pending
-status verification; never inject fake busy/idle events to make the screen green.
-
-
-## One-time setup versus live host loading
-
-User-scope plugin installation and trust of an unchanged definition are not
-per-chat setup. Do not ask users to configure Hooks again for every chat.
-Inspect the current chat's actual Hook configuration separately from a fresh
-CLI app-server's hooks/list response. The current Desktop Settings > Hooks
-page disables its query when there are no configured project roots, showing
-an empty list and disabled refresh. That UI state is not proof that the host
-failed to load Hooks; do not prescribe repeated restarts or per-chat setup.
-Use the chat composer's Review hooks button to open the current definitions,
-inspect Details, and let the user approve them. A modified definition is skipped
-until reviewed. Never auto-approve, write trusted_hash, or add duplicate project
-Hooks. Prefer the composer entry for ordinary setup. If the user specifically wants
-the global Settings list, add the existing fixed-location repository once via
-File > Open folder, then verify Settings > Hooks lists Snowball Companion and
-the actual pending count. This works around the no-project-roots query issue;
-do not create a project per chat, change app installation resources, or approve
-the definitions on the user's behalf. Verify real delivery after the user reviews once. Only
-investigate a reload when the actual configuration is missing, and never
-interrupt active work to restart the host.
-Cloud orchestration does not support local/plugin command Hooks even when tools
-execute locally; check the actual mode before attributing missing events to
-trust or installing duplicate project Hooks. See the official Hooks docs at
-https://learn.chatgpt.com/docs/hooks.
-
-
-## Windows native launch verification
-
-Use configure_windows_plugin.py to generate commandWindows, preserving the
-portable command. Raw quoted executable strings can fail through cmd /C and
-PowerShell even if invoking Python directly succeeds. Verify the configured
-command through both native shells with isolated stdin/state before requesting
-review. Path quoting regressions must cover spaces, Unicode and apostrophes.
-Never interpolate Hook payloads into the launch command. A launch-command
-change requires a fresh user review of that exact definition; never rewrite
-trusted_hash or approve on the user's behalf. Keep synthetic tests isolated
-from the live Hub and verify actual chat delivery separately after review.
+Hardware and web selection cannot activate a desktop Pet through local files.
+For requested all-surface switching, verify Pets selection before sending the
+character ID to the Hub; verify device asset loading separately. Never package
+recipient credentials, pairing keys, Pet IDs, host endpoints or session records.

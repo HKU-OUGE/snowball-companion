@@ -14,8 +14,8 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = '0.5.5'
-VERSIONS = {'codex': '0.5.5', 'claude': '0.2.2', 'cursor': '0.2.2'}
+RELEASE = '0.5.6'
+VERSIONS = {'codex': '0.5.6', 'claude': '0.2.3', 'cursor': '0.2.3'}
 LABELS = {'codex': 'Codex', 'claude': 'Claude', 'cursor': 'Cursor'}
 FIXED_TIME = (2026, 11, 1, 0, 0, 0)
 CORE_LIMIT = 8_000_000
@@ -124,7 +124,7 @@ def bundle_inputs(root, platform, core=False):
             raise ValueError('Missing default Snowball character')
         files[name] = encoded(catalog)
         files['codex/README.md'] = (
-            '# Snowball Companion · Codex Core 0.5.5\n\n'
+            '# Snowball Companion · Codex Core 0.5.6\n\n'
             '本包仅含雪球基础 Pet、Codex Hooks 和电脑伴随运行时，不含其他角色或角色音频；包含设备控制台网页。\n\n'
             'Linux 执行 `./install.sh`，Windows 执行 `install-windows.ps1`；新开聊天后运行插件 Setup，账号 Pet 仍需宿主 Pets 服务验证。\n\n'
             '[新手指南](../docs/START-HERE.md) · [安装与卸载](../docs/INSTALLATION.md) · [设备更新](../docs/UPDATES.md)\n\n'

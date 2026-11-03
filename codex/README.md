@@ -1,5 +1,8 @@
 # Snowball Companion · 0.5.4
 
+首次连接实体设备请从[统一入门指南](../docs/START-HERE.md)开始：配置看电脑控制台，连接后回雪球练习。蓝牙同步不要求先配置 Wi-Fi、语音或账号桌宠。
+
+
 ## 0.5.4：随插件提供的设备控制台
 
 Windows 安装完成后，桌面会出现 **雪球控制台**。也可双击本目录的 `Open-Snowball.cmd`，或在插件 Setup 中说“打开雪球控制台”；Linux/macOS 使用 `./open-console.sh`。网页和服务随包提供，无需 Node.js 或开发服务器。向导包含依赖准备、USB 身份绑定、蓝牙服务、加密 Wi-Fi 配网和真实连接诊断。已有配对和共享服务优先复用。详见[控制台指南](../docs/CONSOLE.md)。

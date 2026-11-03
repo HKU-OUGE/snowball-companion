@@ -12,7 +12,7 @@ import time
 from console_backend import Backend, SetupError, ROOT, STATE
 from private_files import private_dir, private_file, private_write
 
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
           '/console.css': ('console.css', 'text/css; charset=utf-8'),
           '/console.js': ('console.js', 'text/javascript; charset=utf-8'),

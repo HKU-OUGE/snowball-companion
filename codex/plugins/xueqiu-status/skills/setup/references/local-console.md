@@ -11,8 +11,10 @@ directory: Windows double-clicks `Open-Snowball.cmd`; Linux/macOS runs
 working URL when no local service exists. The Windows installer creates a
 desktop shortcut named 雪球控制台.
 
-The console guides dependency preparation, physical USB identity binding,
-starting the shared services, encrypted BLE Wi-Fi provisioning and diagnostics.
+Follow [the first-use flow](first-use.md): 准备电脑 → 连接雪球 → 确认同步 → 可选功能.
+The console is the main guide. Send the user to the device only for physical
+confirmation or hands-on practice, and tell them when to return. Wi-Fi is optional
+and must not come between BLE binding and the first real status check.
 Prepare dependencies before asking the user to open the device pairing window.
 An existing valid binding is reused, never silently overwritten. Wi-Fi secrets
 should normally be entered in the console, not pasted into chat. Confirm the

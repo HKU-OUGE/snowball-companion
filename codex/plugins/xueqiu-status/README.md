@@ -1,5 +1,8 @@
 # Snowball Companion
 
+首次连接实体设备请从[统一入门指南](skills/setup/references/first-use.md)开始：配置看电脑控制台，连接后回雪球练习。蓝牙同步不要求先配置 Wi-Fi、语音或账号桌宠。
+
+
 ## 0.5.3：Windows 并发同步修复
 
 修复 Windows 状态快照在同时读取、替换时偶发的拒绝访问／短暂缺失；读写使用原生文件共享与有限重试，保留私有权限和重解析点检查。新增 Windows／Linux、Python 3.12／3.13 自动回归，包括实际发行文件导入、原生 Hook 命令、锁和 DACL 验证。Codex 原生 Windows 可按专用向导安装；Claude、Cursor 独立包仍不提供原生 Windows 支持。保留 0.5.2 的待答快速回执与回答送达后清除逻辑。
