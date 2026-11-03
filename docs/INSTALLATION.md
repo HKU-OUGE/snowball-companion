@@ -17,7 +17,7 @@ Pet Setup 流程；Claude / Cursor 主要同步状态，不能把它们安装成
 
 ## 设备配置入口
 
-从分发包 v0.5.4 起随包提供[雪球控制台](CONSOLE.md)。Codex 包位于 `codex/`，Claude / Cursor 包位于 `console/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。Codex Windows 安装器会创建桌面入口，插件 Setup 也可以打开已登记的控制台。主线统一为「准备电脑 → 连接雪球 → 确认同步 → 可选功能」。先确认蓝牙同步，再回设备做手势练习；Wi-Fi 按需配置。首次使用看 [同一份入门指南](START-HERE.md)。
+从分发包 v0.5.4 起随包提供[雪球控制台](CONSOLE.md)。Codex 包位于 `codex/`，Claude / Cursor 包位于 `console/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。Codex Windows 安装器会创建桌面入口，插件 Setup 也可以打开已登记的控制台。主线统一为「自动配置 → 连接雪球 → 确认同步 → 网络设置」。Skill 使用 `--setup` 打开后自动准备语音、Pet 与登录自启动，所有选择和进度留在网页；普通打开不自动安装。先确认蓝牙同步，再回设备做手势练习；Wi-Fi 按需配置。首次使用看 [同一份入门指南](START-HERE.md)。
 
 控制台本身支持 Windows；Claude / Cursor 适配器的原生 Windows Hooks 仍保持各自已有的支持边界。普通适配器卸载保留共享控制台及服务；完整移除时才核对本安装的快捷方式、登录任务和可选防火墙规则。
 
@@ -102,7 +102,7 @@ Windows 的文件权限、安全缓存读取和服务入口约束见
 **桌宠安装与硬件连接是两条流程。** 仅安装插件、启用账号 Pet 或在 Windows
 蓝牙设置中看到“已配对”，都不会启动 Hub、桥接或登录自启。
 
-**语音是额外的配置与验收项。** 普通 Windows 安装器不下载识别模型。需要录音时，
+**语音在网页自动配置中准备，可跳过。** 普通 Windows 插件注册仍不下载模型；Skill 发起完整自动配置后会准备模型。排错时，
 按[语音初始化与排错](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md)
 补装本地服务，要求认证健康检查 `ready=true`，再进行设备试录。Windows 消息和建聊
 使用[当前宿主的应用命名管道](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)，

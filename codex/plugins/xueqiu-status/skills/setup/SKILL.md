@@ -10,35 +10,33 @@ requested path from the user's context: physical Snowball, account Pet, or a
 specific repair. Do not make a device owner complete Pet activation first. A
 Pet-only request needs no hardware. Preserve existing authorization and progress.
 
-## Physical device: one continuous guide
+## First use: configure everything in the webpage
 
-Read [first-use flow](references/first-use.md). **The computer console owns the
-setup journey**: 准备电脑 → 连接雪球 → 确认同步 → 可选功能. The device owns physical
-pairing confirmation and hands-on gesture practice. The AI chat owns plugin
-installation, host Hook review and troubleshooting; it must not narrate a second
-competing setup wizard.
+Read [automatic setup](references/automatic-setup.md). For a Setup/configuration
+request, run `python3 <plugin-root>/scripts/open_console.py --setup` (Windows:
+`python -X utf8`) and continue the work after the browser opens. Resolve plugin-root
+as `../..` from this SKILL.md directory. The flag starts environment preparation,
+login startup, connection services and speech; the agent performs real account
+Pet operations and reports their results to the same webpage. Do not require
+separate “configure speech / install Pet / enable startup” chat requests.
 
-Start by discovering the actual installed plugin, shared runtime and pairing
-state. Do not overwrite a newer runtime or launch a duplicate Hub. For install,
-upgrade or removal read [lifecycle](references/plugin-lifecycle.md) first.
-A documentation request authorizes edits, not live installation/removal.
+All configuration choices, progress, retry and skip controls stay in the console.
+Use `--setup-status` / `--setup-watch` to follow the same plan and the documented
+`--pet-state` receipts after actual Pets tool results. Opening the webpage is not
+completion. Keep the agent connected until requested work is verified or a
+specific host/device action is needed, and show that need in the webpage.
 
-Open the real console with `python3 <plugin-root>/scripts/open_console.py`;
-on Windows use `python -X utf8`. Resolve plugin-root as `../..` from this
-SKILL.md directory. Read [console entry](references/local-console.md) if it
-cannot open. Never guess a localhost port or direct a recipient to the developer
-round-screen demo. Keep the complete package in a fixed folder.
+Start by discovering the installed plugin and shared runtime. For install,
+upgrade or removal read [lifecycle](references/plugin-lifecycle.md). Do not
+replace a newer runtime, restart active chats, duplicate services or reset
+pairing. A documentation request authorizes edits, not live installation.
+For read-only diagnosis or only opening an existing settings page, omit `--setup`.
 
-Give one current action and destination: “现在看电脑控制台…”, “现在看雪球…”,
-or “回到 Codex 会话…”. Say where to return. Prepare dependencies before the
-2-minute pairing window. Use actual device button **开启配对** (older firmware:
-开始配对), then return to console for binding. Do not instruct the user to
-complete everything in OS Bluetooth Settings. Reuse valid existing bindings.
-
-Leave Wi-Fi, speech and account Pets optional. After BLE and real status work,
-let the user practice on the device. Tutorial success means a learned gesture,
-not real authentication, message delivery or speech readiness. Resume the current
-stage when interrupted instead of restarting setup.
+Use [console entry](references/local-console.md) for a missing launcher and
+[first-use flow](references/first-use.md) for the device handoff. Physical pairing
+confirmation still uses the device's real 开启配对 button, followed by binding in
+the webpage. Device tutorial is a gesture exercise, not another configuration
+wizard. Never send Wi-Fi passwords to chat or use a developer-only localhost URL.
 
 ## Repair only the missing capability
 
@@ -65,7 +63,7 @@ OTA eligibility from a healthy service alone.
 
 ## Account Pet or character switching
 
-Read [Pet workflow](references/pets.md) only for requested desktop Pet setup,
+Read [Pet workflow](references/pets.md) for the automatic setup Pet lane or requested desktop Pet setup,
 listing, inspection or switching. It preserves asset validation, current-account
 ownership, idempotent creation and authenticated selection. Use Snowball for an
 unspecified first Pet. An explicit character switch authorizes selection without

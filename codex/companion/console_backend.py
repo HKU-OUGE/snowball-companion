@@ -6,6 +6,7 @@ import importlib.util
 import ipaddress
 import json
 import os
+import shutil
 from pathlib import Path
 import socket
 import subprocess
@@ -121,6 +122,8 @@ class Backend:
             self.enabled = json.loads(read_text(self.state / 'console/services.json')).get('enabled') is True
         except (OSError, ValueError):
             pass
+        from console_setup import SetupPlan
+        self.setup = SetupPlan(self)
 
     def dependencies(self):
         at, cached = self.dependency_cache
@@ -154,9 +157,82 @@ class Backend:
                 'dependencies': self.dependencies(), 'network': safe_network,
                 'telemetry': self.telemetry(bound),
                 'capabilities': self.capabilities(),
+                'setup': self.setup.public(), 'pet_catalog': self.pet_catalog(),
+                'speech': self.speech_status(),
                 'addresses': lan_addresses(), 'job': job,
-                'autostart_supported': os.name == 'nt',
+                'autostart_supported': os.name == 'nt' or sys.platform == 'linux',
                 'gateway_configured': (self.config / 'network/gateway.json').is_file()}
+
+    def pet_catalog(self):
+        try:
+            path = self.root.parent / 'plugins/xueqiu-status/assets/pet/catalog.json'
+            rows = json.loads(path.read_text(encoding='utf-8'))['characters']
+            return [{'id': r['id'], 'name': r['name']} for r in rows if r['status'] == 'ready']
+        except (OSError, ValueError, KeyError, TypeError):
+            return []
+
+    def speech_status(self):
+        from speech_profiles import PROFILES, profile_for
+        value = {'ready': False, 'profile': None, 'download_mb': None, 'reload_supported': False}
+        try:
+            config = json.loads(read_text(self.config / 'speech.json'))
+            profile = profile_for(config)
+            value.update(profile=profile, download_mb=PROFILES.get(profile, {}).get('download_mb'))
+            health = local_api(4191, '/v1/health', config=self.config, timeout=.6)
+            value.update(ready=health.get('ready') is True, reload_supported=health.get('reload_supported') is True)
+            if health.get('profile') in PROFILES:
+                value['profile'] = health['profile']
+        except (OSError, ValueError, TypeError, SetupError, http.client.HTTPException):
+            pass
+        return value
+
+    def configure_feature(self, feature, progress):
+        if feature == 'environment':
+            if not all(self.dependencies().get(k) for k in ('bleak', 'serial', 'cryptography')):
+                self.execute('prepare', {})
+            if not all(self.dependencies().get(k) for k in ('bleak', 'serial', 'cryptography')):
+                raise SetupError('dependencies_missing')
+        elif feature == 'autostart':
+            from console_login import enable
+            enable(self.root)
+        elif feature == 'connection':
+            if not (hub_health(self.config) and self.telemetry()['connected']):
+                self.execute('services', {})
+        elif feature == 'speech':
+            model = self.setup.value.get('speech_model', 'auto')
+            status = self.speech_status()
+            if status['ready'] and (model == 'auto' or status['profile'] == model):
+                return
+            log_path = private_dir(self.state / 'console') / 'speech-setup.log'
+            if log_path.exists() and log_path.stat().st_size > 2_000_000:
+                os.replace(log_path, log_path.with_suffix('.previous.log'))
+            upgrade_required = False
+            with log_path.open('ab') as log:
+                private_file(log_path)
+                process = subprocess.Popen([interpreter(self.root), '-X', 'utf8', str(self.root / 'setup-speech.py'), '--model', model],
+                                           stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, **child_options())
+                for raw in process.stdout:
+                    log.write(raw)
+                    if b'speech_worker_upgrade_required' in raw:
+                        upgrade_required = True
+                    if raw.startswith(b'XQSETUP '):
+                        try:
+                            stage = json.loads(raw[8:])['stage']
+                            if stage in ('speech_dependencies', 'speech_model', 'speech_starting', 'speech_sd_imported'):
+                                progress(stage)
+                        except (ValueError, KeyError, TypeError):
+                            pass
+                if process.wait():
+                    raise SetupError('speech_worker_upgrade_required' if upgrade_required else 'speech_failed')
+            until = time.monotonic() + 90
+            while time.monotonic() < until:
+                current = self.speech_status()
+                if current['ready'] and (model == 'auto' or current['profile'] == model):
+                    return
+                time.sleep(.5)
+            raise SetupError('speech_not_ready')
+        else:
+            raise SetupError('invalid_request')
 
     def capabilities(self):
         """Summarize the running Hub, not the console process's own app channel.
@@ -260,6 +336,8 @@ class Backend:
 
     def maintenance(self):
         # Called only after an explicit Start services action, never by opening a page.
+        if self.setup.public().get('local_running'):
+            return
         if self.enabled:
             self.enable_services()
         if (self.config / 'network/gateway.json').is_file() and hub_health(self.config) and not network_status(self.config):
@@ -282,8 +360,14 @@ class Backend:
                 subprocess.run([sys.executable, '-m', 'venv', str(target)],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=120,
                                **child_options())
-            subprocess.run([interpreter(self.root), '-m', 'pip', 'install', '--disable-pip-version-check',
-                            '-r', str(self.root / 'requirements.txt')], check=True, timeout=600,
+            uv=shutil.which('uv')
+            if uv:
+                install=[uv,'pip','install','--python',interpreter(self.root),'-r',str(self.root/'requirements.txt')]
+            else:
+                has_pip=subprocess.run([interpreter(self.root),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options()).returncode==0
+                if not has_pip:subprocess.run([interpreter(self.root),'-m','ensurepip','--upgrade'],check=True,timeout=90,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options())
+                install=[interpreter(self.root),'-m','pip','install','--disable-pip-version-check','-r',str(self.root/'requirements.txt')]
+            subprocess.run(install, check=True, timeout=600,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **child_options())
             self.dependency_cache = (0, None)
             return 'prepared'
@@ -327,16 +411,8 @@ class Backend:
             self.await_service(network=True)
             return 'network_started'
         if action == 'autostart':
-            if os.name != 'nt':
-                raise SetupError('autostart_windows_only')
-            python = Path(interpreter(self.root))
-            pythonw = python.with_name('pythonw.exe')
-            result = subprocess.run(['powershell.exe', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
-                                     str(self.root / 'windows-services.ps1'), '-Action', 'Install',
-                                     '-Python', str(pythonw if pythonw.exists() else python)],
-                                    capture_output=True, timeout=30, **child_options())
-            if result.returncode:
-                raise SetupError('autostart_failed')
+            from console_login import enable
+            enable(self.root)
             return 'autostart_enabled'
         if action == 'firewall':
             if os.name != 'nt':
@@ -356,6 +432,9 @@ class Backend:
             raise SetupError('unknown_action')
         with self.lock:
             if self.job and self.job['state'] == 'running':
+                raise SetupError('job_busy')
+            plan = self.setup.public()
+            if any(plan.get('steps', {}).get(k, {}).get('state') == 'running' for k in ('environment', 'autostart', 'connection')):
                 raise SetupError('job_busy')
             self.job = {'id': uuid.uuid4().hex, 'action': action, 'state': 'running', 'result': None}
         def work():

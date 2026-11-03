@@ -1,32 +1,9 @@
-# Bundled Snowball console
+# Bundled local console
 
-For opening device setup, connecting hardware or configuring Wi-Fi, use the
-bundled local console. Do not send users to a developer's fixed localhost port.
+For device setup use the installed package's authenticated local launcher, not a fixed developer port. Explicit setup requests use `python3 <plugin-root>/scripts/open_console.py --setup` (Windows: `python -X utf8`), then follow [automatic-setup.md](automatic-setup.md). Keep observing and carrying out the account Pet lane; opening the page alone is not completion.
 
-Run `python3 <plugin-root>/scripts/open_console.py` (Windows: `python -X utf8`).
-This opens the recipient's registered local console using an authenticated
-discovery record. If it is missing, guide them to the full package's `codex/`
-directory: Windows double-clicks `Open-Snowball.cmd`; Linux/macOS runs
-`./open-console.sh`. Keep the package in a fixed directory. Do not invent a
-working URL when no local service exists. The Windows installer creates a
-desktop shortcut named 雪球控制台.
+For inspection or merely opening the existing console omit `--setup`; it does not start installation. If the entry is missing, resolve the complete package: `codex/` for Codex; `console/` for Claude/Cursor. Windows double-clicks `Open-Snowball.cmd`, Linux/macOS runs `./open-console.sh`. Keep the package in a fixed PC directory. Do not invent a working URL.
 
-Follow [the first-use flow](first-use.md): 准备电脑 → 连接雪球 → 确认同步 → 可选功能.
-The console is the main guide. Send the user to the device only for physical
-confirmation or hands-on practice, and tell them when to return. Wi-Fi is optional
-and must not come between BLE binding and the first real status check.
-Prepare dependencies before asking the user to open the device pairing window.
-An existing valid binding is reused, never silently overwritten. Wi-Fi secrets
-should normally be entered in the console, not pasted into chat. Confirm the
-device's own provisioning result rather than treating an accepted HTTP request
-as saved credentials or successful Wi-Fi synchronization.
+All choices and progress are in the webpage: automatic setup → connection → verify sync → optional network. Direct the user to the physical device only when its pairing confirmation or subsequent gesture practice requires it; say when to return. Passwords stay in the local webpage. Existing identity and services are reused, never silently overwritten.
 
-For Windows, the console supports the existing current-user login task and an
-explicit, scoped private-LAN firewall helper. UAC remains a user decision. Never
-approve the UAC prompt, disable the firewall, or start multiple bridge instances.
-The console has no firmware flashing, eFuse programming or credential reset API.
-Remote cloud service registration is separate from entering a remote URL.
-
-Opening the console does not activate account Pets, approve Hooks or prove live
-AI events. Preserve the existing lifecycle scopes and report each requested
-capability separately. For Pet-only setup, keep using the Pets workflow.
+Windows uses the current-user login task and a separate explicit private-LAN firewall helper; UAC remains the user's decision. Linux checks owned systemd user services, macOS autostart is explicitly unsupported. The webpage has no firmware flashing, eFuse or credential reset API. Account Pet verification uses the agent's real Pets tools and private receipts, never a browser success button. Preserve separate lifecycle scopes.

@@ -5,20 +5,26 @@
 <header><a class="brand" href="/"><img src="/snowball.png" alt="雪球"><span>Snowball <small>COMPANION</small></span></a><span class="local-badge"><i></i>这台电脑上的控制台</span></header>
 <main>
 <aside><p class="eyebrow">LET’S GET CONNECTED</p><h1>让雪球<br>连上你的世界。</h1><p class="intro">从第一次见面，到工作时的陪伴。<br>配置看电脑，练习看雪球。</p><nav aria-label="配置步骤">
-<button data-step="0" aria-current="step"><span>01</span><b>准备电脑</b><i id="mark-0"></i></button>
+<button data-step="0" aria-current="step"><span>01</span><b>自动配置</b><i id="mark-0"></i></button>
 <button data-step="1"><span>02</span><b>连接雪球</b><i id="mark-1"></i></button>
 <button data-step="2"><span>03</span><b>确认同步</b><i id="mark-2"></i></button>
-<button data-step="3"><span>04</span><b>可选功能</b><i id="mark-3"></i></button>
+<button data-step="3"><span>04</span><b>网络设置</b><i id="mark-3"></i></button>
 </nav><div class="mentor"><img src="/snowball.png" alt=""><p id="mentor">我准备好了，慢慢来就好。</p></div><p class="version" id="version">随插件提供 · 本地运行</p></aside>
 <section class="workspace" aria-label="设备配置">
 <div class="status-strip"><span id="hub-chip">电脑服务 · 检查中</span><span id="device-chip">雪球 · 检查中</span><span id="route-chip">连接 · 检查中</span></div>
-<div class="where-card" aria-live="polite"><span id="where-label">现在看电脑控制台</span><p id="where-action">先准备环境，不用急着在设备上配对。</p></div>
+<div class="where-card" aria-live="polite"><span id="where-label">现在看电脑控制台</span><p id="where-action">自动配置在本页开始，涉及设备操作时会明确提示。</p></div>
 <div id="notice" role="status" aria-live="polite" hidden></div>
-<article data-panel="0"><p class="eyebrow">FIRST, YOUR COMPUTER</p><h2>先把电脑准备好</h2><p class="lead">控制台已随插件安装。先完成依赖下载，再去雪球开启配对。以后双击“雪球控制台”即可回来。</p>
+<article data-panel="0"><p class="eyebrow">FIRST, YOUR COMPUTER</p><h2>配置交给我，在这里看进度</h2><p class="lead">通过插件 Setup 打开后，自动准备语音、桌宠和登录自启动。已有配置会先检查并复用；首次下载需要联网。</p>
+<div class="setup-summary" role="status"><b id="setup-heading">准备开始</b><p id="setup-detail">从插件 Setup 打开时会自动开始，也可以在这里启动。</p></div>
+<label id="adapter-field">使用的软件<select id="setup-adapter"><option value="codex">Codex</option><option value="claude">Claude Code</option><option value="cursor">Cursor</option></select></label>
+<div class="checks setup-checks" id="setup-checks"></div>
+<div class="setup-options"><label>本地语音模型<select id="setup-model"><option value="auto">沿用已有模型 · 新用户默认 Base</option><option value="base">Base · 约 148 MB · 轻量</option><option value="tiny">Tiny · 约 78 MB · 最小</option><option value="small">Small · 约 486 MB · 较大</option></select></label><p class="quiet">SD 卡内的 Base 模型会优先校验并导入电脑，拔线后仍可使用。以上是模型下载体积，不含 Python 依赖。更小模型的中文和专有名词识别需要实际试听；录音保留在电脑本地。</p><label id="pet-choice-field">账号桌宠<select id="setup-character"><option value="auto">沿用当前宠物 · 首次使用雪球</option></select></label><p class="quiet">桌宠由 agent 使用当前账号的 Pets 接口安装，网页实时显示回执。需要授权时会在这里提示。</p></div>
+<button class="primary" id="setup-start">开始自动配置</button>
+<details><summary>手动检查连接环境</summary>
 <div class="checks" id="dependency-checks"></div><p class="hint">如果这台电脑已有雪球服务，会优先复用已有连接和配对。</p>
 <div class="actions"><button class="primary" id="prepare">准备连接环境</button><button class="secondary" id="start-services">启动连接服务</button></div>
 <p class="quiet">首次准备需要联网下载 Python 依赖，可能需要几分钟。无需安装 Node.js。</p>
-<div class="next-row"><span>环境准备好后，就可以与雪球见面了。</span><button class="text-button" data-next="1">下一步：连接雪球 →</button></div></article>
+</details><div class="next-row"><span>连接服务就绪后即可绑定设备，语音可以继续在后台准备。</span><button class="text-button" data-next="1">下一步：连接雪球 →</button></div></article>
 <article data-panel="1" hidden><p class="eyebrow">HELLO, SNOWBALL</p><h2>连接你的雪球</h2><p class="lead">第一次通过 USB 确认设备身份，以后由蓝牙自动连接。</p>
 <div id="bound-card" class="soft-card" hidden><span class="card-label">已绑定的设备</span><strong id="device-name"></strong><p>这次可以复用配对信息。</p><button class="primary" id="connect-existing">连接已绑定的雪球</button></div>
 <div id="bind-card"><p class="hint">准备就绪后再按以下步骤操作。设备首次教程已在“连接电脑”时，无需退出教程。</p><ol class="instructions"><li><b>先在电脑接上 USB 数据线</b><span>把雪球连接到这台电脑并开机。</span></li><li><b>现在看雪球：开启配对</b><span>设置 → 更多 → 连接电脑 → 开启配对。核对蓝牙名称，窗口持续两分钟。</span></li><li><b>回电脑控制台：绑定</b><span>刷新并核对下方串口，勾选后点“绑定这台雪球”。只在系统蓝牙里配对还不算完成。</span></li></ol>
@@ -26,7 +32,7 @@
 <label class="checkbox"><input id="pairing-open" type="checkbox">我已在雪球上开启配对，并核对了这台设备</label><button class="primary" id="bind" disabled>绑定这台雪球</button></div>
 <div class="next-row"><span>绑定后先确认蓝牙和会话同步；Wi-Fi 可以稍后配置。</span><button class="text-button" data-next="2">下一步：确认同步 →</button></div></article>
 <article data-panel="3" hidden><p class="eyebrow">A LITTLE MORE FREEDOM</p><h2>需要时，再开启更多陪伴</h2><p class="lead">蓝牙同步已能日常使用。下面的 Wi-Fi 设置可以跳过；语音和桌宠也不影响基础连接。</p>
-<details><summary>语音和桌宠怎么开启？</summary><p>需要语音时，在 Codex 会话说“配置雪球语音”；需要账号桌宠时说“安装雪球桌宠”。它们是单独的可选项，无需重新配对。配置后回“确认同步”查看状态，并按提示在设备实测。</p></details>
+<p class="hint">语音、桌宠和登录自启动在“自动配置”中统一完成；这里填写网络信息即可。</p>
 <div id="gateway-card" class="soft-card"><b>准备这台电脑的局域网入口</b><p>选择电脑与雪球所在局域网的地址。只为设备建立加密同步连接。</p><label>电脑的局域网地址<select id="lan-address"><option value="">正在检测</option></select></label><button class="secondary" id="init-network">准备局域网同步</button></div>
 <div class="window-hint" id="window-hint"><span>在雪球上打开</span><b>设置 → 更多 → 连接电脑 → Wi-Fi 配网</b><p>保持页面打开，电脑就能安全传送配置。</p></div>
 <details id="firewall-card" hidden><summary>Windows 连上 Wi-Fi 后仍无法同步？</summary><p>请先确认电脑和雪球在同一局域网，家庭网络已设为“专用网络”。下面的操作只允许本安装的网关在专用网络接收局域网连接；Windows 会请求管理员确认。</p><button type="button" class="secondary" id="firewall">允许本安装的局域网连接</button></details>
@@ -38,9 +44,9 @@
 <article data-panel="2" hidden><p class="eyebrow">READY TO KEEP YOU COMPANY</p><h2>先确认同步，再回雪球练习</h2><p class="lead">留在这里看检查结果。蓝牙连接和会话同步分开确认；Wi-Fi 不影响这一步。</p><div class="checks" id="diagnostics"></div>
 <div class="soft-card" id="next-check"><b id="check-title">等待设备连接</b><p id="check-action">请先完成“连接雪球”。</p></div>
 <details><summary>设备上会练习什么？</summary><p>连接确认后，在雪球点“继续练习”。依次试试摸摸、吃西瓜、滑动看设置、会话、待答和状态；做对后雪球会回应并自动继续。</p><p>练习题不会发送真实回答。语音、真实回答是否可用，要看下面各自的检查结果。</p></details>
-<details><summary>回答和语音：分别确认</summary><div class="checks" id="capability-checks"></div><p>需要这些功能时，回到 Codex 会话说“检查雪球回答通道”或“配置雪球语音”。完成后再回此页。Claude / Cursor 的状态同步不代表支持 Codex 的回答投递。</p></details>
-<div id="autostart-card" class="soft-card" hidden><b>下次登录，也自动来陪你</b><p>在 Windows 登录后启动后台服务。电脑睡眠或关机时，服务会暂停。</p><button class="secondary" id="autostart">启用 Windows 登录自启</button></div>
-<div class="next-row"><span>基础连接到这里就可以使用。Wi-Fi、语音、桌宠按需开启。</span><button class="text-button" data-next="3">可选功能 →</button></div></article>
+<details><summary>回答和语音：分别确认</summary><div class="checks" id="capability-checks"></div><p>语音和桌宠的配置结果在“自动配置”中查看；失败可直接在网页重试。Claude / Cursor 的状态同步不代表支持 Codex 的回答投递。</p></details>
+<div id="autostart-card" class="soft-card" hidden><b>下次登录，也自动来陪你</b><p>自动配置会检查登录自启动。电脑睡眠或关机时，服务会暂停。</p><button class="secondary" id="autostart">检查登录自启动</button></div>
+<div class="next-row"><span>基础连接到这里就可以使用。语音、桌宠配置在后台继续。</span><button class="text-button" data-next="3">网络设置 →</button></div></article>
 </section>
 </main><footer><span>Snowball Companion · 只在这台电脑上提供设置</span><span>再次打开：桌面“雪球控制台”或安装目录中的启动器</span></footer>
 </body></html>

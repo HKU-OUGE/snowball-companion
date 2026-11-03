@@ -4,6 +4,7 @@ from array import array
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
 from pathlib import Path
 import numpy as np
+from speech_profiles import profile_for
 
 RATE=16000
 MAX_SAMPLES=RATE*20
@@ -38,12 +39,12 @@ def decode(request):
     return np.frombuffer(raw,dtype='<i2').astype(np.float32)/32768
 
 class Recognizer:
-    def __init__(self,model,language='auto'):
+    def __init__(self,model,language='auto',profile='existing'):
         from faster_whisper import WhisperModel
         from opencc import OpenCC
         self.simplify=OpenCC('t2s')
         self.model=WhisperModel(str(model),device='cpu',compute_type='int8',cpu_threads=min(8,os.cpu_count() or 2),num_workers=1,local_files_only=True)
-        self.lock=threading.Lock();self.language=language
+        self.lock=threading.Lock();self.language=language;self.profile=profile
     def transcribe(self,request):
         audio=decode(request)
         started=time.monotonic()
@@ -62,7 +63,7 @@ class Recognizer:
             if len(text)>256 or len(text.encode())>768:raise ValueError('speech_too_long')
             diagnostic('transcribed',elapsed=round(time.monotonic()-started,3),characters=len(text),
                 language=info.language,speech_seconds=round(info.duration_after_vad,3))
-            return {'text':text,'language':info.language,'duration':len(audio)/RATE,'engine':'faster-whisper-small-local'}
+            return {'text':text,'language':info.language,'duration':len(audio)/RATE,'engine':'faster-whisper-'+self.profile+'-local'}
         finally:self.lock.release()
 
 class Handler(BaseHTTPRequestHandler):
@@ -76,10 +77,31 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.authorized():return self.reply(403,{'error':'local_only'})
         if self.path!='/v1/health':return self.reply(404,{'error':'not_found'})
-        self.reply(200,{'ready':True,'engine':'faster-whisper-small-local','max_seconds':20})
+        self.reply(200,{'ready':not self.server.changing,'engine':'faster-whisper-'+self.server.recognizer.profile+'-local',
+                        'profile':self.server.recognizer.profile,'busy':self.server.recognizer.lock.locked(),'max_seconds':20,'reload_supported':True})
     def do_POST(self):
         if not self.authorized():return self.reply(403,{'error':'local_only'})
+        if self.path=='/v1/reload':
+            self.connection.settimeout(10)
+            if self.headers.get('Content-Length')!='16' or self.headers.get('Content-Type')!='application/json' or self.headers.get('Transfer-Encoding'):
+                return self.reply(400,{'error':'invalid_request'})
+            if self.rfile.read(16)!=b'{"reload": true}':return self.reply(400,{'error':'invalid_request'})
+            if not self.server.reload_lock.acquire(False):return self.reply(409,{'error':'speech_busy'})
+            previous=self.server.recognizer
+            if not previous.lock.acquire(False):
+                self.server.reload_lock.release();return self.reply(409,{'error':'speech_busy'})
+            self.server.changing=True
+            try:
+                config=json.loads(self.server.config_path.read_text())
+                candidate=Recognizer(Path(config['model']),config.get('language','auto'),profile_for(config))
+                self.server.recognizer=candidate
+                return self.reply(200,{'ready':True,'profile':candidate.profile})
+            except Exception:
+                return self.reply(503,{'error':'speech_unavailable'})
+            finally:
+                self.server.changing=False;previous.lock.release();self.server.reload_lock.release()
         if self.path!='/v1/transcribe':return self.reply(404,{'error':'not_found'})
+        if self.server.changing:return self.reply(409,{'error':'speech_busy'})
         try:
             lengths=self.headers.get_all('Content-Length',[])
             if self.headers.get('Transfer-Encoding') or len(lengths)!=1 or not lengths[0].isdigit():raise ValueError('invalid_audio')
@@ -101,9 +123,10 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('--config',type=Path,default=Path.home()/'.config/xueqiu/speech.json');a=p.parse_args()
     config=json.loads(a.config.read_text());model=Path(config['model']).expanduser()
     if not (model/'model.bin').is_file():raise SystemExit('Local speech model missing; run setup-speech.py.')
-    recognizer=Recognizer(model,config.get('language','auto'))
+    recognizer=Recognizer(model,config.get('language','auto'),profile_for(config))
     token=(Path.home()/'.config/xueqiu/hub-token').read_text().strip()
     server=ThreadingHTTPServer(('127.0.0.1',4191),Handler);server.token=token;server.recognizer=recognizer
+    server.config_path=a.config;server.changing=False;server.reload_lock=threading.Lock()
     print('Snowball local speech ready; audio stays on this computer.',flush=True)
     try:server.serve_forever()
     except KeyboardInterrupt:pass

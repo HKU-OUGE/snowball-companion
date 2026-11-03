@@ -50,8 +50,12 @@ def register(root=ROOT, python=None):
                                       'python': str(Path(python or sys.executable).resolve())}).encode())
 
 
-def open_console(browser=True, root=ROOT):
+def open_console(browser=True, root=ROOT, setup=False, adapter='codex'):
     url = active_url()
+    if setup and url:
+        from console_upgrade import ensure_setup_console
+        ensure_setup_console(STATE, root)
+        url = active_url()
     if not url:
         from console_backend import interpreter
         private_dir(STATE)
@@ -91,6 +95,9 @@ def open_console(browser=True, root=ROOT):
         connection.close()
     if browser:
         webbrowser.open(url, new=2)
+    if setup:
+        from setup_agent import begin
+        begin(adapter)
     return url
 
 
@@ -98,6 +105,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', nargs='?', choices=['open', 'register'], default='open')
     parser.add_argument('--no-browser', action='store_true')
+    parser.add_argument('--setup', action='store_true')
+    parser.add_argument('--adapter', choices=('codex', 'claude', 'cursor', 'device'), default='codex')
     args = parser.parse_args()
     if os.name == 'nt':
         from windows_app_endpoint import remember_current_endpoint
@@ -107,7 +116,8 @@ def main():
         print('Snowball console entry registered.')
     else:
         register()
-        print(open_console(not args.no_browser))
+        url = open_console(not args.no_browser, setup=args.setup, adapter=args.adapter)
+        print(url if args.no_browser else url.split('#', 1)[0])
 
 
 if __name__ == '__main__':

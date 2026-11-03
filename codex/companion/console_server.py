@@ -12,7 +12,7 @@ import time
 from console_backend import Backend, SetupError, ROOT, STATE
 from private_files import private_dir, private_file, private_write
 
-VERSION = '0.5.6'
+VERSION = '0.5.7'
 ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
           '/console.css': ('console.css', 'text/css; charset=utf-8'),
           '/console.js': ('console.js', 'text/javascript; charset=utf-8'),
@@ -96,6 +96,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-Type', content_type)
         self.send_header('Content-Length', str(len(body)))
+        if code >= 400:
+            self.send_header('Connection', 'close')
+            self.close_connection = True
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'no-referrer')
@@ -141,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
             self.local()
             if self.path == '/health':
                 self.launcher_auth()
-                return self.reply(200, {'app': 'snowball-console', 'protocol': 1, 'version': VERSION})
+                return self.reply(200, {'app': 'snowball-console', 'protocol': 1, 'version': VERSION, 'automatic_setup': True})
             if self.path in ASSETS:
                 name, content_type = ASSETS[self.path]
                 return self.reply(200, (self.server.assets / name).read_bytes(), content_type)
@@ -158,7 +161,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            if self.path == '/launch':
+            if self.path in ('/launch', '/agent/setup'):
                 self.launcher_auth()
             elif self.path == '/api/bootstrap':
                 self.local()
@@ -188,6 +191,8 @@ class Handler(BaseHTTPRequestHandler):
                 if data:
                     raise SetupError('invalid_request')
                 return self.reply(200, {'ticket': self.server.issue_ticket()})
+            if self.path == '/agent/setup':
+                return self.reply(200, self.server.backend.setup.agent(data))
             if self.path == '/api/bootstrap':
                 if set(data) != {'ticket'}:
                     raise SetupError('invalid_request')
@@ -196,6 +201,15 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, {'ok': True, 'session': self.server.consume_ticket(data['ticket'])})
             if self.path == '/api/provision':
                 return self.reply(200, self.server.backend.provision(data))
+            if self.path == '/api/setup':
+                operation = data.get('operation')
+                if operation == 'start' and set(data) == {'operation', 'adapter'}:
+                    return self.reply(202, self.server.backend.setup.start(data['adapter']))
+                if operation in ('retry', 'skip') and set(data) == {'operation', 'feature'}:
+                    return self.reply(202, self.server.backend.setup.edit(operation, name=data['feature']))
+                if operation in ('character', 'speech_model') and set(data) == {'operation', 'value'}:
+                    return self.reply(202, self.server.backend.setup.edit(operation, character=data['value']))
+                raise SetupError('invalid_request')
             if self.path == '/api/action':
                 action = data.pop('action', None)
                 schemas = {'prepare': set(), 'services': set(), 'bind': {'port', 'pairing_open'},

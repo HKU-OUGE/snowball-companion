@@ -5,7 +5,7 @@ from private_files import private_dir, private_file
 
 
 def acquire(name, state=None):
-    if name not in ('bridge',):
+    if name not in ('bridge', 'speech-setup'):
         raise ValueError('Unknown runtime lock')
     directory = private_dir(state or Path.home() / '.local/state/xueqiu')
     path = directory / (name + '-instance.lock')

@@ -30,9 +30,20 @@ class NativeWindowsConsole(unittest.TestCase):
         parser = self.root / 'parse.ps1'
         parser.write_text("param([string]$Source)\n$tokens=$null;$errors=$null;[System.Management.Automation.Language.Parser]::ParseFile($Source,[ref]$tokens,[ref]$errors)|Out-Null;if($errors.Count){$errors|ForEach-Object{Write-Error $_};exit 1};Write-Output 'parsed'\n", encoding='utf-8')
         for script in ('Open-Snowball.ps1', 'install-windows.ps1', 'tools/install_console_shortcut.ps1',
-                       'companion/windows-services.ps1', 'companion/windows-lan-access.ps1'):
+                       'companion/windows-services.ps1', 'companion/windows-lan-access.ps1', 'companion/windows-login-info.ps1', 'companion/windows-console-control.ps1'):
             with self.subTest(script=script):
                 self.assertEqual(self.powershell(parser, '-Source', ROOT / script), 'parsed')
+
+    def test_login_inspection_plan_is_read_only_and_user_scoped(self):
+        value=json.loads(self.powershell(ROOT/'companion/windows-login-info.ps1','-Plan'))
+        self.assertTrue(value['userOnly'])
+        self.assertFalse(value['mutation'])
+
+    def test_console_control_plan_is_exact_and_user_scoped(self):
+        value=json.loads(self.powershell(ROOT/'companion/windows-console-control.ps1','-Runtime',self.root,'-Plan'))
+        self.assertTrue(value['currentUserOnly'])
+        self.assertTrue(value['exactlyOne'])
+        self.assertFalse(value['stopRequested'])
 
     def fake_entry(self):
         (self.root / 'companion').mkdir()
