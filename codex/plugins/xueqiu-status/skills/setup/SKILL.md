@@ -24,6 +24,10 @@ before opening its two-minute window. Complete-reset requests must account for
 owned background services, login autostart and both OS/app pairing; adapter-only
 removal does not validate a new computer's first connection.
 
+## Open device setup or Wi-Fi provisioning
+
+For a hardware connection, Wi-Fi setup or “打开雪球控制台”, read [local console](references/local-console.md) and use `scripts/open_console.py`. The full package includes the console and launcher; do not require a Vite server or tell recipients to use a developer-only localhost port. Pet-only requests continue with the workflow below.
+
 ## Choose a character
 
 1. Resolve the plugin root as `../..` relative to the directory containing this SKILL.md. Run `python3 <plugin-root>/scripts/pet_setup.py list`. This lists stable character IDs, names, and actual installability. For an unspecified first setup use `snowball`. If the user asks to browse, show the catalog and distinguish pending artwork from installable characters. If the user asks for a specific character, map its name to the catalog ID. Joseph Joestar is **old Joseph from Stardust Crusaders**, not young Joseph. Never claim a pending portrait is an installable animated Pet.

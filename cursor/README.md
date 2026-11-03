@@ -97,3 +97,7 @@ python3 -m venv ~/.local/share/snowball-companion/venv
 在仓库根目录运行 `python3 -m unittest discover -s tests -v`。自动化测试使用隔离的本地服务和测试凭据，不代表 Cursor 或硬件端到端验证。
 
 本仓库尚未指定开源许可证；第三方 Python 依赖各自遵循其许可证。
+
+## 设备控制台
+
+本平台 v0.2.2 分发包在最外层的 `console/` 同时提供通用设备控制台。Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`，无需安装 Codex。仓库源码入口位于 `../codex/`。详见[控制台指南](../docs/CONSOLE.md)。控制台可在原生 Windows 运行；本适配器的 Windows Hooks 支持边界不因此改变。已有 Hub、配对和服务会优先复用。

@@ -82,3 +82,7 @@ python3 -m venv ~/.local/share/snowball-companion/venv
 - [Marketplace 与本地安装](https://code.claude.com/docs/en/plugin-marketplaces)
 
 本项目是独立的第三方插件，与 Anthropic 官方插件无隶属关系。
+
+## 打开设备控制台
+
+完整分发包的 `console/` 目录提供网页和运行时：Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。首次打开会登记入口；之后 Setup 可通过 `scripts/open_console.py` 再次打开。控制台只在本机运行，无需开发服务器，也不要求安装 Codex。配网与设备连接按向导完成；本适配器的 Windows Hooks 支持范围保持原说明。

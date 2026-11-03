@@ -6,18 +6,18 @@
 
 **第一次使用，请从 [新手指南](docs/START-HERE.md) 开始。** 已安装用户请先看 [升级与卸载](docs/INSTALLATION.md)，保留已有配对与共享服务。
 
-当前安装包为 **v0.5.3**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
+当前安装包为 **v0.5.4**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
 
 | 软件 | 下载 | 说明 |
 | --- | --- | --- |
-| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Codex.zip) | [Codex 0.5.3](codex/README.md) |
-| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
-| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Claude.zip) | [Claude 0.2.1](claude/README.md) |
-| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.3/Snowball-Cursor.zip) | [Cursor 0.2.1](cursor/README.md) |
+| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Codex.zip) | [Codex 0.5.4](codex/README.md) |
+| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
+| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Claude.zip) | [Claude 0.2.2](claude/README.md) |
+| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Cursor.zip) | [Cursor 0.2.2](cursor/README.md) |
 
 每个 ZIP 有配套 `.sha256` 文件，Release 同时提供 `SHA256SUMS`。解压后保留完整目录，不要只复制单个 Hook。Core 构建时强制小于 8,000,000 字节。若要从设备 USB 安装盘复制这些包，需要相应设备固件；本仓库不声称已经部署该固件。
 
-新固件的手动蓝牙更新需要新版电脑插件：Codex 0.5.1、Claude／Cursor 0.2.1。新版兼容老设备的 v1 协议。设备 SD 安装盘中的旧离线包没有被本次源码更新替换；从离线包安装后，请联网按 [升级说明](docs/INSTALLATION.md) 更新插件。
+新固件的手动蓝牙更新需要新版电脑插件：Codex 0.5.1、Claude／Cursor 0.2.2。新版兼容老设备的 v1 协议。设备 SD 安装盘中的旧离线包没有被本次源码更新替换；从离线包安装后，请联网按 [升级说明](docs/INSTALLATION.md) 更新插件。
 
 ## 能力与验证边界
 
@@ -56,3 +56,9 @@ python3 -m pytest -q tools/test_plugin_bundles.py
 Codex 原生 Windows 可使用 `codex/install-windows.ps1`；硬件绑定和登录自动重连
 参见[Windows 安装流程](docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。
 仅安装插件/启用桌宠不会启动硬件服务。本次源码修复不代表已发布新版 Release 或安装包。
+
+## 内置设备控制台
+
+完整包和 Core 包都随附控制台网页、启动器和局域网同步服务。Windows 安装 Codex 后可从桌面“雪球控制台”打开；也可在 Codex 包的 `codex/` 或 Claude／Cursor 包的 `console/` 双击 `Open-Snowball.cmd`。Linux/macOS 使用 `./open-console.sh`。无需 Node.js 或开发服务器，向导会带着完成 USB 身份绑定、蓝牙、Wi-Fi 配网和连接检查。详见[控制台使用指南](docs/CONSOLE.md)。
+
+控制台可以独立于 Codex 运行；各 AI 适配器的 Hooks 支持范围仍按平台说明分别核对。

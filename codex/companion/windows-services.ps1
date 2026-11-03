@@ -28,7 +28,7 @@ if ($Action -eq 'Install') {
     if ($existing) { Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue }
     # Stop only this user's processes with one of this runtime's exact script paths.
     $sid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User.Value
-    $scripts = @('windows_supervisor.py','status_hub.py','bridge.py') | ForEach-Object { Join-Path $PSScriptRoot $_ }
+    $scripts = @('windows_supervisor.py','status_hub.py','bridge.py','console_server.py','network_gateway.py') | ForEach-Object { Join-Path $PSScriptRoot $_ }
     foreach ($process in (Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'")) {
         $matchesScript = $false
         foreach ($script in $scripts) {

@@ -142,6 +142,25 @@ def test_three_adapters_keep_separate_entrypoints_and_versions():
         assert 'activity_ticker' not in source
         doctor=(ROOT/platform/relative/'scripts/control.py').read_text()
         assert "'version': '"+builder.VERSIONS[platform]+"'" in doctor
+
+
+def test_every_distribution_contains_the_complete_portable_console():
+    for platform in builder.VERSIONS:
+        files = builder.bundle_inputs(ROOT, platform, core=platform == 'codex')
+        prefix = 'codex/' if platform == 'codex' else 'console/'
+        for name in ('Open-Snowball.cmd', 'Open-Snowball.ps1', 'open-console.sh',
+                     'companion/console_server.py', 'companion/console_launcher.py',
+                     'companion/console_backend.py', 'companion/network_gateway.py',
+                     'companion/private_files.py', 'companion/windows_file_lock.py',
+                     'companion/runtime_lock.py', 'companion/windows_supervisor.py',
+                     'companion/windows-services.ps1', 'companion/windows-lan-access.ps1',
+                     'companion/requirements.txt', 'companion/console_assets/index.html',
+                     'companion/console_assets/console.css', 'companion/console_assets/console.js',
+                     'companion/console_assets/snowball.png'):
+            assert prefix + name in files, (platform, name)
+        assert json.loads(files['BUNDLE.json'])['console_included'] is True
+        assert b'Vite' not in files[prefix + 'companion/console_assets/index.html']
+        assert 'docs/CONSOLE.md' in files
     assert 'docs/OTA-DOWNLOAD-PLAN.md' not in builder.source_lists(ROOT)['common']
 
 

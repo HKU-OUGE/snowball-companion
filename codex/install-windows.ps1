@@ -13,6 +13,7 @@ $pythonExe = (Get-Command $Python -ErrorAction Stop).Source
 if ($LASTEXITCODE -ne 0) { throw 'Cannot inspect installed Snowball plugins.' }
 & $pythonExe -X utf8 (Join-Path $PSScriptRoot 'tools/install_plugin.py') --codex $codex --market-root $PSScriptRoot
 if ($LASTEXITCODE -ne 0) { throw 'Plugin installation failed; old Hook restoration was attempted.' }
+& (Join-Path $PSScriptRoot 'tools/install_console_shortcut.ps1') -Python $pythonExe
 if ($Device -or $AutoReconnect) {
     $venv = Join-Path $PSScriptRoot '.venv'
     if (-not (Test-Path (Join-Path $venv 'Scripts/python.exe'))) {
@@ -39,4 +40,5 @@ if ($Device -or $AutoReconnect) {
     }
 }
 & $codex plugin list --marketplace xueqiu-local --json
+Write-Output 'Open the Snowball Console desktop shortcut, or double-click Open-Snowball.cmd in this folder. The bundled wizard prepares dependencies, binds USB/Bluetooth, configures Wi-Fi and checks the real connection.'
 Write-Output 'Plugin registered. Setup/trust is not per-chat. Use the current chat composer Review hooks button. For the global Settings list, add this fixed repository once through File > Open folder; an empty no-project list does not imply missing installation. Verify real events after user review. Review changed definitions and run Setup to verify the account Pet; hardware connection is checked separately.'

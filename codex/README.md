@@ -1,4 +1,8 @@
-# Snowball Companion · 0.5.3
+# Snowball Companion · 0.5.4
+
+## 0.5.4：随插件提供的设备控制台
+
+Windows 安装完成后，桌面会出现 **雪球控制台**。也可双击本目录的 `Open-Snowball.cmd`，或在插件 Setup 中说“打开雪球控制台”；Linux/macOS 使用 `./open-console.sh`。网页和服务随包提供，无需 Node.js 或开发服务器。向导包含依赖准备、USB 身份绑定、蓝牙服务、加密 Wi-Fi 配网和真实连接诊断。已有配对和共享服务优先复用。详见[控制台指南](../docs/CONSOLE.md)。
 
 ## 0.5.3：Windows 并发同步修复
 
@@ -52,7 +56,7 @@ Windows 原生回归、USB/BLE 实机测试和未验收范围见[验证记录](d
 ./install.sh
 ```
 
-本安装器需要 Python 3 和 Codex CLI，使用 Unix 文件锁，已在本机 Linux 验证。Windows 使用 `install-windows.ps1`，需要硬件与登录后自动重连时加 `-Device -Port COMx -AutoReconnect`；详见[安装说明](../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。Windows 已完成单机 USB/BLE 验证，macOS 尚未实机验证。
+本安装器需要 Python 3 和 Codex CLI，使用 Unix 文件锁，已在本机 Linux 验证。Windows 使用 `install-windows.ps1`，需要硬件与登录后自动重连时加 `-Device -Port COMx -AutoReconnect`；详见[安装说明](../docs/INSTALLATION.md#windows-原生安装与自动重连2026-11-03)。Windows 已完成单机 USB/BLE 验证，macOS 尚未实机验证。
 
 稳定技术 ID 仍为 `xueqiu-status@xueqiu-local`，以保留现有安装、设备配对和私有状态。显示名称为 **Snowball Companion**。升级器保留旧会话仍引用的 Hook 脚本，不改写 Hook 信任。若宿主要求审阅新的/变化的 Hooks，请在 `/hooks` 中按提示完成；重新加载插件后运行设置。不要为了加载插件中断正在运行的任务。
 

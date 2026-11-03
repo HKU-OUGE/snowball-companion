@@ -15,6 +15,12 @@ Windows 请使用下方专门流程，不要套用 Linux 命令。最后核对�
 安装插件与启用账号里的 ChatGPT Pet 也是两个动作。只有 Codex 版提供现有的
 Pet Setup 流程；Claude / Cursor 主要同步状态，不能把它们安装成功写成桌宠已创建。
 
+## 设备配置入口
+
+分发包 v0.5.4 随包提供[雪球控制台](CONSOLE.md)。Codex 包位于 `codex/`，Claude / Cursor 包位于 `console/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。Codex Windows 安装器会创建桌面入口，插件 Setup 也可以打开已登记的控制台。先完成依赖准备，再通过 USB 绑定、蓝牙连接和 Wi-Fi 配网。
+
+控制台本身支持 Windows；Claude / Cursor 适配器的原生 Windows Hooks 仍保持各自已有的支持边界。普通适配器卸载保留共享控制台及服务；完整移除时才核对本安装的快捷方式、登录任务和可选防火墙规则。
+
 ## 安装前检查
 
 将仓库放在固定位置，确认 `codex/`、`claude/`、`cursor/` 三个目录齐全。

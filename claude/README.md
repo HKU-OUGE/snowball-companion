@@ -39,3 +39,7 @@ claude plugin list
 共享的 Snowball Hub、配对凭据、设备与其他软件集成继续保留。删除插件目录前核对现有服务的 `ExecStart`，避免删掉其他客户端仍在使用的共享运行时。插件状态位于用户的 `~/.config/xueqiu/hook-state/claude-code-plugin/`，不放在插件缓存中。
 
 完整功能、前提、状态语义、数据边界与首次设备配置见 [插件说明](plugins/snowball-companion/README.md)。验证边界见 `VALIDATION.json`。ZIP 不包含账号、会话记录、Wi-Fi 密码、设备密钥或签名私钥。
+
+## 设备控制台
+
+本平台 v0.2.2 分发包在最外层的 `console/` 同时提供通用设备控制台。Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`，无需安装 Codex。仓库源码入口位于 `../codex/`。详见[控制台指南](../docs/CONSOLE.md)。控制台可在原生 Windows 运行；本适配器的 Windows Hooks 支持边界不因此改变。已有 Hub、配对和服务会优先复用。

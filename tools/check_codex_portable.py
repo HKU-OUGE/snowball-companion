@@ -12,6 +12,7 @@ COMPANION = [
     'test_session_capacity', 'test_sidebar_tasks', 'test_speech',
     'test_speech_relay', 'test_speech_scheduling', 'test_status_hub',
     'test_windows', 'test_windows_app_pipe', 'test_portable_imports',
+    'test_console', 'test_network', 'test_network_tls', 'test_console_windows',
 ]
 
 def main():

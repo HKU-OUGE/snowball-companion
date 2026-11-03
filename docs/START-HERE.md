@@ -4,7 +4,7 @@
 
 ## 1. 下载对应插件
 
-先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 核对 v0.5.1 是否已发布，再下载对应 ZIP；也可以克隆源码。解压后保留全部目录。新固件的手动蓝牙更新需要 Codex 0.5.1 或 Claude／Cursor 0.2.1 插件；新版仍兼容老设备 v1 协议。
+先在 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases) 核对 v0.5.4 是否已发布，再下载对应 ZIP；也可以克隆源码。解压后保留全部目录。新固件的手动蓝牙更新需要 Codex 0.5.1 或 Claude／Cursor 0.2.1 插件；新版仍兼容老设备 v1 协议。
 
 | 软件 | 安装包 | 解压后进入 |
 | --- | --- | --- |
@@ -47,6 +47,9 @@ claude plugin install snowball-companion@snowball-local --scope user
 **Cursor：**进入 `cursor/`，按目录内 README 将 `snowball-companion/` 安装到 `~/.cursor/plugins/local/`。目标存在时先核对并备份，不混合覆盖新旧文件。等任务结束后重载窗口，在插件设置页核对加载。
 
 ## 3. 可选：连接雪球圆屏
+
+推荐打开随包提供的[雪球控制台](CONSOLE.md)，按四步向导完成准备、连接、Wi-Fi 配网与检查。Codex 包中的入口位于 `codex/`；Claude / Cursor 包位于 `console/`。Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。这项设备设置不需要安装 Codex，也不要求启动开发服务器。
+
 
 需要运行兼容 Snowball 固件的设备、电脑依赖及本机 Hub。插件包没有设备固件、配对密钥或 Wi-Fi 密码，也不会刷写设备。不要把任意 ESP32 的串口当成雪球。
 
@@ -100,4 +103,4 @@ USB/BLE 绑定不包含语音模型；「开始录音」不可点击或提示「
 实体设备首次安装按[逐步引导](../codex/plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
 先准备依赖，再连接 USB 数据线、核对串口并启用设备**「开始配对」**，完成 USB/BLE 绑定与登录自启。
 “等待已配对电脑重连”需要电脑端桥接持续运行，单独启用桌宠不会自动连接硬件。
-详见[Windows 完整说明](INSTALLATION.md#windows-原生安装与自动重连2026-11-02)。
+详见[Windows 完整说明](INSTALLATION.md#windows-原生安装与自动重连2026-11-03)。

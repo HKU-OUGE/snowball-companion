@@ -152,6 +152,10 @@ def main():
     args = parser.parse_args()
     try:
         install(args.codex, args.market_root.resolve())
+        launcher = args.market_root.resolve() / 'companion/console_launcher.py'
+        if launcher.is_file():
+            subprocess.run([sys.executable, '-X', 'utf8', str(launcher), 'register'], check=True)
+            print('Device setup: open Open-Snowball.cmd on Windows or ./open-console.sh on Linux/macOS. The bundled console handles USB binding, Bluetooth, Wi-Fi and diagnostics; no development server is needed.')
     except subprocess.CalledProcessError as error:
         print(f'Codex installation failed (exit {error.returncode}); old hook restoration was attempted.', file=sys.stderr)
         return error.returncode if error.returncode > 0 else 1

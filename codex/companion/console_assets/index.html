@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>雪球控制台 · Snowball Companion</title><link rel="icon" href="/snowball.png"><link rel="stylesheet" href="/console.css"><script src="/console.js" defer></script></head>
+<body>
+<header><a class="brand" href="/"><img src="/snowball.png" alt="雪球"><span>Snowball <small>COMPANION</small></span></a><span class="local-badge"><i></i>这台电脑上的控制台</span></header>
+<main>
+<aside><p class="eyebrow">LET’S GET CONNECTED</p><h1>让雪球<br>连上你的世界。</h1><p class="intro">从第一次见面，到工作时的陪伴。<br>我们一步一步来。</p><nav aria-label="配置步骤">
+<button data-step="0" aria-current="step"><span>01</span><b>准备电脑</b><i id="mark-0"></i></button>
+<button data-step="1"><span>02</span><b>连接雪球</b><i id="mark-1"></i></button>
+<button data-step="2"><span>03</span><b>Wi-Fi 设置</b><i id="mark-2"></i></button>
+<button data-step="3"><span>04</span><b>连接检查</b><i id="mark-3"></i></button>
+</nav><div class="mentor"><img src="/snowball.png" alt=""><p id="mentor">我准备好了，慢慢来就好。</p></div><p class="version" id="version">随插件提供 · 本地运行</p></aside>
+<section class="workspace" aria-label="设备配置">
+<div class="status-strip"><span id="hub-chip">电脑服务 · 检查中</span><span id="device-chip">雪球 · 检查中</span><span id="route-chip">连接 · 检查中</span></div>
+<div id="notice" role="status" aria-live="polite" hidden></div>
+<article data-panel="0"><p class="eyebrow">FIRST, YOUR COMPUTER</p><h2>先把电脑准备好</h2><p class="lead">控制台已随插件安装。准备一次依赖，之后双击入口就能再次打开。</p>
+<div class="checks" id="dependency-checks"></div><p class="hint">如果这台电脑已有雪球服务，会优先复用已有连接和配对。</p>
+<div class="actions"><button class="primary" id="prepare">准备连接环境</button><button class="secondary" id="start-services">启动连接服务</button></div>
+<p class="quiet">首次准备需要联网下载 Python 依赖，可能需要几分钟。无需安装 Node.js。</p>
+<div class="next-row"><span>环境准备好后，就可以与雪球见面了。</span><button class="text-button" data-next="1">下一步：连接雪球 →</button></div></article>
+<article data-panel="1" hidden><p class="eyebrow">HELLO, SNOWBALL</p><h2>连接你的雪球</h2><p class="lead">第一次通过 USB 确认设备身份，以后由蓝牙自动连接。</p>
+<div id="bound-card" class="soft-card" hidden><span class="card-label">已绑定的设备</span><strong id="device-name"></strong><p>这次可以复用配对信息。</p><button class="primary" id="connect-existing">连接已绑定的雪球</button></div>
+<div id="bind-card"><ol class="instructions"><li><b>接上 USB 数据线</b><span>把雪球连接到这台电脑并开机。</span></li><li><b>在雪球开启配对</b><span>设置 → 更多 → 连接电脑 → 开启配对。窗口持续两分钟。</span></li></ol>
+<div class="field-row"><label>检测到的雪球串口<select id="ports"><option value="">先点击刷新串口</option></select></label><button class="secondary" id="refresh-ports">刷新串口</button></div>
+<label class="checkbox"><input id="pairing-open" type="checkbox">我已在雪球上开启配对，并核对了这台设备</label><button class="primary" id="bind" disabled>绑定这台雪球</button></div>
+<div class="next-row"><span>确认绑定后，继续配置可选的 Wi-Fi。</span><button class="text-button" data-next="2">下一步：Wi-Fi 设置 →</button></div></article>
+<article data-panel="2" hidden><p class="eyebrow">A LITTLE MORE FREEDOM</p><h2>让雪球连上 Wi-Fi</h2><p class="lead">靠近电脑时继续用蓝牙。离开蓝牙范围后，可以通过 Wi-Fi 保持同步。</p>
+<div id="gateway-card" class="soft-card"><b>准备这台电脑的局域网入口</b><p>选择电脑与雪球所在局域网的地址。只为设备建立加密同步连接。</p><label>电脑的局域网地址<select id="lan-address"><option value="">正在检测</option></select></label><button class="secondary" id="init-network">准备局域网同步</button></div>
+<div class="window-hint" id="window-hint"><span>在雪球上打开</span><b>设置 → 更多 → 连接电脑 → Wi-Fi 配网</b><p>保持页面打开，电脑就能安全传送配置。</p></div>
+<details id="firewall-card" hidden><summary>Windows 连上 Wi-Fi 后仍无法同步？</summary><p>请先确认电脑和雪球在同一局域网，家庭网络已设为“专用网络”。下面的操作只允许本安装的网关在专用网络接收局域网连接；Windows 会请求管理员确认。</p><button type="button" class="secondary" id="firewall">允许本安装的局域网连接</button></details>
+<form id="wifi-form" autocomplete="off"><div class="field-grid"><label>2.4 GHz Wi-Fi 名称<input id="ssid" required maxlength="32" placeholder="输入 Wi-Fi 名称" spellcheck="false"></label><label>Wi-Fi 密码<input id="password" type="password" required minlength="8" maxlength="63" autocomplete="new-password" placeholder="输入 Wi-Fi 密码"></label></div>
+<label>日常连接方式<select id="mode"><option value="1">自动切换 · 蓝牙优先（推荐）</option><option value="2">优先 Wi-Fi · 立即验证局域网同步</option></select></label>
+<details><summary>可选：远程同步入口</summary><p>跨互联网同步还需要电脑端的云连接服务与设备身份注册。此向导先完成局域网连接；填写地址不会自动开通云服务。</p><label>已配置的 HTTPS 网关<input id="remote" type="url" maxlength="191" placeholder="https://api.snowball.pet:443"></label></details>
+<div class="submit-row"><button class="primary" id="provision" disabled>加密传送到雪球</button><span id="provision-hint">等待蓝牙和配网窗口</span></div><p class="quiet">密码仅用于本次加密传输，不保存到网页、网址或安装包。</p></form>
+<div class="next-row"><span>看到“配置已加密保存”后，再检查连接。</span><button class="text-button" data-next="3">下一步：连接检查 →</button></div></article>
+<article data-panel="3" hidden><p class="eyebrow">READY TO KEEP YOU COMPANY</p><h2>看看是否都连接好了</h2><p class="lead">配对、连接和状态同步分别检查，进展会在这里自动更新。</p><div class="checks" id="diagnostics"></div>
+<div id="autostart-card" class="soft-card" hidden><b>下次登录，也自动来陪你</b><p>在 Windows 登录后启动后台服务。电脑睡眠或关机时，服务会暂停。</p><button class="secondary" id="autostart">启用 Windows 登录自启</button></div>
+<p class="hint">自动模式下显示“蓝牙优先，Wi-Fi 休眠”是正常的。想立即验证 Wi-Fi，可在雪球的 Wi-Fi 页点击“优先 Wi-Fi”。</p><button class="text-button" data-next="2">← 返回网络设置</button></article>
+</section>
+</main><footer><span>Snowball Companion · 只在这台电脑上提供设置</span><span>再次打开：桌面“雪球控制台”或安装目录中的启动器</span></footer>
+</body></html>

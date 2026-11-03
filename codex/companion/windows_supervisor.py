@@ -18,6 +18,18 @@ CONFIG = Path.home() / '.config/xueqiu'
 TASK_NAME = 'Snowball Companion Auto Reconnect'
 
 
+def running():
+    if sys.platform != 'win32' or not (STATE / 'supervisor.lock').is_file():
+        return False
+    from windows_file_lock import flock, LOCK_EX, LOCK_NB
+    with (STATE / 'supervisor.lock').open('a+b') as handle:
+        try:
+            flock(handle, LOCK_EX | LOCK_NB)
+            return False
+        except BlockingIOError:
+            return True
+
+
 def hub_healthy(config=CONFIG):
     connection = http.client.HTTPConnection('127.0.0.1', 4190, timeout=2)
     try:
@@ -37,6 +49,8 @@ def hub_healthy(config=CONFIG):
 
 def child_arguments(name, state=None):
     if name == 'status_hub':
+        return []
+    if name == 'console_server':
         return []
     if name == 'bridge':
         state = state or Path.home() / '.local/state/xueqiu/hub'
@@ -70,6 +84,12 @@ def main():
             creationflags=subprocess.CREATE_NO_WINDOW)
     try:
         while True:
+            # A configured console is reopened on login without launching a browser.
+            # It reuses existing authenticated services and owns optional LAN setup.
+            if (CONFIG / 'console-installation.json').is_file():
+                from console_launcher import active_url
+                if not active_url() and ('console_server' not in children or children['console_server'].poll() is not None):
+                    launch('console_server')
             # Adopt an authenticated, already-running Hub instead of duplicating it.
             if not hub_healthy() and ('status_hub' not in children or children['status_hub'].poll() is not None):
                 launch('status_hub')

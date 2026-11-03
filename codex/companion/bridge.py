@@ -925,7 +925,18 @@ def main():
     if args.command == 'pair-usb':
         pair_usb(args.port, args.config)
     else:
-        asyncio.run(run(args))
+        handle = None
+        if args.command == 'watch':
+            from runtime_lock import acquire
+            handle = acquire('bridge')
+            if handle is None:
+                print('Snowball bridge is already running; reusing the existing transport.')
+                return
+        try:
+            asyncio.run(run(args))
+        finally:
+            if handle is not None:
+                handle.close()
 
 
 if __name__ == '__main__':

@@ -14,13 +14,13 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = '0.5.3'
-VERSIONS = {'codex': '0.5.3', 'claude': '0.2.1', 'cursor': '0.2.1'}
+RELEASE = '0.5.4'
+VERSIONS = {'codex': '0.5.4', 'claude': '0.2.2', 'cursor': '0.2.2'}
 LABELS = {'codex': 'Codex', 'claude': 'Claude', 'cursor': 'Cursor'}
 FIXED_TIME = (2026, 11, 1, 0, 0, 0)
 CORE_LIMIT = 8_000_000
 MANIFEST = 'tools/plugin_bundle_files.json'
-COMMON = {'AGENTS.md', 'docs/INSTALLATION.md', 'docs/START-HERE.md', 'docs/UPDATES.md'}
+COMMON = {'AGENTS.md', 'docs/INSTALLATION.md', 'docs/START-HERE.md', 'docs/UPDATES.md', 'docs/CONSOLE.md'}
 PRIVATE_NAMES = {'hub-token', 'ble-pairing.json', 'gateway.json', 'cloud.json', 'credentials.json', 'snapshot.json', '.env'}
 BLOCKED_PARTS = {'.git', 'node_modules', '__pycache__', '.pytest_cache', 'qa', 'work', 'logs', 'firmware', 'web', 'cloud', 'dist', 'build'}
 BLOCKED_SUFFIXES = {'.key', '.pem', '.aesgcm', '.sqlite', '.sqlite3', '.db', '.log', '.jsonl', '.pyc', '.bin', '.zip'}
@@ -99,6 +99,18 @@ def bundle_inputs(root, platform, core=False):
     manifest = source_lists(root)
     names = manifest['common'] + manifest['platforms'][platform]
     files = {name: read_source(root, name) for name in names if not core or core_keep(name)}
+    if platform != 'codex':
+        # One reviewed source for the portable device console. The generated
+        # packages include it beside the adapter, without replacing that
+        # adapter's existing runtime or broadening its host-OS support claims.
+        entrypoints = {'codex/Open-Snowball.cmd', 'codex/Open-Snowball.ps1', 'codex/open-console.sh'}
+        for name in manifest['platforms']['codex']:
+            if name.startswith('codex/companion/') or name in entrypoints:
+                files['console/' + name[len('codex/'):]] = read_source(root, name)
+        files['console/README.md'] = ('# Snowball device console\n\n'
+            'Windows: double-click Open-Snowball.cmd. Linux/macOS: run ./open-console.sh.\n'
+            'The console prepares its own Python environment and reuses existing shared services.\n'
+            'It does not install Codex, approve Hooks, or change the adapter platform support.\n').encode()
     plugin = {'codex': 'codex/plugins/xueqiu-status/.codex-plugin/plugin.json',
               'claude': 'claude/plugins/snowball-companion/.claude-plugin/plugin.json',
               'cursor': 'cursor/snowball-companion/.cursor-plugin/plugin.json'}[platform]
@@ -112,10 +124,11 @@ def bundle_inputs(root, platform, core=False):
             raise ValueError('Missing default Snowball character')
         files[name] = encoded(catalog)
         files['codex/README.md'] = (
-            '# Snowball Companion · Codex Core 0.5.3\n\n'
-            '本包仅含雪球基础 Pet、Codex Hooks 和电脑伴随运行时，不含其他角色、音频或网页。\n\n'
+            '# Snowball Companion · Codex Core 0.5.4\n\n'
+            '本包仅含雪球基础 Pet、Codex Hooks 和电脑伴随运行时，不含其他角色或角色音频；包含设备控制台网页。\n\n'
             'Linux 执行 `./install.sh`，Windows 执行 `install-windows.ps1`；新开聊天后运行插件 Setup，账号 Pet 仍需宿主 Pets 服务验证。\n\n'
             '[新手指南](../docs/START-HERE.md) · [安装与卸载](../docs/INSTALLATION.md) · [设备更新](../docs/UPDATES.md)\n\n'
+            '设备连接与 Wi-Fi 配网：双击 `Open-Snowball.cmd`（Windows）或运行 `./open-console.sh`，也可在插件 Setup 中打开雪球控制台。控制台已随包提供，无需 Node.js 或开发服务器。\n\n'
             '使用更多角色时，用完整版升级同一个 `xueqiu-status@xueqiu-local` 插件，不并排安装两份。\n'
         ).encode()
         files['codex/plugins/xueqiu-status/README.md'] = (
@@ -128,12 +141,13 @@ def bundle_inputs(root, platform, core=False):
     files['README.md'] = (
         f'# Snowball Companion · {label}\n\n分发版本 {RELEASE}；平台插件版本 {VERSIONS[platform]}。\n\n'
         f'先看 [新手指南](docs/START-HERE.md)，再进入 [{platform}/]({platform}/README.md) 安装。\n\n'
+        f'设备配置：[雪球控制台指南](docs/CONSOLE.md)。控制台入口位于 `{ "codex" if platform == "codex" else "console" }/`；Windows 双击 `Open-Snowball.cmd`，Linux/macOS 运行 `./open-console.sh`。\n\n'
         '本包不安装或更新设备固件。USB 安装盘需要相应固件，不能凭此 ZIP 声称已部署。\n\n'
         '文件完整性见 FILES.sha256.json；账号授权、配对及依赖由接收者完成。\n'
     ).encode()
     files['BUNDLE.json'] = encoded({'schema': 1, 'release': RELEASE, 'platform': platform,
         'plugin_version': VERSIONS[platform], 'flavor': 'core' if core else 'full',
-        'firmware_included': False, 'credentials_included': False, 'usb_storage_firmware_included': False})
+        'firmware_included': False, 'credentials_included': False, 'usb_storage_firmware_included': False, 'console_included': True, 'console_version': RELEASE})
     return files
 
 
