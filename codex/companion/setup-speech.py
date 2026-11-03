@@ -65,11 +65,17 @@ def main():
     packages=['faster-whisper==1.2.1','huggingface-hub>=0.25,<3','opencc-python-reimplemented==0.1.7','socksio==1.0.0']
     progress('speech_dependencies')
     uv=shutil.which('uv')
-    if uv:
-        if not (env/'pyvenv.cfg').exists():subprocess.run([uv,'venv','--allow-existing','--python',sys.executable,str(env)],check=True)
-        subprocess.run([uv,'pip','install','--python',str(python),*packages],check=True)
+    if not python.exists():venv.EnvBuilder(with_pip=True).create(env)
+    from offline_resources import pip_args
+    offline=pip_args(python,'speech',packages)
+    if offline:
+        if subprocess.run([str(python),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+            subprocess.run([str(python),'-m','ensurepip','--upgrade'],check=True)
+        subprocess.run(offline,check=True)
+    elif uv:subprocess.run([uv,'pip','install','--python',str(python),*packages],check=True)
     else:
-        if not python.exists():venv.EnvBuilder(with_pip=True).create(env)
+        if subprocess.run([str(python),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode:
+            subprocess.run([str(python),'-m','ensurepip','--upgrade'],check=True)
         subprocess.run([str(python),'-m','pip','install',*packages],check=True)
     progress('speech_model')
     code='''from huggingface_hub import snapshot_download

@@ -4,7 +4,7 @@
 
 Skill 打开控制台后自动准备连接环境、当前用户登录自启动、连接服务、本地语音与账号 Pet。所有选择、进度、重试和跳过集中在网页；账号 Pet 必须由 agent 经真实 Pets 接口核验。已有服务、模型与配对复用，普通打开页面不自动安装。Windows 使用原生计划任务及进程归属检查；Linux 使用用户服务；macOS 自启显示不适用。
 
-新用户默认多语言 Base（约 148 MB），可选 Tiny（约 78 MB）或 Small（约 486 MB），已有 Small 不自动降级。若挂载的 SD 卡包含固定 Base 模型，则校验后导入电脑缓存；Python 依赖另行准备。原有语音模型与录音投递功能保持独立检查。
+新用户默认多语言 Base（约 148 MB），可选 Tiny（约 78 MB）或 Small（约 486 MB），已有 Small 不自动降级。挂载 SD 后优先校验并导入对应模型和系统依赖到电脑缓存；依赖按 Windows x64、Linux x64、Apple Silicon Mac、Intel Mac 以及 Python 3.12 / 3.13 区分。提供独立 Python 3.13.18 作为缺少完整解释器时的准备资源。原有语音模型与录音投递功能保持独立检查，系统驱动和 AI 软件授权仍需单独完成。详见 [SD 离线资源](../codex/docs/OFFLINE-RESOURCES.md)。
 
 Codex 插件版本 0.5.7，Claude/Cursor 适配器版本 0.2.4。本次插件包不包含模型、设备固件、个人凭据或 SD 资源，也不会自动刷机。整卡 USB 存储需要对应固件。
 

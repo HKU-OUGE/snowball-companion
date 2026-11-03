@@ -18,7 +18,7 @@
 <div class="setup-summary" role="status"><b id="setup-heading">准备开始</b><p id="setup-detail">从插件 Setup 打开时会自动开始，也可以在这里启动。</p></div>
 <label id="adapter-field">使用的软件<select id="setup-adapter"><option value="codex">Codex</option><option value="claude">Claude Code</option><option value="cursor">Cursor</option></select></label>
 <div class="checks setup-checks" id="setup-checks"></div>
-<div class="setup-options"><label>本地语音模型<select id="setup-model"><option value="auto">沿用已有模型 · 新用户默认 Base</option><option value="base">Base · 约 148 MB · 轻量</option><option value="tiny">Tiny · 约 78 MB · 最小</option><option value="small">Small · 约 486 MB · 较大</option></select></label><p class="quiet">SD 卡内的 Base 模型会优先校验并导入电脑，拔线后仍可使用。以上是模型下载体积，不含 Python 依赖。更小模型的中文和专有名词识别需要实际试听；录音保留在电脑本地。</p><label id="pet-choice-field">账号桌宠<select id="setup-character"><option value="auto">沿用当前宠物 · 首次使用雪球</option></select></label><p class="quiet">桌宠由 agent 使用当前账号的 Pets 接口安装，网页实时显示回执。需要授权时会在这里提示。</p></div>
+<div class="setup-options"><label>本地语音模型<select id="setup-model"><option value="auto">沿用已有模型 · 新用户默认 Base</option><option value="base">Base · 约 148 MB · 轻量</option><option value="tiny">Tiny · 约 78 MB · 最小</option><option value="small">Small · 约 486 MB · 较大</option></select></label><p class="quiet">SD 卡内的模型与当前系统依赖会优先校验并导入电脑，拔线后仍可使用。以上是模型下载体积，不含 Python 依赖。更小模型的中文和专有名词识别需要实际试听；录音保留在电脑本地。</p><label id="pet-choice-field">账号桌宠<select id="setup-character"><option value="auto">沿用当前宠物 · 首次使用雪球</option></select></label><p class="quiet">桌宠由 agent 使用当前账号的 Pets 接口安装，网页实时显示回执。需要授权时会在这里提示。</p></div>
 <button class="primary" id="setup-start">开始自动配置</button>
 <details><summary>手动检查连接环境</summary>
 <div class="checks" id="dependency-checks"></div><p class="hint">如果这台电脑已有雪球服务，会优先复用已有连接和配对。</p>

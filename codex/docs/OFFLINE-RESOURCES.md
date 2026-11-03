@@ -1,0 +1,22 @@
+# SD 卡离线资源
+
+资源目录为 `Snowball-Setup/`。先把对应平台插件 ZIP 复制到电脑固定目录并完整解压，再让 agent 通过 Setup 打开电脑控制台。用户只在网页看选择、进度、重试；设备上的首次教程负责物理确认和手势练习。
+
+| 目录 | 用途 |
+| --- | --- |
+| `speech-models/tiny/` | 多语言 Tiny，约 78 MB |
+| `speech-models/base/` | 多语言 Base，约 148 MB，新安装默认 |
+| `speech-models/small/` | 多语言 Small，约 486 MB，已有安装保留 |
+| `offline/wheels/windows-x64-py312/`、`py313/` | Windows x64 的连接与识别依赖 |
+| `offline/wheels/linux-x64-py312/`、`py313/` | Linux x64 的连接与识别依赖 |
+| `offline/wheels/macos-arm64-py312/`、`py313/` | Apple Silicon macOS 14+ 的依赖 |
+| `offline/wheels/macos-x64-py312/`、`py313/` | Intel macOS 15+ 的依赖；加密库已通过项目原生构建、认证和本地 TLS 测试 |
+| `offline/python/` | CPython 3.13.18 独立运行时，不覆盖系统 Python |
+
+模型和依赖先依据插件自带的固定 SHA-256 清单校验，再复制到电脑私有缓存。pip 使用 `--no-index --require-hashes` 从匹配的依赖集合安装；模型在电脑上做 CPU INT8 识别，ESP32 只录音和显示文字。复制完成并安全弹出后，语音和状态同步不依赖 SD 盘符。
+
+模型数据可由全部系统共用。依赖按真实操作系统、CPU 和 Python 小版本区分，不能把 Windows 目录拿给 Linux，或在 Intel Mac 使用 ARM 包。没有完整匹配且可校验的集合时，自动配置回到正常联网安装。旧版识别进程无法安全热切换时保留原配置，等待 agent 按归属和空闲状态更新。
+
+Linux 系统的 BlueZ、系统动态库和操作系统蓝牙驱动不属于 Python 包。AI 软件安装、账号登录、宿主 Hooks/Pets 授权仍在对应软件里完成。提供安装资源不代表每一种电脑都已做实物蓝牙、麦克风和登录启动验收。
+
+固件的整卡 USB 存储与只读 USB 安装盘是两种模式。整卡模式容量由实际 SD 卡决定，电脑可读写全部卡内文件；设备暂时停止卡内资源/日志读写，用完先在电脑安全弹出。只读安装盘是 8 MiB 公共镜像，只放小型插件包及说明，完整语音模型和依赖位于整张卡上。不要从可拔出的盘符长期运行后台程序。

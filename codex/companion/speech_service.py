@@ -95,11 +95,13 @@ class Handler(BaseHTTPRequestHandler):
                 config=json.loads(self.server.config_path.read_text())
                 candidate=Recognizer(Path(config['model']),config.get('language','auto'),profile_for(config))
                 self.server.recognizer=candidate
-                return self.reply(200,{'ready':True,'profile':candidate.profile})
+                status,body=200,{'ready':True,'profile':candidate.profile}
             except Exception:
-                return self.reply(503,{'error':'speech_unavailable'})
+                status,body=503,{'error':'speech_unavailable'}
             finally:
                 self.server.changing=False;previous.lock.release();self.server.reload_lock.release()
+            # Publish completion only after the busy flags and locks agree.
+            return self.reply(status,body)
         if self.path!='/v1/transcribe':return self.reply(404,{'error':'not_found'})
         if self.server.changing:return self.reply(409,{'error':'speech_busy'})
         try:

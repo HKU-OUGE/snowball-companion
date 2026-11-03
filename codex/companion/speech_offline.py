@@ -1,4 +1,4 @@
-"""Import the pinned Base model from a mounted Snowball SD card, never execute from it."""
+"""Import pinned speech models from a mounted SD card into private PC storage."""
 import ctypes
 import hashlib
 import json
@@ -30,16 +30,16 @@ def checked_file(path,entry):
 
 
 def import_available(profile,roots=None,cache=None):
-    if profile!='base':return None
-    manifest=json.loads(Path(__file__).with_name('speech-base-manifest.json').read_text(encoding='utf-8'))
+    if profile not in ('base','tiny','small'):return None
+    manifest=json.loads(Path(__file__).with_name('speech-'+profile+'-manifest.json').read_text(encoding='utf-8'))
     cache=private_dir(cache or Path.home()/'.cache/xueqiu/speech-offline')
     target=cache/(profile+'-'+manifest['revision'])
     if all(checked_file(target/name,item) for name,item in manifest['files'].items()):return target
     for root in mounted_roots() if roots is None else roots:
-        source=Path(root)/'Snowball-Setup/speech-models/base'
+        source=Path(root)/'Snowball-Setup/speech-models'/profile
         if source.is_symlink() or not source.is_dir():continue
         if not all(checked_file(source/name,item) for name,item in manifest['files'].items()):continue
-        temporary=Path(tempfile.mkdtemp(prefix='.base-',dir=cache))
+        temporary=Path(tempfile.mkdtemp(prefix='.'+profile+'-',dir=cache))
         try:
             for name,item in manifest['files'].items():
                 shutil.copyfile(source/name,temporary/name)

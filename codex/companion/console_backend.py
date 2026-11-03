@@ -360,8 +360,14 @@ class Backend:
                 subprocess.run([sys.executable, '-m', 'venv', str(target)],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=120,
                                **child_options())
+            from offline_resources import pip_args
+            offline=pip_args(interpreter(self.root),'connection',[],self.root/'requirements.txt')
             uv=shutil.which('uv')
-            if uv:
+            if offline:
+                has_pip=subprocess.run([interpreter(self.root),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options()).returncode==0
+                if not has_pip:subprocess.run([interpreter(self.root),'-m','ensurepip','--upgrade'],check=True,timeout=90,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options())
+                install=offline
+            elif uv:
                 install=[uv,'pip','install','--python',interpreter(self.root),'-r',str(self.root/'requirements.txt')]
             else:
                 has_pip=subprocess.run([interpreter(self.root),'-c','import pip'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,**child_options()).returncode==0

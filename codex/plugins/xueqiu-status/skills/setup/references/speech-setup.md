@@ -9,7 +9,7 @@
 
 新用户默认 Base（约 148 MB），Tiny 约 78 MB，Small 约 486 MB；已有 Small 不自动换小。模型文件体积不包含 Python 依赖，CPU INT8 执行不等于下载文件也是 INT8。更小模型的中文准确度需要实际试录，不作未经测试的保证。
 
-SD 卡中的 `Snowball-Setup/speech-models/base/` 若已通过整卡 U盘或读卡器挂载，安装器优先校验并复制固定 Base 模型到电脑缓存。检测 Windows 原生盘符、Linux 用户挂载点和 macOS /Volumes；没有可验证的文件才联网下载。识别在电脑运行，不在 ESP32 上加载 Whisper；拔线后仍可工作。
+SD 卡中的 `Snowball-Setup/speech-models/base/` 若已通过整卡 U盘或读卡器挂载，安装器优先校验并复制所选固定模型到电脑缓存。检测 Windows 原生盘符、Linux 用户挂载点和 macOS /Volumes；没有可验证的文件才联网下载。识别在电脑运行，不在 ESP32 上加载 Whisper；拔线后仍可工作。
 
 ## 先界定能力
 

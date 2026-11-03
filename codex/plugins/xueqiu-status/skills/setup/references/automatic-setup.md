@@ -87,3 +87,9 @@ Physical USB connection and firmware-required device confirmation cannot be done
 by pretending the user touched the screen. Keep instructions in the webpage;
 the user only visits the device to perform the specified physical action. Wi-Fi
 name/password are entered in the webpage. No second chat checklist is required.
+
+## Offline resources and interpreter fallback
+
+Mounted SD resources are preferred to network downloads. `offline/wheels/` has separate hash-pinned manifests for the actual OS, CPU and Python minor version; do not substitute another platform or skip validation. Tiny/Base/Small model files are shared across systems. Dependencies and models are copied into private PC caches before installation/use.
+
+If dependency preparation fails because the system interpreter lacks venv/ensurepip, use the verified SD archive via `companion/offline_resources.py --prepare-python`. It prints an owned interpreter path, not a credential. Use that interpreter to finish the owned environment preparation and retry the same webpage step; preserve unrelated Python environments. Do not ask the user to run a second command tutorial. A matching portable Python archive does not supply OS Bluetooth drivers/BlueZ or AI account authorization.
