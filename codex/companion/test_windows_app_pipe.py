@@ -76,6 +76,62 @@ class ConfirmedAnswerTests(unittest.TestCase):
 
 @unittest.skipUnless(os.name == 'nt', 'Windows named pipes')
 class NativePipeTests(unittest.TestCase):
+    def test_background_handoff_and_stale_inherited_endpoint_use_real_pipe(self):
+        import _winapi
+        from pathlib import Path
+        import windows_app_endpoint as handoff
+        for stale in (False, True):
+            received=[]
+            def respond(handle):
+                head,_=_winapi.ReadFile(handle,4)
+                body,_=_winapi.ReadFile(handle,struct.unpack('<I',head)[0])
+                received.append(json.loads(body))
+                data=json.dumps({'jsonrpc':'2.0','id':1,'result':{'tools':[
+                    {'name':'send_message_to_thread','namespace':'codex_app'}]}}).encode()
+                _winapi.WriteFile(handle,struct.pack('<I',len(data))+data)
+            name,errors=self.server(respond)
+            with self.subTest(stale=stale),tempfile.TemporaryDirectory() as folder:
+                with patch.object(handoff,'receipt_path',return_value=Path(folder)/'endpoint.json'):
+                    with patch.dict(os.environ,CODEX_APP_TOOLS_PIPE_PATH=name):
+                        self.assertTrue(handoff.remember_current_endpoint())
+                    inherited=r'\\.\pipe\codex-app-tools-'+str(uuid.uuid4()) if stale else ''
+                    with patch.dict(os.environ,CODEX_APP_TOOLS_PIPE_PATH=inherited),patch('windows_app_pipe.verify_server'):
+                        self.assertTrue(AppTools().available())
+                    self.assertEqual([r['method'] for r in received],['tools/list'])
+                    self.assertEqual(errors,[])
+
+    def test_new_host_handoff_invalidates_cached_unavailable_immediately(self):
+        from pathlib import Path
+        import windows_app_endpoint as handoff
+        names=[r'\\.\pipe\codex-app-tools-'+str(uuid.uuid4()) for _ in range(2)]
+        with tempfile.TemporaryDirectory() as folder,patch.object(handoff,'receipt_path',return_value=Path(folder)/'endpoint.json'):
+            with patch.dict(os.environ,CODEX_APP_TOOLS_PIPE_PATH=names[0]):handoff.remember_current_endpoint()
+            with patch.dict(os.environ,CODEX_APP_TOOLS_PIPE_PATH=''):
+                app=AppTools()
+                with patch.object(app,'rpc',side_effect=AppToolError('desktop_app_unavailable')):
+                    self.assertFalse(app.available())
+                with patch.dict(os.environ,CODEX_APP_TOOLS_PIPE_PATH=names[1]):handoff.remember_current_endpoint()
+                with patch.object(app,'rpc',return_value={'tools':[{'name':'send_message_to_thread','namespace':'codex_app'}]}) as rpc:
+                    self.assertTrue(app.available())
+                    self.assertEqual(rpc.call_count,1)
+
+    def test_old_probe_cannot_override_a_new_host_result(self):
+        started,release=threading.Event(),threading.Event()
+        app=AppTools()
+        def slow(*_):
+            started.set();release.wait(2)
+            raise AppToolError('desktop_app_unavailable')
+        with patch('windows_app_endpoint.candidates',return_value=('old',)),patch.object(app,'rpc',side_effect=slow):
+            thread=threading.Thread(target=app.available);thread.start()
+            self.assertTrue(started.wait(1))
+            try:
+                with patch('windows_app_endpoint.candidates',return_value=('new',)),patch.object(app,'rpc',return_value={'tools':[{'name':'send_message_to_thread','namespace':'codex_app'}]}):
+                    self.assertTrue(app.available())
+                    release.set();thread.join(3)
+                    self.assertTrue(app.available())
+            finally:
+                release.set();thread.join(3)
+
     def test_concurrent_health_probe_is_false_until_verified(self):
         started,release=threading.Event(),threading.Event()
         app=AppTools();results=[]

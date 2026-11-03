@@ -80,7 +80,7 @@ Windows 原生回归、USB/BLE 实机测试和未验收范围见[验证记录](d
 「布置任务」「追加指令」或「语音回答」时，按[语音初始化与排错](plugins/xueqiu-status/skills/setup/references/speech-setup.md)
 检查并安装服务，分别验证录音、识别和确认后的送达。Windows 确认发送使用
 [经过身份校验的应用命名管道](plugins/xueqiu-status/skills/setup/references/windows-send.md)，
-需继承当前宿主端点；普通异步问题回答带准确问题标识走同一管道，需独立验收。
+v0.5.5 的 Hook/Setup 会把当前宿主端点交接给后台 Hub；普通异步问题回答带准确问题标识走同一管道，需独立验收。
 蓝牙或识别就绪不代表任务已送达，回答接收不代表桌面问题卡片已收起。
 
 不连接 ESP32 也能使用雪球 Pet。只有需要桌面圆屏上的实时会话状态时，才启动 companion 内的 Hub 和 BLE 服务。连接步骤、字段隐私、排序与心跳规则见 [设备状态说明](docs/DEVICE_STATUS.md)。当前会话名称属于用户授权的显示元数据，仅额外支持用户授权的显式提问标题，不发送答案、对话历史、代码或其他工具正文。

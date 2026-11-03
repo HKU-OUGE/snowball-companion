@@ -1,19 +1,18 @@
 """Bounded byte-stream transport to the current user's installed Codex app.
 
-Only the host-injected endpoint is used. No pipe enumeration or credential reads.
+Only host-injected endpoints or their private handoff are used. No enumeration.
 The connected server must belong to the current user and the Store installation.
 """
 import os
 import re
 import time
 from pathlib import Path
+from windows_app_endpoint import candidates
 
 
 def endpoint():
-    value = os.environ.get('CODEX_APP_TOOLS_PIPE_PATH', '')
-    if re.fullmatch(r'\\\\\.\\pipe\\codex-app-tools-[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}', value):
-        return value
-    return None
+    values = candidates()
+    return values[0] if values else None
 
 
 def verify_server(handle):
@@ -67,7 +66,7 @@ def verify_server(handle):
 class WindowsAppPipe:
     def __init__(self, path, timeout=20):
         import _winapi
-        if path != endpoint():
+        if path not in candidates():
             raise OSError('App endpoint was not supplied by this host')
         self.handle = _winapi.CreateFile(path, 0xC0000000, 0, 0, 3, 0x40000000, 0)
         self.deadline = time.monotonic() + timeout

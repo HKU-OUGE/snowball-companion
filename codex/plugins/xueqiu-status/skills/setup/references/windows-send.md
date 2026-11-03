@@ -11,13 +11,47 @@ Codex 已安装应用的原生工具命名管道，调用 `send_message_to_threa
 
 - 当前支持 Windows Store 的 `OpenAI.Codex_*__2p2nqsd0c76g0/app/ChatGPT.exe`。
   其他分发位置需另行验证，不能去掉安装路径校验来强行连接。
-- 从当前 Codex 的本地工具环境启动 Hub，继承宿主注入的 `CODEX_APP_TOOLS_PIPE_PATH`。
+- v0.5.5 的正式 Hook 和 Setup 会接收宿主注入的 `CODEX_APP_TOOLS_PIPE_PATH`，将端点名称交接到
+  当前用户的 `.config/xueqiu/codex-app-endpoint.json`。文件使用经读回验证的用户/SYSTEM ACL，
+  不保存其他环境变量、凭据或对话。后台 Hub 可读取这份交接，不要求登录任务继承 Codex 环境。
   仅接受本机 `\\.\pipe\codex-app-tools-<UUID>`，不枚举任意命名管道，不扫描进程环境或凭据。
 - 连接后读取服务进程身份，核对当前用户 SID 和受保护的 Store 安装路径，成功后才发送请求。
   健康探测只请求工具目录，要求存在 `codex_app/send_message_to_thread`。
-- 应用重启可能更换端点。旧 Hub 或登录任务未继承新端点时，通道会报告不可用；
-  在当前宿主环境重新启动归属已核实的 Hub。不能把任务 Running 当成发送通道就绪。
-  不把会话级管道地址写死在公开配置或声称登录后可自动发现新端点。
+- 应用重启换端点后，新版 Hook 会刷新交接；Hub 发现端点变化后重新探测。旧的继承端点已关闭时，
+  可以在尚未发送任何数据的阶段尝试新交接。写入后的失败不切换端点、不重发回答。
+  未启动 Codex、未运行新版 Hook 或服务身份不匹配时仍显示不可用。交接文件存在不代表回答接口可用。
+
+## 升级旧后台服务
+
+先核对实际运行目录，确认完整发布包包含 `companion/windows_app_endpoint.py` 和
+`companion/answer_diagnostics.py`，不能仅凭目录上的版本号认定代码已经更新。
+
+在 **Windows Codex 当前聊天的工具环境** 中，从完整包的 `codex/` 目录执行：
+
+```powershell
+.\install-windows.ps1
+python -X utf8 .\companion\answer_diagnostics.py --remember-host
+```
+
+此时第一次升级的旧 Hub 仍可能显示不可回答，因为它尚未加载新模块。使用归属已核实的
+本安装服务管理器重启雪球服务；它不重启 Codex、不修改配对或聊天：
+
+```powershell
+.\companion\windows-services.ps1 -Action Stop
+.\companion\windows-services.ps1 -Action Start
+python -X utf8 .\companion\answer_diagnostics.py
+```
+
+`Start` 需要该安装已有登录任务；尚未安装任务时，通过控制台启用 Windows 登录自启。
+使用安装了设备依赖的 Python；若它不在默认环境，改为本安装的 `.venv\Scripts\python.exe`。
+普通 PowerShell 没有宿主变量时，`--remember-host` 不会编造端点，应回到 Codex 工具环境执行。
+
+诊断分别报告当前进程的 `app_tools_available` 与后台快照中的 `hub_can_create`、
+`hub_instruction_available_count`、`hub_answerable_questions`。同时核对快照年龄；不能把前者为真
+当成后台 Hub 已就绪。诊断不输出问题文字、聊天标题、管道名称或密钥，不发送消息。
+
+宿主要求审阅新版 Hooks 时，按正常 Review hooks 流程由用户完成。旧聊天可能继续引用旧版 Hook；
+升级后使用新版 Setup 或开启新聊天，保证之后的端点刷新由新版 Hook 接管。
 
 ## 投递与去重
 

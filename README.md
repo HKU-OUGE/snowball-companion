@@ -6,14 +6,14 @@
 
 **第一次使用，请从 [新手指南](docs/START-HERE.md) 开始。** 已安装用户请先看 [升级与卸载](docs/INSTALLATION.md)，保留已有配对与共享服务。
 
-当前安装包为 **v0.5.4**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
+当前安装包为 **v0.5.5**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
 
 | 软件 | 下载 | 说明 |
 | --- | --- | --- |
-| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Codex.zip) | [Codex 0.5.4](codex/README.md) |
-| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
-| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Claude.zip) | [Claude 0.2.2](claude/README.md) |
-| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.4/Snowball-Cursor.zip) | [Cursor 0.2.2](cursor/README.md) |
+| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Codex.zip) | [Codex 0.5.5](codex/README.md) |
+| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
+| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Claude.zip) | [Claude 0.2.2](claude/README.md) |
+| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Cursor.zip) | [Cursor 0.2.2](cursor/README.md) |
 
 每个 ZIP 有配套 `.sha256` 文件，Release 同时提供 `SHA256SUMS`。解压后保留完整目录，不要只复制单个 Hook。Core 构建时强制小于 8,000,000 字节。若要从设备 USB 安装盘复制这些包，需要相应设备固件；本仓库不声称已经部署该固件。
 

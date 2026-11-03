@@ -37,6 +37,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--no-browser', action='store_true')
     args = parser.parse_args()
+    if os.name == 'nt':
+        from windows_app_endpoint import remember_current_endpoint
+        remember_current_endpoint()
     try:
         root, python = resolve()
         command = [python, '-X', 'utf8', str(root / 'console_launcher.py'), 'open']

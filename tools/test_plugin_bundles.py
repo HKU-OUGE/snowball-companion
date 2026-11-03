@@ -152,6 +152,7 @@ def test_every_distribution_contains_the_complete_portable_console():
                      'companion/console_server.py', 'companion/console_launcher.py',
                      'companion/console_backend.py', 'companion/network_gateway.py',
                      'companion/private_files.py', 'companion/windows_file_lock.py',
+                     'companion/windows_app_endpoint.py', 'companion/answer_diagnostics.py',
                      'companion/runtime_lock.py', 'companion/windows_supervisor.py',
                      'companion/windows-services.ps1', 'companion/windows-lan-access.ps1',
                      'companion/requirements.txt', 'companion/console_assets/index.html',

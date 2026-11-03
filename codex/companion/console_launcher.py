@@ -99,6 +99,9 @@ def main():
     parser.add_argument('command', nargs='?', choices=['open', 'register'], default='open')
     parser.add_argument('--no-browser', action='store_true')
     args = parser.parse_args()
+    if os.name == 'nt':
+        from windows_app_endpoint import remember_current_endpoint
+        remember_current_endpoint()
     if args.command == 'register':
         register()
         print('Snowball console entry registered.')

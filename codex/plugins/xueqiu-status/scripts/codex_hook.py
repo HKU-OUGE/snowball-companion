@@ -524,7 +524,15 @@ def main():
         try:
             raw = sys.stdin.buffer.read(MAX_INPUT + 1)
             if len(raw) <= MAX_INPUT:
-                process_hook(json.loads(raw), args.state_dir, emit)
+                payload = json.loads(raw)
+                if (sys.platform == 'win32' and not args.dry_run and isinstance(payload, dict)
+                        and payload.get('hook_event_name') in HOOKS):
+                    try:
+                        from windows_app_endpoint import remember_current_endpoint
+                        remember_current_endpoint()
+                    except (ImportError, OSError, ValueError):
+                        pass  # A handoff failure must not suppress lifecycle events.
+                process_hook(payload, args.state_dir, emit)
         except (ValueError, OSError, TypeError, KeyError, OverflowError):
             pass
         # Stop requires JSON, other hooks accept {}; no approval/continue decision is returned.

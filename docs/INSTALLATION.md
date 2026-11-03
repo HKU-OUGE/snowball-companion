@@ -106,7 +106,7 @@ Windows 的文件权限、安全缓存读取和服务入口约束见
 按[语音初始化与排错](../codex/plugins/xueqiu-status/skills/setup/references/speech-setup.md)
 补装本地服务，要求认证健康检查 `ready=true`，再进行设备试录。Windows 消息和建聊
 使用[当前宿主的应用命名管道](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)，
-要求继承端点并通过服务身份与工具目录检查；普通异步问题回答带准确问题标识走同一通道。
+v0.5.5 通过新版 Hook/Setup 将宿主端点交接给当前用户的后台 Hub，并继续核验服务身份与工具目录；普通异步问题回答带准确问题标识走同一通道。
 录音服务就绪不代表任务可送达。
 
 固定保存整个仓库或安装包，不要运行 Unix `install.sh`。PowerShell 中从 `codex/` 执行：

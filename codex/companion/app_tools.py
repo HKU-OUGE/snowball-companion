@@ -11,6 +11,7 @@ import stat
 import struct
 import uuid
 import time
+import threading
 
 READ_ONLY={'list_projects','list_threads','read_thread'}
 ALLOWED=READ_ONLY|{'send_message_to_thread','create_thread'}
@@ -18,7 +19,9 @@ class AppToolError(ValueError):
     def __init__(self,code,uncertain=False):self.code=code;self.uncertain=uncertain;super().__init__(code)
 
 class AppTools:
-    def __init__(self,home=None):self.home=Path(home or Path.home())
+    def __init__(self,home=None):
+        self.home=Path(home or Path.home())
+        self._probe_lock=threading.Lock()
     def pipe(self):
         if os.name == "nt":
             from windows_app_pipe import endpoint
@@ -57,15 +60,29 @@ class AppTools:
         return None
     def available(self):
         if os.name != 'nt': return self.pipe() is not None
+        from windows_app_endpoint import candidates
+        current = candidates() if self.home == Path.home() else ()
         now = time.monotonic()
-        if now-getattr(self,'_probe_at',float('-inf')) > 5:
+        with self._probe_lock:
+            if now-getattr(self,'_probe_at',float('-inf')) <= 5 and current == getattr(self,'_probe_key',None):
+                return bool(getattr(self,'_probe_ok',False))
             self._probe_at = now
-            try:
-                catalog = self.rpc('tools/list',{'threadStartKind':'all'})
-                self._probe_ok = any(x.get('name')=='send_message_to_thread' and x.get('namespace')=='codex_app'
-                    for x in catalog.get('tools',[]))
-            except (AppToolError,AttributeError,TypeError): self._probe_ok = False
-        return bool(getattr(self,'_probe_ok',False))
+            self._probe_key = current
+            self._probe_ok = False
+            ticket = object()
+            self._probe_ticket = ticket
+        try:
+            catalog = self.rpc('tools/list',{'threadStartKind':'all'})
+            ok = any(x.get('name')=='send_message_to_thread' and x.get('namespace')=='codex_app'
+                for x in catalog.get('tools',[]))
+            error_code = '' if ok else 'send_tool_missing'
+        except (AppToolError,AttributeError,TypeError) as error:
+            ok = False
+            error_code = error.code if isinstance(error,AppToolError) else 'invalid_tool_catalog'
+        with self._probe_lock:
+            if self._probe_ticket is ticket:
+                self._probe_ok, self._probe_error = ok, error_code
+            return bool(self._probe_ok)
     def rpc(self,method,params,write=False):
         path=self.pipe()
         if path is None:raise AppToolError('desktop_app_unavailable')
@@ -73,7 +90,18 @@ class AppTools:
         try:
             if os.name == 'nt':
                 from windows_app_pipe import WindowsAppPipe
-                connection = WindowsAppPipe(path)
+                from windows_app_endpoint import candidates
+                connection = None
+                for candidate in candidates():
+                    try:
+                        connection = WindowsAppPipe(candidate)
+                        break
+                    except OSError:
+                        # Nothing has been sent. A closed inherited endpoint may
+                        # be replaced by a fresh, host-captured private handoff.
+                        continue
+                if connection is None:
+                    raise AppToolError('desktop_app_unavailable')
             else:
                 connection = socket.socket(socket.AF_UNIX)
                 try:

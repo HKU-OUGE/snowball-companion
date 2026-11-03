@@ -1,6 +1,10 @@
 # 电脑插件与设备更新
 
-v0.5.4 分发包含 Codex 插件 0.5.4、Claude Code 插件 0.2.2 和 Cursor 插件 0.2.2。它们共享电脑伴随模块，各平台入口、Hooks 和权限边界继续独立。
+v0.5.5 分发包含 Codex 插件 0.5.5、Claude Code 插件 0.2.2 和 Cursor 插件 0.2.2。它们共享电脑伴随模块，各平台入口、Hooks 和权限边界继续独立。
+
+v0.5.5 修复 Windows 后台 Hub 未继承 Codex 回答接口、导致设备只显示「稍后处理／忽略提醒」的问题。
+新版 Hook/Setup 在用户私有目录交接宿主端点；Hub 重新检查身份和工具目录后才启用回答，不绕过权限确认。
+首次升级需要让已运行的旧 Hub 加载新版代码，见 [Windows 回答与后台升级](../codex/plugins/xueqiu-status/skills/setup/references/windows-send.md)。
 
 本版新增随包提供的[雪球控制台](CONSOLE.md)：Windows 可双击打开或使用 Codex 安装器创建的桌面快捷方式。控制台提供依赖准备、USB 首次绑定、蓝牙连接、Wi-Fi 配网、连接诊断和 Windows 登录自启入口。已有配对和较新的共享运行时保留；不会因打开网页而重新绑定设备。
 
