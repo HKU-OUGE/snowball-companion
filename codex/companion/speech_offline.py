@@ -88,7 +88,9 @@ def hf_cached_file(snapshot,name,entry):
     """Accept HF's normal blob links only inside this model's private repository."""
     from resource_fetch import valid
     try:
-        repository=checked_path(snapshot.parent.parent)
+        # Check for unexpected links before resolving legitimate Windows 8.3
+        # aliases. The blob link and its allowed root must use the same spelling.
+        repository=checked_path(snapshot.parent.parent).resolve(strict=True)
         candidate=snapshot/name
         if candidate.is_symlink():
             candidate=candidate.resolve(strict=True)

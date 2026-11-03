@@ -21,7 +21,7 @@ class Fetch(unittest.TestCase):
     def setUp(self):
         temp = tempfile.TemporaryDirectory(prefix="Snowball 中文 O'Brien ")
         self.addCleanup(temp.cleanup)
-        self.root = Path(temp.name)
+        self.root = Path(temp.name).resolve()
         self.card = self.root/'card'
         self.card.mkdir()
         self.progress = []

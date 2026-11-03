@@ -1,4 +1,4 @@
-import hashlib,json,tempfile,unittest
+import hashlib,json,os,tempfile,unittest
 from pathlib import Path
 from unittest.mock import patch
 import speech_offline
@@ -7,7 +7,7 @@ class OfflineImport(unittest.TestCase):
     def test_new_model_resolver_falls_back_to_sd_then_reuses_pc_cache(self):
         from urllib.error import URLError
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);card=root/'card';source=card/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
+            root=Path(tmp).resolve();card=root/'card';source=card/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
             data=b'fixture model';(source/'model.bin').write_bytes(data)
             manifest={'repo':'fixture/model','revision':'fixture','files':{'model.bin':{'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}}}
             with patch('speech_offline.json.loads',return_value=manifest),patch('resource_fetch.SMALL_BYTES',1),patch('resource_fetch.open_https',side_effect=URLError('offline')) as network:
@@ -19,19 +19,22 @@ class OfflineImport(unittest.TestCase):
 
     def test_hf_blob_link_is_reused_but_escape_link_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);repository=root/'models--fixture';snapshot=repository/'snapshots/revision';snapshot.mkdir(parents=True)
+            # Preserve native Windows short-path input to reproduce its alias
+            # comparison; canonicalize macOS's normal /var temporary parent.
+            root=Path(tmp) if os.name=='nt' else Path(tmp).resolve()
+            repository=root/'models--fixture';snapshot=repository/'snapshots/revision';snapshot.mkdir(parents=True)
             blobs=repository/'blobs';blobs.mkdir();data=b'cached model';blob=blobs/'fixed';blob.write_bytes(data)
             entry={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
             try:(snapshot/'model.bin').symlink_to(blob)
             except OSError:self.skipTest('This host cannot create symlinks')
-            self.assertEqual(speech_offline.hf_cached_file(snapshot,'model.bin',entry),blob)
+            self.assertEqual(speech_offline.hf_cached_file(snapshot,'model.bin',entry),blob.resolve())
             (snapshot/'model.bin').unlink();outside=root/'outside';outside.write_bytes(data)
             (snapshot/'model.bin').symlink_to(outside)
             self.assertIsNone(speech_offline.hf_cached_file(snapshot,'model.bin',entry))
 
     def test_verified_model_is_copied_and_survives_card_removal(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);card=root/'card';source=card/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
+            root=Path(tmp).resolve();card=root/'card';source=card/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
             data=b'fixture model';(source/'model.bin').write_bytes(data)
             manifest={'revision':'fixture','files':{'model.bin':{'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}}}
             with patch('speech_offline.json.loads',return_value=manifest):
@@ -41,7 +44,7 @@ class OfflineImport(unittest.TestCase):
                 self.assertEqual(speech_offline.import_available('base',[],root/'cache'),target)
     def test_wrong_hash_is_never_loaded_or_installed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);source=root/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
+            root=Path(tmp).resolve();source=root/'Snowball-Setup/speech-models/base';source.mkdir(parents=True)
             (source/'model.bin').write_bytes(b'bad')
             manifest={'revision':'fixture','files':{'model.bin':{'bytes':3,'sha256':'0'*64}}}
             with patch('speech_offline.json.loads',return_value=manifest):
@@ -54,7 +57,7 @@ class WheelImport(unittest.TestCase):
         import offline_resources as offline
         from resource_fetch import ResourceFetcher
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);card=root/'card';key='windows-x64-py313'
+            root=Path(tmp).resolve();card=root/'card';key='windows-x64-py313'
             source=card/'Snowball-Setup/offline/wheels'/key;source.mkdir(parents=True)
             content={'connection.whl':b'connection wheel','speech.whl':b'speech wheel','connection.txt':b'connection fixture\n'}
             files={}
@@ -72,7 +75,7 @@ class WheelImport(unittest.TestCase):
     def test_pinned_wheel_cache_survives_sd_removal_and_rejects_changed_files(self):
         import offline_resources as offline
         with tempfile.TemporaryDirectory() as tmp:
-            root=Path(tmp);card=root/'card';source=card/'Snowball-Setup/offline/wheels/windows-x64-py313';source.mkdir(parents=True)
+            root=Path(tmp).resolve();card=root/'card';source=card/'Snowball-Setup/offline/wheels/windows-x64-py313';source.mkdir(parents=True)
             data=b'fixture wheel';(source/'fixture.whl').write_bytes(data)
             manifest={'platforms':{'windows-x64-py313':{'files':{'fixture.whl':{'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}}}}}
             with patch.object(offline,'target_key',return_value='windows-x64-py313'),patch('offline_resources.json.loads',return_value=manifest):
