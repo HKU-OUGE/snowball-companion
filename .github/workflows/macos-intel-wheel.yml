@@ -23,7 +23,16 @@ jobs:
           python -m pip install cffi pytest numpy bleak==3.0.2 pyserial==3.5
       - name: Validate crypto, authentication and local TLS
         working-directory: codex/companion
-        run: python -m unittest test_network test_network_tls
+        run: |
+          python - <<'PYCODE'
+          import tempfile, unittest, sys
+          from pathlib import Path
+          # macOS /var aliases /private/var; security helpers intentionally
+          # reject symlinked parents, so use the actual temporary root.
+          tempfile.tempdir = str(Path(tempfile.gettempdir()).resolve())
+          result = unittest.TextTestRunner(verbosity=2).run(unittest.defaultTestLoader.loadTestsFromNames(['test_network','test_network_tls']))
+          sys.exit(not result.wasSuccessful())
+          PYCODE
       - name: Check wheel dynamic dependencies and hashes
         run: |
           python -m zipfile -e wheels/*.whl unpacked
