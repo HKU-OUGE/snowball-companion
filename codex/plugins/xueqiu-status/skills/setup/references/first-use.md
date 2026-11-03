@@ -15,3 +15,16 @@
 若用户只看配置、打开控制台或要求编辑文档，不运行 `--setup`。若只想用账号 Pet，走 [pets.md](pets.md)，不要求设备、语音或登录后台。插件、共享服务、账号 Pet 和固件的生命周期仍分开；不批准 Hooks 或写 eFuse。网页圆屏演示是模拟，不能用于真实连接验收。
 
 Windows 缺少回答能力时按 [windows-send.md](windows-send.md) 检查当前 Hub 的投递接口；识别服务就绪不证明真实问题已答复。用户未要求发送测试消息时不代发。
+
+## Background device updates
+
+After pairing, the shared companion downloads verified device releases over the
+computer connection. Keep Bluetooth first; Wi-Fi is the fallback. Downloading
+is separate from installation. Automatic installation needs a validated boot,
+fresh complete Codex activity evidence, no active or unresolved waiting/error
+session, five uninterrupted minutes on the idle main face, and external power
+or battery above 30%. Each intermediate incremental release repeats these
+checks after reboot. Do not infer idleness from the last completed message.
+The updater carries public verification keys only; never ask a recipient for a
+release signing key. See the bundled docs/OTA-UPDATES.md for transport and
+Windows behavior.

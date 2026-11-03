@@ -57,7 +57,7 @@ def test_auto_chain_accepts_intermediate_but_manual_pins_target(release,monkeypa
  assert ota_delta.download_best(prepared,identity,target='1.0.2',**kw)[2]=='1.0.2'
 
 class StreamPeer:
- def __init__(self):self.seq=0;self.done=0;self.queue=[];self.data=bytearray();self.streaming=False;self.max_pending=0;self.ops=[];self.resumed=False
+ def __init__(self):self.seq=0;self.done=0;self.queue=[];self.data=bytearray();self.streaming=False;self.max_pending=0;self.ops=[];self.resumed=False;self.now=100.;self.step_time=.002
  async def info(self):return dict(ota_v=1,ota_stream_v=2,nonce='6e'*8,accepted=self.seq,ota_window=8)
  async def start_acknowledgements(self):return True
  async def stop_acknowledgements(self):pass
@@ -66,7 +66,7 @@ class StreamPeer:
   seq=struct.unpack_from('<I',p,3)[0];assert seq==self.seq+1;self.seq=seq;self.ops.append(p[2])
   if p[2]==IMAGE:self.queue.append((seq,p[15:-32]));self.max_pending=max(self.max_pending,len(self.queue));assert len(self.queue)<=32
   else:self.done=seq
-  await asyncio.sleep(.001)
+  self.now+=self.step_time;await asyncio.sleep(0)
  async def wait_ack(self,seq,timeout,*,cumulative=False,merge=False,maintenance=None):
   if cumulative:
    batch,self.queue=self.queue[:4],self.queue[4:]
@@ -82,8 +82,9 @@ def test_continuous_sender_cumulative_ack_and_live_writer_order():
    assert not p.queue
    services.append(len(p.data));p.seq+=1;p.done=p.seq;return True
   data=bytes(range(251))*1000
-  out=await transfer_release(p,b'k'*32,b'm',data,service,lambda:False)
-  assert bytes(p.data)==data and out['phase']==5 and p.max_pending==32 and BEGIN_STREAM in p.ops
+  out=await transfer_release(p,b'k'*32,b'm',data,service,lambda:False,clock=lambda:p.now)
+  assert hashlib.sha256(p.data).digest()==hashlib.sha256(data).digest()
+  assert out['phase']==5 and p.max_pending==32 and BEGIN_STREAM in p.ops
   assert any(0<n<len(data) for n in services)
  asyncio.run(run())
 
@@ -92,7 +93,7 @@ def test_windows_uses_bleak_capacity_without_unix_backend(monkeypatch):
  client=SimpleNamespace(services=SimpleNamespace(get_characteristic=lambda _:char))
  g=ota_ble_gatt.OTAGatt(client,{'key':'11'*32},None);g._notify=True
  monkeypatch.setattr(ota_ble_gatt,'sys',SimpleNamespace(platform='win32'))
- assert asyncio.run(g.prepare_image_window({'ota_window':8,'ota_stream_v':2}))==32
+ assert asyncio.run(g.prepare_image_window({'ota_window':8,'ota_stream_v':2}))==16
  char.max_write_without_response_size=20
  assert asyncio.run(g.prepare_image_window({'ota_window':8,'ota_stream_v':2}))==1
 
@@ -178,4 +179,16 @@ def test_reconstruction_progress_keeps_live_service_and_extends_only_on_progress
    result=await g.wait_ack(100,.15,merge=True,maintenance=live)
    assert result['staged'] and len(services)>=2
   finally:await task
+ asyncio.run(run())
+
+def test_slow_windows_style_scheduler_services_before_window_fills():
+ async def run():
+  p=StreamPeer();p.step_time=.02;seen=[]
+  async def service():
+   assert not p.queue;seen.append(len(p.data));return False
+  data=b'x'*30000
+  out=await transfer_release(p,b'k'*32,b'm',data,service,lambda:False,clock=lambda:p.now)
+  assert bytes(p.data)==data
+  assert out['phase']==5 and 1<p.max_pending<32
+  assert any(0<n<len(data) for n in seen)
  asyncio.run(run())

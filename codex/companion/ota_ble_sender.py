@@ -12,7 +12,7 @@ class OTARejected(OTAInterrupted):
     def __init__(self,result):
         super().__init__('device rejected update frame');self.result=result
 
-async def transfer_release(transport,key,manifest,image,service_live,should_stop,*,ack_timeout=10,progress=None,delta=False):
+async def transfer_release(transport,key,manifest,image,service_live,should_stop,*,ack_timeout=10,progress=None,delta=False,clock=time.monotonic):
     if not isinstance(manifest,bytes) or not isinstance(image,bytes):raise ValueError('bytes required')
     # Validate lengths and iterator creation before the first remote mutation.
     begin=body(BEGIN,total=len(manifest))
@@ -26,12 +26,12 @@ async def transfer_release(transport,key,manifest,image,service_live,should_stop
     nonce=bytes.fromhex(initial['nonce'])
     acknowledged=None
     notifications=False
-    began=time.monotonic();reported=began
+    began=clock();reported=began
     metrics=dict(packets=0,service_ms=0,info_ms=0,write_ms=0,ack_ms=0)
 
     def report(status,force=False):
         nonlocal reported
-        now=time.monotonic()
+        now=clock()
         if progress and (force or now-reported>=10):
             progress(dict(metrics,image=status.get('image',0),total=len(image),
                 transfer_ms=int((now-began)*1000),**getattr(transport,'ack_stats',{})))
@@ -39,8 +39,8 @@ async def transfer_release(transport,key,manifest,image,service_live,should_stop
 
     async def merge_live():
         nonlocal acknowledged
-        tick=time.monotonic();serviced=await service_live()
-        metrics['service_ms']+=int((time.monotonic()-tick)*1000)
+        tick=clock();serviced=await service_live()
+        metrics['service_ms']+=int((clock()-tick)*1000)
         # FINISH is already admitted and the image window was fully drained.
         # Other messages may use later global sequences while the worker's
         # independent FINISH sequence stays constant in progress ACKs.
@@ -50,51 +50,51 @@ async def transfer_release(transport,key,manifest,image,service_live,should_stop
     async def send(op,payload):
         nonlocal acknowledged
         serviced=None
-        tick=time.monotonic()
+        tick=clock()
         if op!=CANCEL:serviced=await service_live()  # let state and attention heartbeats run
-        metrics['service_ms']+=int((time.monotonic()-tick)*1000)
+        metrics['service_ms']+=int((clock()-tick)*1000)
         if op!=CANCEL and should_stop():raise OTAInterrupted('interrupted by activity')
         # The bridge owns the only writer. An explicit False means the live
         # service wrote nothing; the previous authenticated ACK gives the exact
         # next sequence without another slow GATT metadata round trip.
-        tick=time.monotonic()
+        tick=clock()
         info=({'ota_v':1,'nonce':nonce.hex(),'accepted':acknowledged}
               if serviced is False and acknowledged is not None else await transport.info())
-        metrics['info_ms']+=int((time.monotonic()-tick)*1000)
+        metrics['info_ms']+=int((clock()-tick)*1000)
         if info.get('ota_v')!=1 or bytes.fromhex(info['nonce'])!=nonce:raise OTAInterrupted('connection changed')
         seq=info['accepted']+1
-        tick=time.monotonic()
+        tick=clock()
         await transport.write(packet(key,nonce,seq,op,payload))
-        metrics['write_ms']+=int((time.monotonic()-tick)*1000);tick=time.monotonic()
+        metrics['write_ms']+=int((clock()-tick)*1000);tick=clock()
         if notifications:
             status=await transport.wait_ack(seq,60,merge=True,maintenance=merge_live) if op==FINISH and delta else await transport.wait_ack(seq,ack_timeout)
             if status['result']!=0:raise OTARejected(status['result'])
             acknowledged=seq
-            metrics['packets']+=1;metrics['ack_ms']+=int((time.monotonic()-tick)*1000)
+            metrics['packets']+=1;metrics['ack_ms']+=int((clock()-tick)*1000)
             report(status,op==FINISH)
             return status
-        deadline=time.monotonic()+ack_timeout
+        deadline=clock()+ack_timeout
         while True:
             status=await transport.ota_status() # caller authenticates status against nonce
             if status['seq']==seq and not status['busy']:
                 if status['result']!=0:raise OTARejected(status['result'])
                 acknowledged=seq
-                metrics['packets']+=1;metrics['ack_ms']+=int((time.monotonic()-tick)*1000)
+                metrics['packets']+=1;metrics['ack_ms']+=int((clock()-tick)*1000)
                 report(status,op==FINISH)
                 return status
             if status['seq']>seq:raise OTAInterrupted('unexpected update acknowledgement')
-            if time.monotonic()>=deadline:raise OTAInterrupted('update acknowledgement timeout')
+            if clock()>=deadline:raise OTAInterrupted('update acknowledgement timeout')
             await asyncio.sleep(.005)
 
     async def continuous(status,frames,window):
         nonlocal acknowledged
         iterator=iter(frames);exhausted=False;pending={};sent=acknowledged
-        last_service=time.monotonic()
+        last_service=clock()
         async def wait(sequence,drain=False):
             nonlocal acknowledged
-            tick=time.monotonic()
+            tick=clock()
             reply=await transport.wait_ack(sequence,ack_timeout,cumulative=not drain)
-            metrics['ack_ms']+=int((time.monotonic()-tick)*1000)
+            metrics['ack_ms']+=int((clock()-tick)*1000)
             seq=reply['seq']
             if reply['result']:raise OTARejected(reply['result'])
             if seq>sent or seq<=acknowledged or seq not in pending or reply['image']!=pending[seq]:
@@ -110,23 +110,23 @@ async def transfer_release(transport,key,manifest,image,service_live,should_stop
                 if should_stop():raise OTAInterrupted('interrupted by activity')
                 # A bounded slice retains one writer. Drain its admissions before
                 # any session/question frame can consume the shared sequence.
-                if time.monotonic()-last_service>=.25:
+                if clock()-last_service>=.25:
                     if pending:status=await wait(sent,True)
-                    tick=time.monotonic();serviced=await service_live()
-                    metrics['service_ms']+=int((time.monotonic()-tick)*1000)
+                    tick=clock();serviced=await service_live()
+                    metrics['service_ms']+=int((clock()-tick)*1000)
                     if serviced is not False:
                         info=await transport.info()
                         if bytes.fromhex(info['nonce'])!=nonce:raise OTAInterrupted('connection changed')
                         acknowledged=sent=info['accepted']
-                    last_service=time.monotonic()
+                    last_service=clock()
                 while not exhausted and len(pending)<window:
                     try:payload=next(iterator)
                     except StopIteration:exhausted=True;break
                     if should_stop():raise OTAInterrupted('interrupted by activity')
                     sent+=1;pending[sent]=struct.unpack_from('<I',payload)[0]+len(payload)-4
-                    tick=time.monotonic();await transport.write(packet(key,nonce,sent,IMAGE,payload))
-                    metrics['write_ms']+=int((time.monotonic()-tick)*1000)
-                    if time.monotonic()-last_service>=.25:break
+                    tick=clock();await transport.write(packet(key,nonce,sent,IMAGE,payload))
+                    metrics['write_ms']+=int((clock()-tick)*1000)
+                    if clock()-last_service>=.25:break
                 if pending:status=await wait(min(pending),False)
             return status
         finally:transport.streaming=False
@@ -141,34 +141,34 @@ async def transfer_release(transport,key,manifest,image,service_live,should_stop
         status=await send(IMAGE_BEGIN,b'')
         window=(await transport.prepare_image_window(initial) if notifications and hasattr(transport,'prepare_image_window') else
                 transport.image_window(initial) if notifications and hasattr(transport,'image_window') else 1)
-        if window not in (1,4,8,32):raise OTAInterrupted('invalid stream window')
+        if window not in (1,4,8,16,32):raise OTAInterrupted('invalid stream window')
         metrics['window']=window;report(status,True)
         resumed=status.get('image',0)
         if resumed:
             if not delta or type(resumed) is not int or not 0<=resumed<=len(image):raise OTAInterrupted('invalid staged patch offset')
             image_frames=chunks(image,IMAGE,start=resumed)
-        if window==32:
+        if window in (16,32):
             status=await continuous(status,image_frames,window)
             image_frames=iter(())
         while batch:=list(itertools.islice(image_frames,window)):
             if window==1:
                 await send(IMAGE,batch[0]);continue
-            tick=time.monotonic();serviced=await service_live()
-            metrics['service_ms']+=int((time.monotonic()-tick)*1000)
+            tick=clock();serviced=await service_live()
+            metrics['service_ms']+=int((clock()-tick)*1000)
             if should_stop():raise OTAInterrupted('interrupted by activity')
-            tick=time.monotonic()
+            tick=clock()
             info=({'nonce':nonce.hex(),'accepted':acknowledged} if serviced is False else await transport.info())
-            metrics['info_ms']+=int((time.monotonic()-tick)*1000)
+            metrics['info_ms']+=int((clock()-tick)*1000)
             if bytes.fromhex(info['nonce'])!=nonce:raise OTAInterrupted('connection changed')
             seq=info['accepted'];transport.streaming=True
             try:
-                tick=time.monotonic()
+                tick=clock()
                 for payload in batch:
                     if should_stop():raise OTAInterrupted('interrupted by activity')
                     seq+=1;await transport.write(packet(key,nonce,seq,IMAGE,payload))
-                metrics['write_ms']+=int((time.monotonic()-tick)*1000);tick=time.monotonic()
+                metrics['write_ms']+=int((clock()-tick)*1000);tick=clock()
                 status=await transport.wait_ack(seq,ack_timeout)
-                metrics['ack_ms']+=int((time.monotonic()-tick)*1000)
+                metrics['ack_ms']+=int((clock()-tick)*1000)
                 if status['result']!=0 or status.get('image')!=struct.unpack_from('<I',batch[-1])[0]+len(batch[-1])-4:
                     raise OTAInterrupted('invalid image acknowledgement')
                 acknowledged=seq;metrics['packets']+=len(batch);report(status)

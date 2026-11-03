@@ -7,7 +7,8 @@ compete with an established Bluetooth transfer.
 
 ## Incremental updates
 
-Firmware with the delta capability reports its exact running image digest and
+The reliable delta foundation is firmware 0.28.2 or later. Older devices first
+use the verified full-image path. Firmware with the delta capability reports its exact running image digest and
 size through the authenticated connection. The companion prefers a separately
 signed patch matching that image. The SD card holds the patch; the device checks
 its complete digest before reconstructing the inactive application slot. The

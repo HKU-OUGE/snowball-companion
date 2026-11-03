@@ -41,10 +41,12 @@ class OTAGatt:
    if not self.matches(status,self.expected_request):raise OTAInterrupted('request changed')
   await asyncio.wait_for(self.client.write_gatt_char(WRITE,packet,response=not(self.streaming and packet[2]==3)),self.timeout)
  def image_window(self,info):
+  # Keep headroom below the peripheral's 24 ACL buffers. Its application
+  # queue has 32 credits, but controller buffers also carry live messages.
   char=self.client.services.get_characteristic(WRITE)
   capacity=self._write_capacity if self._write_capacity is not None else getattr(char,'max_write_without_response_size',0)
   self.ack_stats.update(advertised_window=info.get('ota_window',1),write_capacity=capacity,notify_fallback=int(self._ack_fallback))
-  return (32 if info.get('ota_stream_v')==2 else info['ota_window']) if (info.get('ota_window') in (4,8) and self._notify and capacity>=243) else 1
+  return (16 if info.get('ota_stream_v')==2 else info['ota_window']) if (info.get('ota_window') in (4,8) and self._notify and capacity>=243) else 1
  async def prepare_image_window(self,info):
   char=self.client.services.get_characteristic(WRITE)
   self._write_capacity=getattr(char,'max_write_without_response_size',0)
