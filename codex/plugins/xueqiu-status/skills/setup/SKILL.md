@@ -33,9 +33,10 @@ pairing. A documentation request authorizes edits, not live installation.
 For read-only diagnosis or only opening an existing settings page, omit `--setup`.
 
 Use [console entry](references/local-console.md) for a missing launcher and
-[first-use flow](references/first-use.md) for the device handoff. Physical pairing
-confirmation still uses the device's real 开启配对 button, followed by binding in
-the webpage. Device tutorial is a gesture exercise, not another configuration
+[first-use flow](references/first-use.md) for the device handoff. On firmware0.27.0 and later, first-use pairing is opened by the installer
+through USB while the device is at its connection tutorial; the user only connects
+the cable. Reuse valid bindings. Older/configured devices retain the real 开启配对
+confirmation, followed by binding in the webpage. Device tutorial is a gesture exercise, not another configuration
 wizard. Never send Wi-Fi passwords to chat or use a developer-only localhost URL.
 
 ## Repair only the missing capability

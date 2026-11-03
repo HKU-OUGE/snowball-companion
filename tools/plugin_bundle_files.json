@@ -5,7 +5,8 @@
     "docs/CONSOLE.md",
     "docs/INSTALLATION.md",
     "docs/START-HERE.md",
-    "docs/UPDATES.md"
+    "docs/UPDATES.md",
+    "docs/OTA-UPDATES.md"
   ],
   "platforms": {
     "codex": [
@@ -54,6 +55,7 @@
       "codex/companion/ota_ble_sender.py",
       "codex/companion/ota_ble_status.py",
       "codex/companion/ota_download.py",
+      "codex/companion/ota_delta.py",
       "codex/companion/ota_idle.py",
       "codex/companion/ota_idle_heartbeat.py",
       "codex/companion/ota_relay.py",
@@ -236,6 +238,7 @@
       "claude/plugins/snowball-companion/runtime/ota_ble_sender.py",
       "claude/plugins/snowball-companion/runtime/ota_ble_status.py",
       "claude/plugins/snowball-companion/runtime/ota_download.py",
+      "claude/plugins/snowball-companion/runtime/ota_delta.py",
       "claude/plugins/snowball-companion/runtime/ota_idle.py",
       "claude/plugins/snowball-companion/runtime/ota_idle_heartbeat.py",
       "claude/plugins/snowball-companion/runtime/ota_relay.py",
@@ -249,7 +252,8 @@
       "claude/plugins/snowball-companion/scripts/open_console.py",
       "claude/plugins/snowball-companion/scripts/run_hub.py",
       "claude/plugins/snowball-companion/scripts/snowball_hook.py",
-      "claude/runtime-sources.json"
+      "claude/runtime-sources.json",
+      "claude/plugins/snowball-companion/runtime/private_files.py"
     ],
     "cursor": [
       "cursor/README.md",
@@ -276,6 +280,7 @@
       "cursor/snowball-companion/runtime/ota_ble_sender.py",
       "cursor/snowball-companion/runtime/ota_ble_status.py",
       "cursor/snowball-companion/runtime/ota_download.py",
+      "cursor/snowball-companion/runtime/ota_delta.py",
       "cursor/snowball-companion/runtime/ota_idle.py",
       "cursor/snowball-companion/runtime/ota_idle_heartbeat.py",
       "cursor/snowball-companion/runtime/ota_relay.py",
@@ -289,7 +294,8 @@
       "cursor/snowball-companion/scripts/cursor_hook.py",
       "cursor/snowball-companion/scripts/open_console.py",
       "cursor/snowball-companion/scripts/run_hub.py",
-      "cursor/snowball-companion/scripts/shared.py"
+      "cursor/snowball-companion/scripts/shared.py",
+      "cursor/snowball-companion/runtime/private_files.py"
     ]
   }
 }

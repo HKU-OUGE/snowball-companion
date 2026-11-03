@@ -31,5 +31,5 @@ def test_catalogue_controls_reconstruct_bounded_utf8_with_same_authenticated_hea
  assert recovered==raw
  assert body(CATALOG_END,request=request)==struct.pack('<I',request)
  assert body(HOST_PROGRESS,request=request,kind=1,value=6000)==struct.pack('<IBI',request,1,6000)
- for call in (lambda:body(CATALOG_BEGIN,total=16001,request=1),lambda:body(CATALOG_DATA,data=b'x'*189,request=1),lambda:body(CATALOG_END,request=0),lambda:body(CATALOG_END,request=True),lambda:body(HOST_PROGRESS,request=1,kind=0,value=1),lambda:body(HOST_PROGRESS,request=1,kind=2,value=0),lambda:packet(b'k'*32,b'n'*8,1,11,b'')):
+ for call in (lambda:body(CATALOG_BEGIN,total=16001,request=1),lambda:body(CATALOG_DATA,data=b'x'*189,request=1),lambda:body(CATALOG_END,request=0),lambda:body(CATALOG_END,request=True),lambda:body(HOST_PROGRESS,request=1,kind=0,value=1),lambda:body(HOST_PROGRESS,request=1,kind=2,value=0),lambda:packet(b'k'*32,b'n'*8,1,14,b'')):
   with pytest.raises(ValueError):call()

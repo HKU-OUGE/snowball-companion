@@ -236,7 +236,7 @@ class CodexDesktop:
             if not current or current['thread']!=route['thread']:raise DeliveryError('session_changed')
             message_id=str(uuid.uuid5(uuid.NAMESPACE_URL,'snowball-instruction:'+request_id))
             items=[{'type':'text','text':text,'text_elements':[]}]
-            if current['activity'] in ('running','thinking'):
+            if current['activity'] in ('running','thinking','compacting'):
                 method,version='thread-follower-steer-turn',1
                 params={'conversationId':route['thread'],'input':items,'clientUserMessageId':message_id,
                     'restoreMessage':{'id':message_id,'context':{'prompt':text}}}
@@ -310,7 +310,7 @@ class CodexDesktop:
             text = reply_envelope(route, answer)
             input_items = [{'type':'text','text':text,'text_elements':[]}]
             client_id = str(uuid.uuid5(uuid.NAMESPACE_URL, 'snowball-answer:'+request_id))
-            if route['activity'] in ('running','thinking'):
+            if route['activity'] in ('running','thinking','compacting'):
                 params = {'conversationId':route['thread'], 'input':input_items,
                     'clientUserMessageId':client_id, 'restoreMessage':{'id':client_id,'context':{'prompt':text}}}
                 method, version = 'thread-follower-steer-turn', 1

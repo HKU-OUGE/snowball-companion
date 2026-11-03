@@ -27,9 +27,9 @@
 </details><div class="next-row"><span>连接服务就绪后即可绑定设备，语音可以继续在后台准备。</span><button class="text-button" data-next="1">下一步：连接雪球 →</button></div></article>
 <article data-panel="1" hidden><p class="eyebrow">HELLO, SNOWBALL</p><h2>连接你的雪球</h2><p class="lead">第一次通过 USB 确认设备身份，以后由蓝牙自动连接。</p>
 <div id="bound-card" class="soft-card" hidden><span class="card-label">已绑定的设备</span><strong id="device-name"></strong><p>这次可以复用配对信息。</p><button class="primary" id="connect-existing">连接已绑定的雪球</button></div>
-<div id="bind-card"><p class="hint">准备就绪后再按以下步骤操作。设备首次教程已在“连接电脑”时，无需退出教程。</p><ol class="instructions"><li><b>先在电脑接上 USB 数据线</b><span>把雪球连接到这台电脑并开机。</span></li><li><b>现在看雪球：开启配对</b><span>设置 → 更多 → 连接电脑 → 开启配对。核对蓝牙名称，窗口持续两分钟。</span></li><li><b>回电脑控制台：绑定</b><span>刷新并核对下方串口，勾选后点“绑定这台雪球”。只在系统蓝牙里配对还不算完成。</span></li></ol>
+<div id="bind-card"><p class="hint">准备就绪后再按以下步骤操作。设备首次教程已在“连接电脑”时，无需退出教程。</p><ol class="instructions"><li><b>先在电脑接上 USB 数据线</b><span>把雪球连接到这台电脑并开机。</span></li><li><b>保持数据线连接</b><span>首次配置由安装程序通过 USB 自动开启限时配对，不必点击雪球。旧固件若提示确认，再在设备上开启配对。</span></li><li><b>回电脑控制台：绑定</b><span>只有一台新雪球时自动绑定；若有多台，请核对下方串口再点“绑定这台雪球”。只在系统蓝牙里配对还不算完成。</span></li></ol>
 <div class="field-row"><label>检测到的雪球串口<select id="ports"><option value="">先点击刷新串口</option></select></label><button class="secondary" id="refresh-ports">刷新串口</button></div>
-<label class="checkbox"><input id="pairing-open" type="checkbox">我已在雪球上开启配对，并核对了这台设备</label><button class="primary" id="bind" disabled>绑定这台雪球</button></div>
+<input id="pairing-open" type="checkbox" checked hidden><button class="primary" id="bind" disabled>绑定这台雪球</button></div>
 <div class="next-row"><span>绑定后先确认蓝牙和会话同步；Wi-Fi 可以稍后配置。</span><button class="text-button" data-next="2">下一步：确认同步 →</button></div></article>
 <article data-panel="3" hidden><p class="eyebrow">A LITTLE MORE FREEDOM</p><h2>需要时，再开启更多陪伴</h2><p class="lead">蓝牙同步已能日常使用。下面的 Wi-Fi 设置可以跳过；语音和桌宠也不影响基础连接。</p>
 <p class="hint">语音、桌宠和登录自启动在“自动配置”中统一完成；这里填写网络信息即可。</p>

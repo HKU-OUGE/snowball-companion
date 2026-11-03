@@ -20,7 +20,7 @@ SERVICE = '9e7a0001-6ed4-4b6b-bf37-43dc42838c20'
 INFO = '9e7a0002-6ed4-4b6b-bf37-43dc42838c20'
 WRITE = '9e7a0003-6ed4-4b6b-bf37-43dc42838c20'
 PROVIDERS = ['Codex', 'Claude', 'Cursor']
-STATES = ['idle', 'thinking', 'running', 'waiting', 'completed', 'failed']
+STATES = ['idle', 'thinking', 'running', 'waiting', 'completed', 'failed', 'compacting']
 CONFIG = Path.home() / '.config/xueqiu/ble-pairing.json'
 
 def transport_io_timeout(client, default=8):
@@ -169,9 +169,14 @@ def validate_title(title):
         raise ValueError('Display name exceeds UTF-8 budget')
 
 
+def wire_state(state, info):
+    # Older devices keep displaying thinking instead of rejecting the frame.
+    return 1 if state == 'compacting' and not info.get('compaction_v') else STATES.index(state)
+
+
 def make_packet(key, info, provider, state, seq=None, session_id=None, display_name=''):
     p = PROVIDERS.index(provider)
-    s = STATES.index(state)
+    s = wire_state(state, info)
     seq = info['accepted'] + 1 if seq is None else seq
     head = struct.pack('<BBBI8s', 1, p, s, seq, bytes.fromhex(info['nonce']))
     if session_id is not None:
@@ -301,7 +306,7 @@ class CatalogRelay:
                 quiet_questions = entry.get('pending_total', 0) > 0 and not attention
                 if attention:
                     expiry = payload['generated_at'] + ATTENTION_HUB_LEASE
-                active = attention or (entry['phase'] in ('thinking', 'running', 'waiting', 'failed') and
+                active = attention or (entry['phase'] in ('thinking', 'running', 'waiting', 'failed', 'compacting') and
                           entry.get('source_fresh') is True and entry.get('task_fresh') is True and expiry > now)
                 key = entry['source'] + '/' + entry['session_id']
                 if not ((directory_fresh and entry.get('sidebar_visible') is True) or attention or quiet_questions or (entry.get('source_fresh') is True and entry.get('task_fresh') is True and expiry > now) or (payload.get('focus_pinned') and key == focused)):
@@ -431,7 +436,7 @@ class CatalogRelay:
             for index, row in enumerate(rows):
                 title = row.get('display_name', '').encode()
                 lease = max(0, min(20, int(row['expiry'] - time.time()))) if row['active'] else 0
-                packets.append((1, struct.pack('<IB16sBBB', gen, index, bytes.fromhex(row['wire_id']), STATES.index(row['phase']) | (128 if info.get('catalog_v')==3 and not row.get('known',True) else 0), lease, len(title)) + title))
+                packets.append((1, struct.pack('<IB16sBBB', gen, index, bytes.fromhex(row['wire_id']), wire_state(row['phase'], info) | (128 if info.get('catalog_v')==3 and not row.get('known',True) else 0), lease, len(title)) + title))
             packets.append((2, struct.pack('<I', gen)))
             previous=self.sent_catalogs.get((p,self.last_sent_gen[p]))
             if info.get('catalog_v')==3 and unchanged and (p,gen) in self.sent_catalogs:
@@ -441,7 +446,7 @@ class CatalogRelay:
                 flags=int(pinned)|result<<1|(8 if p==0 and (payload or {}).get('can_create') else 0)
                 delta=struct.pack('<IIBHB16sIB',self.last_sent_gen[p],gen,len(rows),total,flags,bytes.fromhex(focused) if focused else bytes(16),ack,20)
                 for row in rows:
-                    delta+=bytes([STATES.index(row['phase'])|(0 if row.get('known',True) else 128),max(0,min(20,int(row['expiry']-time.time()))) if row['active'] else 0])
+                    delta+=bytes([wire_state(row['phase'], info)|(0 if row.get('known',True) else 128),max(0,min(20,int(row['expiry']-time.time()))) if row['active'] else 0])
                 packets=[(4,delta)]
             info = await read_info(client, config)
             for op, body in packets:
@@ -489,7 +494,7 @@ def pair_usb(port, config_path):
         deadline = time.monotonic() + 4
         while time.monotonic() < deadline:
             s.read(8192)
-        s.write(b':PAIR\r\n')
+        s.write(b':PAIR_SETUP\r\n:PAIR\r\n')
         s.flush()
         deadline = time.monotonic() + 8
         while time.monotonic() < deadline:
@@ -672,9 +677,9 @@ def decode_info(raw):
         applied, provider, state = info['s']
         rq, rp, rg, pending, rid, action, before, request_proof = info['r']
         ps, pr, pet_id, pet_proof = info['p']
-        return {'v': 1, 'device': info['d'], 'nonce': info['n'],
+        return {'v': 1, 'device': info['d'], 'nonce': info['n'], 'ota_window':info['w'] if info.get('w') in (4,8) else 1, 'ota_stream_v':2 if info.get('x')==2 else 0,
                 'accepted': info['a'], 'applied': applied, 'provider': provider,
-                'state': state, 'proof': info['h'], 'catalog_v': 3 if info['v']>=5 else 2, 'network_v':1 if info['v']>=6 else 0, 'attention_v': 2 if info['v'] >= 4 else 1 if info['v'] == 3 else 0,
+                'state': state, 'proof': info['h'], 'catalog_v': 3 if info['v']>=5 else 2, 'network_v':1 if info['v']>=6 else 0, 'compaction_v':1 if info.get('c')==1 else 0, 'attention_v': 2 if info['v'] >= 4 else 1 if info['v'] == 3 else 0,
                 'request': {'seq': rq, 'provider': rp, 'generation': rg,
                             'pending': pending, 'id': rid, 'action': action,
                             'before': before, 'proof': request_proof},
@@ -699,10 +704,22 @@ async def send(client, config, provider, state, valid_until=None, session_id=Non
     await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), transport_io_timeout(client))
     for _ in range(20):
         ack = await read_info(client, config)
-        if ack['applied'] == seq and ack['provider'] == PROVIDERS.index(provider) and ack['state'] == STATES.index(state):
+        if ack['applied'] == seq and ack['provider'] == PROVIDERS.index(provider) and ack['state'] == wire_state(state, info):
             return ack
         await asyncio.sleep(.05)
     raise TimeoutError('Command not acknowledged by watch UI')
+
+
+def observe_client_writes(client):
+    """Count completed writes on the shared writer; reads don't change sequence."""
+    if type(getattr(client,'_snowball_write_count',None)) is int:return
+    original=client.write_gatt_char
+    client._snowball_write_count=0
+    async def counted(*args,**kwargs):
+        result=await original(*args,**kwargs)
+        client._snowball_write_count+=1
+        return result
+    client.write_gatt_char=counted
 
 
 async def connected_session(args, config):
@@ -714,6 +731,7 @@ async def connected_session(args, config):
     try:
         async with BleakClient(device, timeout=30, pair=sys.platform != 'linux',
                                **({'winrt': {'use_cached_services': False}} if sys.platform == 'win32' else {})) as client:
+            observe_client_writes(client)
             await read_info(client, config)
             print(f'Connected and authenticated: {config["device"]}', flush=True)
             if args.command == 'demo':
@@ -753,30 +771,49 @@ async def connected_session(args, config):
                 args._ota_relay = OtaRelay()
             ota = args._ota_relay
             last_ota_service = 0.0
+            last_ota_bulk = 0.0
             def ota_should_stop():
                 if speech.latency_sensitive:return True
                 try:
                     p=json.loads((power.root/'latest.json').read_text())
-                    return not (p.get('device')==config['device'] and p.get('connected') is True and
-                        p.get('valid') is True and p.get('power') in (2,3) and
-                        type(p.get('percent')) is int and p['percent']>=30 and
-                        0<=time.time()-p.get('received_at',0)<25)
+                    from ota_idle import update_power_allowed
+                    return not update_power_allowed(p,config['device'])
                 except (OSError,ValueError,TypeError):return True
             async def ota_service_live():
-                nonlocal last_ota_service
+                nonlocal last_ota_service,last_ota_bulk
                 now=time.monotonic()
-                if now-last_ota_service<1:return False
-                last_ota_service=now;current=None;current_target=None
+                if now-last_ota_service<.25:return False
+                writes_before=client._snowball_write_count
+                current=None;current_target=None
                 try:
                     current=json.loads(read_snapshot_text(args.source)) if args.source else None
                     current_target=parse_source(current)
                 except (OSError,ValueError,TypeError):pass
-                await attention.step(client,config,current)
+                await relay.step(client,config,current_target)
+                refreshed=await attention.step(client,config,current,poll_interval=.25)
+                if refreshed is not None:
+                    current=refreshed
+                    try:current_target=parse_source(current)
+                    except (ValueError,TypeError):current_target=None
+                # Lists and summaries also have leases. Keep them fresh during
+                # a long transfer instead of letting them expire until FINISH.
+                if now-last_ota_bulk>=5:
+                    refreshed=await catalogue.step(client,config,current)
+                    if refreshed is not None:
+                        current=refreshed;relay.previous=None
+                        try:current_target=parse_source(current)
+                        except (ValueError,TypeError):current_target=None
+                    await summaries.step(client,config,current)
+                    last_ota_bulk=time.monotonic()
                 await relay.step(client,config,current_target)
                 await idle_heartbeat.step(client,config,read_info,current)
                 await power.step(client,config,read_info,current,current_target)
                 await speech.step(client,config,current)
-                return True
+                # Measure the quiet window after I/O completes. Otherwise a
+                # slow INFO read makes every firmware packet run this entire
+                # group again, starving the actual transfer.
+                last_ota_service=time.monotonic()
+                return client._snowball_write_count!=writes_before
             source_notice = None
             previous = None
             last_bulk = float('-inf')
@@ -806,6 +843,12 @@ async def connected_session(args, config):
                 if notice != source_notice:
                     print(notice, flush=True)
                     source_notice = notice
+                ack = await relay.step(client, config, target)
+                if target is None:
+                    previous = None
+                elif ack is not None and (target.provider, target.state) != previous:
+                    print(f'Applied {target.provider}: {target.state}, seq={ack["applied"]}', flush=True)
+                    previous = target.provider, target.state
                 refreshed_attention = None
                 if args.command == 'watch' and args.source:
                     refreshed_attention = await attention.step(client, config, payload)
@@ -825,12 +868,7 @@ async def connected_session(args, config):
                             target = parse_source(refreshed)
                         except SourceUnavailable:
                             target = None
-                ack = await relay.step(client, config, target)
-                if target is None:
-                    previous = None
-                elif ack is not None and (target.provider, target.state) != previous:
-                    print(f'Applied {target.provider}: {target.state}, seq={ack["applied"]}', flush=True)
-                    previous = target.provider, target.state
+                        await relay.step(client, config, target)
                 if bulk_due:
                     await summaries.step(client, config, payload)
                     await pets.step(client, config, payload, read_info)

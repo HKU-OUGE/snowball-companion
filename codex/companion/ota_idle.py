@@ -3,6 +3,14 @@ import math,time
 MAX_SNAPSHOT_AGE=12
 DEFAULT_IDLE_SECONDS=300
 
+def update_power_allowed(p,device,now=None):
+ now=time.time() if now is None else now
+ if not isinstance(p,dict):return False
+ stamp=p.get('received_at');percent=p.get('percent')
+ return (p.get('device')==device and p.get('connected') is True and p.get('valid') is True
+     and type(stamp) in (int,float) and math.isfinite(stamp) and 0<=now-stamp<25
+     and (p.get('power') in (2,3) or (p.get('power')==1 and type(percent) is int and 30<percent<=100)))
+
 def idle_evidence(snapshot,now=None):
  now=time.time() if now is None else now
  if not isinstance(snapshot,dict) or snapshot.get('version')!=1 or snapshot.get('hub_alive') is not True or snapshot.get('directory_available') is not True:return False

@@ -6,6 +6,7 @@ here starts an installation or changes an active BLE connection.
 import base64, hashlib, json, re, time, os, tempfile
 from pathlib import Path
 from dataclasses import dataclass
+from private_files import safe_reader, private_dir
 from urllib.parse import urlencode
 from urllib.request import Request, build_opener, HTTPRedirectHandler, ProxyHandler
 from cryptography.hazmat.primitives import hashes
@@ -112,10 +113,9 @@ def download_prepared(prepared,public_key=PUBLIC_KEY,opener=None,now=None,cache_
  if target is not None and (not isinstance(target,str) or target!=m['version']):raise OTAError('confirmed target unavailable')
  data=None;cache=None
  if cache_dir is not None:
-  root=Path(cache_dir);root.mkdir(mode=0o700,parents=True,exist_ok=True);cache=root/(m['sha256']+'.bin')
+  root=private_dir(cache_dir);cache=root/(m['sha256']+'.bin')
   try:
-   fd=os.open(cache,os.O_RDONLY|os.O_NOFOLLOW)
-   with os.fdopen(fd,'rb') as stream:cached=stream.read(m['size']+1)
+   with safe_reader(cache) as stream:cached=stream.read(m['size']+1)
    if len(cached)==m['size'] and hashlib.sha256(cached).hexdigest()==m['sha256']:data=cached
   except OSError:pass
  fetched=data is None

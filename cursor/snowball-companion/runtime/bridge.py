@@ -642,7 +642,7 @@ def decode_info(raw):
         applied, provider, state = info['s']
         rq, rp, rg, pending, rid, action, before, request_proof = info['r']
         ps, pr, pet_id, pet_proof = info['p']
-        return {'v': 1, 'device': info['d'], 'nonce': info['n'],
+        return {'v': 1, 'device': info['d'], 'nonce': info['n'], 'ota_stream_v':2 if info.get('x')==2 else 0, 'ota_window':info['w'] if info.get('w') in (4,8) else 1,
                 'accepted': info['a'], 'applied': applied, 'provider': provider,
                 'state': state, 'proof': info['h'], 'catalog_v': 3 if info['v']>=5 else 2, 'network_v':1 if info['v']>=6 else 0, 'attention_v': 2 if info['v'] >= 4 else 1 if info['v'] == 3 else 0,
                 'request': {'seq': rq, 'provider': rp, 'generation': rg,

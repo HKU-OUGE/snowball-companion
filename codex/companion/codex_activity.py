@@ -24,7 +24,7 @@ class CodexActivity:
         # Live hooks are sufficient to veto an installation. Do not ask the
         # desktop to load histories while the user is actively working.
         if records is not None and any(r.get('provider')=='Codex' and
-            r.get('phase') in ('thinking','running','waiting','failed') and
+            r.get('phase') in ('thinking','running','waiting','failed','compacting') and
             min(r.get('expires_at',0),r.get('task_expires_at') or 0)>now
             for r in records.values()):
             self.value={'scope':'codex-desktop-local','complete':False,

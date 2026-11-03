@@ -253,7 +253,9 @@ def hook_phase(payload, current):
         waiting.clear()
         # Resuming/interruption is not an answer to an already posted question.
         phase = 'idle'
-    elif name in ('UserPromptSubmit', 'PreCompact', 'PostCompact'):
+    elif name == 'PreCompact':
+        phase = 'compacting'
+    elif name in ('UserPromptSubmit', 'PostCompact'):
         if name == 'UserPromptSubmit':
             active.clear()
             waiting.clear()

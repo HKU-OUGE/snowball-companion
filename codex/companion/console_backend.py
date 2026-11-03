@@ -196,6 +196,12 @@ class Backend:
             from console_login import enable
             enable(self.root)
         elif feature == 'connection':
+            if not (self.config / 'ble-pairing.json').exists():
+                ports = self.ports()
+                if len(ports) != 1:
+                    raise SetupError('usb_port_missing' if not ports else 'usb_port_ambiguous')
+                progress('usb_binding')
+                self.execute('bind', {'port': ports[0]['port']})
             if not (hub_health(self.config) and self.telemetry()['connected']):
                 self.execute('services', {})
         elif feature == 'speech':
@@ -379,8 +385,6 @@ class Backend:
             self.dependency_cache = (0, None)
             return 'prepared'
         if action == 'bind':
-            if data.get('pairing_open') is not True:
-                raise SetupError('confirm_device_pairing')
             if (self.config / 'ble-pairing.json').exists():
                 pairing(self.config)
                 return 'pairing_reused'

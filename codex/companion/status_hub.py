@@ -26,7 +26,7 @@ from private_files import private_dir as secure_private_dir, private_file
 
 VERSION = 1
 PROVIDERS = ('Codex', 'Claude', 'Cursor')
-PHASES = ('idle', 'thinking', 'running', 'waiting', 'completed', 'failed')
+PHASES = ('idle', 'thinking', 'running', 'waiting', 'completed', 'failed', 'compacting')
 TOKEN_PATH = Path.home() / '.config/xueqiu/hub-token'
 STATE_DIR = Path.home() / '.local/state/xueqiu/hub'
 ID = re.compile(r'^[A-Za-z0-9_.:-]+$')
@@ -521,7 +521,7 @@ class StatusHub:
                 record = self.records[key]
                 phase, pending, _, _ = self.project_questions(record, self.clock())
                 if not pending and (
-                        phase not in ('thinking', 'running', 'waiting', 'failed') or
+                        phase not in ('thinking', 'running', 'waiting', 'failed', 'compacting') or
                         min(record['expires_at'], record.get('task_expires_at') or 0) <= self.clock()):
                     raise Invalid('session_not_active', 409)
                 self.focus, self.pinned = key, True
@@ -562,7 +562,7 @@ class StatusHub:
             # remains attention even after the ordinary activity lease expires.
             rank = (0 if fresh and phase == 'failed' else
                     1 if pending or (fresh and phase == 'waiting') else
-                    2 if fresh and phase in ('thinking', 'running') else
+                    2 if fresh and phase in ('thinking', 'running', 'compacting') else
                     3 if fresh else 4)
             tie = index if rank < 3 else -record['task_event_at']
             candidates.append((rank, tie, key))
@@ -576,7 +576,7 @@ class StatusHub:
                 target = self.records.get(self.focus)
                 phase, pending, _, _ = self.project_questions(target, now) if target else (None, 0, 0, [])
                 actionable = target and (pending > 0 or (
-                    phase in ('thinking', 'running', 'waiting', 'failed') and
+                    phase in ('thinking', 'running', 'waiting', 'failed', 'compacting') and
                     min(target.get('expires_at', 0), target.get('task_expires_at') or 0) > now))
                 if not actionable:
                     self.pinned = False

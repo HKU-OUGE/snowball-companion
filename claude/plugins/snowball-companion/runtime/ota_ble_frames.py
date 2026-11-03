@@ -11,6 +11,7 @@ MAX_CHUNK=192
 MAX_MANIFEST=6144
 MAX_IMAGE=0x600000
 BEGIN,MANIFEST,IMAGE_BEGIN,IMAGE,FINISH,CANCEL,IDLE_EVIDENCE,CATALOG_BEGIN,CATALOG_DATA,CATALOG_END,HOST_PROGRESS=range(11)
+BEGIN_DELTA,IDENTITY,BEGIN_STREAM=11,12,13
 MAX_CATALOG=16000
 MAX_CATALOG_CHUNK=188
 
@@ -32,7 +33,7 @@ def body(op, offset=0, data=b'', total=0, *, request=0,kind=0,value=0):
                 return struct.pack('<IBI',request,kind,value)
         raise ValueError('invalid control payload')
     if request or kind or value:raise ValueError('unexpected control fields')
-    if op == BEGIN:
+    if op in (BEGIN,BEGIN_DELTA,BEGIN_STREAM):
         if not 1 <= total <= MAX_MANIFEST or data or offset: raise ValueError('manifest size')
         return struct.pack('<I',total)
     if op in (MANIFEST,IMAGE):
@@ -40,7 +41,7 @@ def body(op, offset=0, data=b'', total=0, *, request=0,kind=0,value=0):
         if not 1 <= len(data) <= MAX_CHUNK or not 0 <= offset < limit or len(data)>limit-offset or total:
             raise ValueError('chunk bounds')
         return struct.pack('<I',offset)+data
-    if op in (IMAGE_BEGIN,FINISH,CANCEL):
+    if op in (IMAGE_BEGIN,FINISH,CANCEL,IDENTITY):
         if data or offset or total: raise ValueError('unexpected payload')
         return b''
     raise ValueError('unknown operation')
@@ -51,17 +52,18 @@ def packet(key,nonce,sequence,op,payload):
         raise ValueError('invalid authentication material')
     if type(sequence) is not int or not 1<=sequence<=0xffffffff:
         raise ValueError('invalid sequence')
-    if type(op) is not int or op not in range(11) or not isinstance(payload,bytes) or len(payload)>MAX_CHUNK+4:
+    if type(op) is not int or op not in range(14) or not isinstance(payload,bytes) or len(payload)>MAX_CHUNK+4:
         raise ValueError('invalid OTA payload')
     header=struct.pack('<BBBI8s',PACKET_VERSION,0,op,sequence,nonce)+payload
     return header+hmac.digest(key,header,'sha256')
 
 
-def chunks(data,op):
+def chunks(data,op,*,start=0):
     if not isinstance(data,bytes) or not data or op not in (MANIFEST,IMAGE): raise ValueError('invalid data')
     limit=MAX_MANIFEST if op==MANIFEST else MAX_IMAGE
     if len(data)>limit: raise ValueError('data too large')
-    for offset in range(0,len(data),MAX_CHUNK):
+    if type(start) is not int or not 0<=start<=len(data):raise ValueError('invalid resume offset')
+    for offset in range(start,len(data),MAX_CHUNK):
         yield body(op,offset,data[offset:offset+MAX_CHUNK])
 
 

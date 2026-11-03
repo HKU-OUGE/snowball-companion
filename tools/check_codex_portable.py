@@ -19,7 +19,7 @@ def main():
     env = dict(os.environ, PYTHONUTF8='1')
     commands = [
         (ROOT / 'codex/companion', ['-m', 'unittest', *COMPANION]),
-        (ROOT, ['-m', 'pytest', '-q', 'codex/tests']),
+        (ROOT, ['-m', 'pytest', '-q', 'codex/tests', 'codex/companion/test_ota_notify.py', 'codex/companion/test_compaction.py', 'codex/companion/test_ota_stream.py', 'codex/companion/test_ota_service_budget.py', 'codex/companion/test_ota_delta.py']),
         (ROOT, ['-m', 'pytest', '-q', 'codex/tools']),
         (ROOT, ['-m', 'pytest', '-q', 'tools/test_plugin_bundles.py']),
     ]

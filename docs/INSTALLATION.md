@@ -125,7 +125,7 @@ Hooks 改为本机 Python 绝对路径与 UTF-8 模式。它不修改 Hook 信�
 旧版本脚本；Windows 不使用 Linux 的 `/proc`、systemd 或 shell 安装器。
 
 第一次连接请按[Windows 逐步引导](../codex/plugins/xueqiu-status/skills/setup/references/windows-first-run.md)
-提前准备依赖，再提醒用户连接 USB 数据线、核对串口，并在设备「连接电脑」界面启用
+提前准备依赖，再提醒用户连接 USB 数据线、核对串口，0.27.0+首次教程通过 USB 自动开启限时配对；旧固件或已配置设备才需在「连接电脑」界面启用
 **「开启配对」**。环境已准备好的快捷命令为：
 
 ```powershell
@@ -340,3 +340,5 @@ Windows 配置器现在保留通用命令，使用官方 `commandWindows` 覆盖
 更新启动命令后需要用户再审阅一次变化的定义；不修改保存的信任哈希，也不自动批准。
 之后再检查真实 Hook → Hub → BLE 设备回执，不能把直接调用 Python 的成功结果
 或隔离测试当作真实聊天已同步。
+
+Device firmware delivery and automatic idle installation are described in [Device updates](OTA-UPDATES.md).

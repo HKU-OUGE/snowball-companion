@@ -54,7 +54,7 @@ class WindowsReconnect(unittest.IsolatedAsyncioTestCase):
             with contextlib.redirect_stdout(output):bridge.pair_usb('TEST-PORT',Path(folder)/'pair.json')
             self.assertEqual(json.loads((Path(folder)/'pair.json').read_text())['key'],key)
         self.assertTrue(instances[0].dtr);self.assertFalse(instances[0].rts)
-        self.assertEqual(instances[0].sent,[b':PAIR\r\n']);self.assertTrue(instances[0].closed)
+        self.assertEqual(instances[0].sent,[b':PAIR_SETUP\r\n:PAIR\r\n']);self.assertTrue(instances[0].closed)
         self.assertNotIn(key,output.getvalue())
 
     async def test_usb_binding_reports_expired_pairing_window_without_saving(self):

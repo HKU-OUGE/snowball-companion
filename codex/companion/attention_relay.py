@@ -81,7 +81,7 @@ class AttentionRelay:
         self.results = {}
         self.pending_ack = None
 
-    async def step(self, client, config, payload):
+    async def step(self, client, config, payload, *, poll_interval=1):
         # Production injects functions from the running bridge (__main__).
         # Importing bridge again would create distinct exception classes and
         # turn a retryable truncated read into a fatal authentication failure.
@@ -90,7 +90,13 @@ class AttentionRelay:
         else:
             read_info, verify_request = self.read_info, self.verify_request
         tick = time.monotonic()
-        if tick - self.last_poll < 1:
+        prepared=[]
+        for provider in PROVIDERS:
+            rows,total=rows_for(payload,provider,time.time())
+            fingerprint=tuple((q['session'],q['id'],q['text'],q['status'],tuple(q.get('options',[])),bool(q.get('answerable'))) for q in rows),total
+            prepared.append((rows,total,fingerprint))
+        changed_input=any(row[2]!=self.fingerprints[p] for p,row in enumerate(prepared))
+        if tick - self.last_poll < poll_interval and not changed_input and self.pending_ack is None:
             return None
         self.last_poll = tick
         info = await read_info(client, config)
@@ -159,6 +165,7 @@ class AttentionRelay:
             # independent of this acknowledgement; never fake updated text.
             return refreshed
         for p, provider in enumerate(PROVIDERS):
+            # A handled device action may have replaced the snapshot above.
             rows, total = rows_for(payload, provider, time.time())
             fingerprint = tuple((q['session'], q['id'], q['text'], q['status'], tuple(q.get('options',[])), bool(q.get('answerable'))) for q in rows), total
             changed = fingerprint != self.fingerprints[p]

@@ -154,9 +154,7 @@ class ConsoleBackend(unittest.TestCase):
         run.assert_not_called()
         self.assertEqual(backend.pairing(self.config), data)
 
-    def test_usb_requires_physical_confirmation_and_an_enumerated_device(self):
-        with self.assertRaisesRegex(backend.SetupError, 'confirm_device_pairing'):
-            self.backend.execute('bind', {'pairing_open': False, 'port': 'COM1'})
+    def test_usb_automatic_binding_still_requires_an_enumerated_device(self):
         with patch.object(self.backend, 'ports', return_value=[{'port': 'COM9'}]), patch('subprocess.run') as run:
             with self.assertRaisesRegex(backend.SetupError, 'usb_port_missing'):
                 self.backend.execute('bind', {'pairing_open': True, 'port': 'COM1'})

@@ -4,8 +4,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime,timezone
 from functools import partial
 from ota_ble_gatt import OTAGatt
-from ota_ble_sender import OTAInterrupted,transfer_release
+from ota_ble_sender import OTAInterrupted,OTARejected,transfer_release
 from ota_ble_frames import CATALOG_BEGIN,CATALOG_DATA,CATALOG_END,HOST_PROGRESS,MAX_IMAGE,body,catalogue_chunks
+from ota_delta import download_best
 from ota_download import download_official,check_catalogue_official,download_prepared_official,PreparedCatalogue,OTAError
 
 class OtaRelay:
@@ -20,6 +21,7 @@ class OtaRelay:
   self._request=None;self._job_kind=None;self._handled=False
   self._accepted=False;self._progress=0;self._sent_progress=0;self._heartbeat=None
   self._catalogue_ready=None;self._catalogues={};self._started=0
+  self._identity=None;self._current=None;self._force_full=False;self._delta_rejected=set();self._version_seen_at=None
  def _note(self,event):
   if event==self.notice:return
   self.notice=event;token=self._request
@@ -54,7 +56,13 @@ class OtaRelay:
   self._start('check',partial(self.check_catalogue,current,**self._worker_kwargs(self.check_catalogue,cancel)),cancel)
  def _start_auto(self,current):
   cancel=threading.Event()
-  self._start('auto',partial(self.download,current,**self._worker_kwargs(self.download,cancel)),cancel)
+  if self.download is download_official:
+   def prepare():
+    catalogue=self.check_catalogue(current,cancelled=cancel.is_set)
+    identity=None if catalogue.metadata and (current,catalogue.metadata['version']) in self._delta_rejected else self._identity
+    return download_best(catalogue,identity,allow_chain=True,cancelled=cancel.is_set,diagnostic=self._note)
+   self._start('auto',prepare,cancel)
+  else:self._start('auto',partial(self.download,current,**self._worker_kwargs(self.download,cancel)),cancel)
  def _start_install(self,current,target):
   cached=self._catalogues.get(target);cancelled=threading.Event()
   def progress(value):
@@ -66,7 +74,9 @@ class OtaRelay:
    if cancelled.is_set():raise OTAError('cancelled')
    if not isinstance(catalogue,PreparedCatalogue) or not catalogue.metadata or catalogue.metadata['version']!=target:
     raise OTAError('confirmed target unavailable')
-   release=self.download_prepared(catalogue,target=target,progress=progress,cancelled=cancelled.is_set)
+   release=(download_best(catalogue,None if (current,target) in self._delta_rejected else self._identity,target=target,progress=progress,cancelled=cancelled.is_set,diagnostic=self._note)
+            if self.download_prepared is download_prepared_official and not self._force_full else
+            self.download_prepared(catalogue,target=target,progress=progress,cancelled=cancelled.is_set))
    if cancelled.is_set():raise OTAError('cancelled')
    if not release or release[2]!=target:raise OTAError('confirmed target mismatch')
    return catalogue,release
@@ -87,15 +97,28 @@ class OtaRelay:
   if self._request:
    try:await self._control(g,HOST_PROGRESS,body(HOST_PROGRESS,request=self._request[1],kind=2,value=error),service_live)
    except Exception:pass
+ def _transfer_progress(self,metrics):
+  # Numeric transport timings only; never exception text or user content.
+  allowed={'packets','service_ms','info_ms','write_ms','ack_ms','image','total','transfer_ms','notifications','fallback_reads','window','advertised_window','write_capacity','notify_fallback'}
+  record={'event':'transfer_progress',**{k:v for k,v in metrics.items() if k in allowed and type(v) is int and v>=0}}
+  if self.diagnostic:
+   try:self.diagnostic('XQOTA '+json.dumps(record,separators=(',',':')))
+   except Exception:pass
  async def step(self,client,config,read_info,service_live,should_stop):
   g=OTAGatt(client,config,read_info)
   if not g.supported():return
   # Manual requests are polled even while staged/downloading or rate limited.
   info=await g.info();status=await g.ota_status()
-  token=(info['nonce'],status['request'],status['operation'],status['target']) if status.get('v')==2 and status['operation'] else None
+  current=status['version']
+  if current!=self._current:self._version_seen_at=self.clock()
+  if self._current is not None and current!=self._current:
+   self._cancel_job();self.ready=None;self.staged=False;self.last_check=None;self._request=None;self._identity=None
+   self._note('version_changed_recheck')
+  self._current=current
+  token=(info['nonce'],status['request'],status['operation'],status['target']) if status.get('v') in (2,3) and status['operation'] else None
   if token!=self._request:
    self._cancel_job();self.ready=None;self._catalogue_ready=None
-   self._request=token;self._handled=False;self._accepted=False
+   self._request=token;self._handled=False;self._accepted=False;self._force_full=False
    with self._lock:self._progress=0
    self._sent_progress=0;self._heartbeat=None;self._started=self.clock()
    if token:
@@ -131,8 +154,10 @@ class OtaRelay:
     return
   if token and self._catalogue_ready is not None:
    catalogue=self._catalogue_ready;self._catalogue_ready=None
+   notify=False
    try:
     if not isinstance(catalogue,PreparedCatalogue):raise OTAError('invalid catalogue')
+    if hasattr(g,'start_acknowledgements'):notify=await g.start_acknowledgements()
     await self._control(g,CATALOG_BEGIN,body(CATALOG_BEGIN,total=len(catalogue.raw),request=token[1]),service_live)
     for payload in catalogue_chunks(catalogue.raw,token[1]):
      await self._control(g,CATALOG_DATA,payload,service_live)
@@ -140,6 +165,8 @@ class OtaRelay:
     self._handled=True;self._note('catalogue_sent')
    except Exception:
     await self._fail(g,service_live,3,'catalogue_interrupted')
+   finally:
+    if notify:await g.stop_acknowledgements()
    return
   if self.ready is not None:
    if should_stop():
@@ -150,11 +177,24 @@ class OtaRelay:
     await self._fail(g,service_live,3,'target_mismatch');return
    try:
     if token:await self._progress_control(g,service_live)
-    elif status.get('v')==2:g.bind_request(0,0,'',info['nonce'])
-    result=await transfer_release(g,g.key,manifest,image,service_live,should_stop)
+    elif status.get('v') in (2,3):g.bind_request(0,0,'',info['nonce'])
+    kwargs={'progress':self._transfer_progress} if 'progress' in inspect.signature(transfer_release).parameters else {}
+    if getattr(self.ready,'delta',False):kwargs['delta']=True;self._note('delta_transfer')
+    result=await transfer_release(g,g.key,manifest,image,service_live,should_stop,**kwargs)
     if result.get('phase')!=5:raise OTAInterrupted('device did not stage image')
     self.staged=True;self._handled=bool(token);self.ready=None;self._note('staged')
-   except Exception:
+   except Exception as error:
+    if isinstance(error,OTARejected):self._note('device_rejected_'+str(error.result))
+    if getattr(self.ready,'delta',False) and isinstance(error,OTARejected) and error.result not in (0x103,0x107) and not should_stop():
+     self._delta_rejected.add((status['version'],version))
+     if len(self._delta_rejected)>8:self._delta_rejected={ (status['version'],version) }
+     # One full-image retry, never an unbounded delta/whole-image loop. A
+     # reconnect changes the request token and is checked before every frame.
+     self.ready=None;self._identity=None;self._force_full=True;self._note('delta_full_fallback')
+     if token:self._start_install(status['version'],token[3])
+     else:
+      cancel=threading.Event();self._start('auto',partial(self.download,status['version'],**self._worker_kwargs(self.download,cancel)),cancel)
+     return
     if token:await self._fail(g,service_live,2,'transfer_interrupted')
     else:
      self._note('transfer_interrupted');self.ready=None;self.last_check=self.clock()-self.interval+60
@@ -164,11 +204,16 @@ class OtaRelay:
    return
   if token:
    if token[2]==1:self._start_check(status['version'])
-   else:self._start_install(status['version'],token[3])
+   else:
+    self._identity=await g.identity() if info.get('ota_stream_v')==2 and hasattr(g,'identity') else None
+    self._start_install(status['version'],token[3])
    return
   now=self.clock()
   if self.last_check is not None and now-self.last_check<self.interval:return
   self.last_check=now;self._started=now;self._note('checking')
+  self._identity=await g.identity() if info.get('ota_stream_v')==2 and hasattr(g,'identity') else None
+  if self._identity and (self._identity.get('ready') is False or ('ready' not in self._identity and self._version_seen_at is not None and now-self._version_seen_at<35)):
+   self.last_check=now-self.interval+5;self._note('waiting_boot_health');return
   self._start_auto(status['version'])
  def close(self):
   self._cancel_job();self.ready=None;self._catalogue_ready=None;self._request=None
