@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import struct
+import subprocess
 import tempfile
 import threading
 import time
@@ -58,7 +59,18 @@ class Security(unittest.TestCase):
         from cryptography import x509
         with tempfile.TemporaryDirectory() as d:
             a=create_gateway(Path(d),'192.168.9.20','Fixture');b=create_gateway(Path(d),'192.168.9.20','Fixture');self.assertEqual(a,b)
-            self.assertEqual(os.stat(Path(d)/'gateway.json').st_mode&0o777,0o600)
+            if os.name == 'nt':
+                # POSIX mode bits do not describe Windows access control. Read
+                # the actual DACL without repairing it as part of the test.
+                dump = Path(d)/'acl.txt'
+                subprocess.run(['icacls',str(Path(d)/'gateway.json'),'/save',str(dump)],check=True,capture_output=True)
+                sddl = dump.read_text(encoding='utf-16-le').lstrip('\ufeff')
+                self.assertIn('D:P',sddl)
+                self.assertIn(';;;SY)',sddl)
+                self.assertNotIn(';;;WD)',sddl)
+                self.assertEqual(sddl.count('(A;'),2)
+            else:
+                self.assertEqual(os.stat(Path(d)/'gateway.json').st_mode&0o777,0o600)
             cert=x509.load_pem_x509_certificate((Path(d)/'server-cert.pem').read_bytes())
             self.assertIn('192.168.9.20',str(cert.extensions.get_extension_for_class(x509.SubjectAlternativeName).value))
             with self.assertRaises(ValueError):create_gateway(Path(d),'192.168.9.21','Fixture')
