@@ -81,7 +81,7 @@ class AttentionRelay:
         self.results = {}
         self.pending_ack = None
 
-    async def step(self, client, config, payload, *, poll_interval=1):
+    async def step(self, client, config, payload, *, poll_interval=1, service_state=None):
         # Production injects functions from the running bridge (__main__).
         # Importing bridge again would create distinct exception classes and
         # turn a retryable truncated read into a fatal authentication failure.
@@ -184,6 +184,8 @@ class AttentionRelay:
                     raise ValueError('Question packet exceeds ATT limit')
                 await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), transport_io_timeout(client))
                 info = dict(info, accepted=info['accepted'] + 1)
+                if service_state is not None and await service_state():
+                    info = await read_info(client, config)
             self.sent_at[p] = time.monotonic()
             self.fingerprints[p] = fingerprint
             self.sent[(p, gen)] = {'at': self.sent_at[p], 'rows': rows}
@@ -201,7 +203,7 @@ class SummaryRelay:
         self.generations = [0]*3
         self.last_poll = float('-inf')
 
-    async def step(self, client, config, payload):
+    async def step(self, client, config, payload, *, service_state=None):
         tick = time.monotonic()
         if tick-self.last_poll<2: return
         self.last_poll = tick
@@ -231,4 +233,6 @@ class SummaryRelay:
                 head=struct.pack('<BBBI8s',7,p,op,info['accepted']+1,bytes.fromhex(info['nonce']))+body
                 await asyncio.wait_for(client.write_gatt_char(WRITE,head+hmac.digest(bytes.fromhex(config['key']),head,'sha256'),response=True),transport_io_timeout(client))
                 info=dict(info,accepted=info['accepted']+1)
+                if service_state is not None and await service_state():
+                    info=await self.read_info(client,config)
             self.fingerprints[p]=fp;self.sent_at[p]=time.monotonic()

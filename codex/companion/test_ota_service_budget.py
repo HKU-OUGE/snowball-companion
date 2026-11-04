@@ -18,16 +18,20 @@ def test_slow_live_service_does_not_repeat_before_each_image_packet():
  g={'time':SimpleNamespace(monotonic=lambda:clock[0]),'args':SimpleNamespace(source=None),
     'parse_source':lambda v:None,'client':client,'config':{},'read_info':None,
     **{k:Slow(k) for k in ('attention','relay','idle_heartbeat','power','speech','catalogue','summaries')}}
+ async def state(**kwargs):await g['relay'].step()
+ g.update(service_state=state,current_payload=lambda:None,current_target=lambda:None)
  exec(compile(module,'live_service','exec'),g);service=g['make']()
  async def run():
   assert await service() is True
-  assert len(calls)==8
+  first=len(calls)
+  assert calls.count('attention')==1
   for _ in range(4):
    clock[0]+=.05
    assert await service() is False
+   assert len(calls)==first
   clock[0]+=.6
   assert await service() is True
-  assert len(calls)==14
+  assert calls.count('attention')==2
  asyncio.run(run())
 
 def test_write_observer_is_idempotent_and_does_not_count_failed_writes():

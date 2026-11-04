@@ -2,6 +2,7 @@
 """Snowball BLE bridge. Status, session names and posted-question titles cross BLE; no answers or execution commands."""
 import argparse
 import asyncio
+import copy
 import hashlib
 import hmac
 import json
@@ -159,6 +160,51 @@ class StatusRelay:
             self.previous, self.last_io = identity if ack is not None else None, now
             return ack
         return None
+
+
+class LiveStatusPump:
+    """Re-read real task evidence between bulk packets on the same GATT writer.
+
+    A pending catalogue/summary transaction must not delay a new task until the
+    next complete bridge loop. This never invents activity or changes focus.
+    """
+    def __init__(self, source, relay, *, clock=time.monotonic, interval=.1, report=print):
+        self.source, self.relay = source, relay
+        self.clock, self.interval, self.report = clock, interval, report
+        self.last_check = float('-inf')
+        self.payload = self.target = None
+        self.notice = self.previous = None
+
+    async def step(self, client, config, *, force=False):
+        tick = self.clock()
+        if not force and tick - self.last_check < self.interval:
+            return False
+        self.last_check = tick
+        self.payload = self.target = None
+        notice = 'Live status-hub source; BLE refreshes do not change task timestamps'
+        try:
+            self.payload = json.loads(read_snapshot_text(self.source))
+            self.target = parse_source(self.payload)
+        except (OSError, ValueError) as error:
+            reason = str(error) if isinstance(error, SourceUnavailable) else 'source file unreadable or invalid JSON'
+            notice = f'Waiting for source: {reason}; BLE link probe only'
+        if notice != self.notice:
+            self.report(notice)
+            self.notice = notice
+        ack = await self.relay.step(client, config, self.target)
+        if self.target is None:
+            self.previous = None
+        elif ack is not None:
+            identity = self.target.provider, self.target.state, self.target.session_id
+            if identity != self.previous:
+                # Timing only: no titles, prompts, thread IDs or device secrets.
+                record = {'time': round(time.time(), 3), 'provider': self.target.provider,
+                          'state': self.target.state, 'applied': ack['applied']}
+                if self.target.task_updated_at is not None:
+                    record['source_age_ms'] = round(max(0, time.time()-self.target.task_updated_at)*1000)
+                self.report('XQSTATE ' + json.dumps(record, separators=(',', ':')))
+            self.previous = identity
+        return ack is not None
 
 
 def validate_title(title):
@@ -338,7 +384,7 @@ class CatalogRelay:
         display_focus = focus is not None and (pinned or (focus.get('pending_total', 0) > 0 and focus['phase'] == 'idle') or pending_attention(payload, now, focus) or (focus['expiry'] > now and focus.get('source_fresh') is True and focus.get('task_fresh') is True))
         return chosen, total, pinned and focus is not None, focus['wire_id'] if display_focus else ''
 
-    async def step(self, client, config, payload):
+    async def step(self, client, config, payload, *, service_state=None):
         tick = time.monotonic()
         if tick - self.last_poll < 1.0:
             return None
@@ -458,6 +504,10 @@ class CatalogRelay:
                 packet = make_catalog_packet(bytes.fromhex(config['key']), info, provider, op, body)
                 await asyncio.wait_for(client.write_gatt_char(WRITE, packet, response=True), transport_io_timeout(client))
                 info = dict(info, accepted=info['accepted'] + 1)
+                if service_state is not None and await service_state():
+                    # A status write consumes the same sequence. Re-authenticate
+                    # before continuing the atomic catalogue transaction.
+                    info = await read_info(client, config)
             self.sent_at[p] = time.monotonic()
             self.entries = {k: v for k, v in self.entries.items() if k[0] != p}
             self.entries.update({(p, row['wire_id']): row for row in rows})
@@ -690,8 +740,22 @@ def decode_info(raw):
 
 
 async def read_info(client, config):
+    # Only a bridge-owned sequential writer may share a short-lived read. All
+    # writes invalidate it, including failed/ambiguous writes. Wi-Fi adapters
+    # retain their existing authenticated request/response semantics.
+    cacheable = (type(getattr(client, '_snowball_write_count', None)) is int and
+                 type(getattr(client, '_snowball_info_epoch', None)) is int and
+                 getattr(client, 'transport', None) != 'wifi')
+    epoch = getattr(client, '_snowball_info_epoch', None)
+    cached = getattr(client, '_snowball_info_cache', None) if cacheable else None
+    if (isinstance(cached, tuple) and len(cached) == 3 and
+            time.monotonic()-cached[0] < .2 and cached[1] == epoch):
+        return verify_info(copy.deepcopy(cached[2]), config)
     raw = bytes(await asyncio.wait_for(client.read_gatt_char(INFO), transport_io_timeout(client)))
-    return verify_info(decode_info(raw), config)
+    info = verify_info(decode_info(raw), config)
+    if cacheable and epoch == client._snowball_info_epoch:
+        client._snowball_info_cache = (time.monotonic(), epoch, copy.deepcopy(info))
+    return info
 
 
 async def send(client, config, provider, state, valid_until=None, session_id=None, display_name=''):
@@ -706,6 +770,8 @@ async def send(client, config, provider, state, valid_until=None, session_id=Non
         ack = await read_info(client, config)
         if ack['applied'] == seq and ack['provider'] == PROVIDERS.index(provider) and ack['state'] == wire_state(state, info):
             return ack
+        # Do not cache the short interval between ATT acceptance and UI apply.
+        client._snowball_info_cache = None
         await asyncio.sleep(.05)
     raise TimeoutError('Command not acknowledged by watch UI')
 
@@ -715,10 +781,18 @@ def observe_client_writes(client):
     if type(getattr(client,'_snowball_write_count',None)) is int:return
     original=client.write_gatt_char
     client._snowball_write_count=0
+    client._snowball_info_epoch=0
+    client._snowball_info_cache=None
     async def counted(*args,**kwargs):
-        result=await original(*args,**kwargs)
-        client._snowball_write_count+=1
-        return result
+        client._snowball_info_cache=None
+        client._snowball_info_epoch+=1
+        try:
+            result=await original(*args,**kwargs)
+            client._snowball_write_count+=1
+            return result
+        finally:
+            client._snowball_info_epoch+=1
+            client._snowball_info_cache=None
     client.write_gatt_char=counted
 
 
@@ -762,6 +836,16 @@ async def connected_session(args, config):
             pets = args._pet_relay
             from network_provision import NetworkProvision
             network = NetworkProvision()
+            live = LiveStatusPump(args.source, relay) if args.command == 'watch' and args.source else None
+            payload = target = None
+            async def service_state(*, force=False):
+                if live is None or network.quiescent:
+                    return False
+                return await live.step(client, config, force=force)
+            def current_payload():
+                return live.payload if live is not None else payload
+            def current_target():
+                return live.target if live is not None else target
             from ota_idle_heartbeat import IdleHeartbeat
             from ota_relay import OtaRelay
             idle_heartbeat = IdleHeartbeat()
@@ -784,31 +868,25 @@ async def connected_session(args, config):
                 now=time.monotonic()
                 if now-last_ota_service<.25:return False
                 writes_before=client._snowball_write_count
-                current=None;current_target=None
-                try:
-                    current=json.loads(read_snapshot_text(args.source)) if args.source else None
-                    current_target=parse_source(current)
-                except (OSError,ValueError,TypeError):pass
-                await relay.step(client,config,current_target)
-                refreshed=await attention.step(client,config,current,poll_interval=.25)
-                if refreshed is not None:
-                    current=refreshed
-                    try:current_target=parse_source(current)
-                    except (ValueError,TypeError):current_target=None
+                await service_state(force=True)
+                refreshed=await attention.step(client,config,current_payload(),poll_interval=.25,service_state=service_state)
+                await service_state(force=refreshed is not None)
                 # Lists and summaries also have leases. Keep them fresh during
                 # a long transfer instead of letting them expire until FINISH.
                 if now-last_ota_bulk>=5:
-                    refreshed=await catalogue.step(client,config,current)
+                    refreshed=await catalogue.step(client,config,current_payload(),service_state=service_state)
                     if refreshed is not None:
-                        current=refreshed;relay.previous=None
-                        try:current_target=parse_source(current)
-                        except (ValueError,TypeError):current_target=None
-                    await summaries.step(client,config,current)
+                        relay.previous=None
+                    await service_state(force=refreshed is not None)
+                    await summaries.step(client,config,current_payload(),service_state=service_state)
                     last_ota_bulk=time.monotonic()
-                await relay.step(client,config,current_target)
-                await idle_heartbeat.step(client,config,read_info,current)
-                await power.step(client,config,read_info,current,current_target)
-                await speech.step(client,config,current)
+                await service_state()
+                await idle_heartbeat.step(client,config,read_info,current_payload())
+                await service_state()
+                await power.step(client,config,read_info,current_payload(),current_target())
+                await service_state()
+                await speech.step(client,config,current_payload())
+                await service_state()
                 # Measure the quiet window after I/O completes. Otherwise a
                 # slow INFO read makes every firmware packet run this entire
                 # group again, starving the actual transfer.
@@ -830,63 +908,53 @@ async def connected_session(args, config):
                 # Their firmware leases are 20s. All writes remain sequential.
                 bulk_due = not speech.latency_sensitive or time.monotonic()-last_bulk >= 8
                 if bulk_due:last_bulk=time.monotonic()
-                if args.command == 'watch' and args.source:
-                    try:
-                        payload = json.loads(read_snapshot_text(args.source))
-                        target = parse_source(payload)
-                        notice = ('Live status-hub source; BLE refreshes do not change task timestamps'
-                                  if target.mode == 'hub' else notice)
-                    except (OSError, ValueError) as error:
-                        target = None
-                        reason = str(error) if isinstance(error, SourceUnavailable) else 'source file unreadable or invalid JSON'
-                        notice = f'Waiting for source: {reason}; BLE link probe only'
-                if notice != source_notice:
-                    print(notice, flush=True)
-                    source_notice = notice
-                ack = await relay.step(client, config, target)
-                if target is None:
-                    previous = None
-                elif ack is not None and (target.provider, target.state) != previous:
-                    print(f'Applied {target.provider}: {target.state}, seq={ack["applied"]}', flush=True)
-                    previous = target.provider, target.state
+                if live is not None:
+                    await service_state(force=True)
+                else:
+                    if notice != source_notice:
+                        print(notice, flush=True)
+                        source_notice = notice
+                    ack = await relay.step(client, config, target)
+                    if target is None:
+                        previous = None
+                    elif ack is not None and (target.provider, target.state) != previous:
+                        print(f'Applied {target.provider}: {target.state}, seq={ack["applied"]}', flush=True)
+                        previous = target.provider, target.state
                 refreshed_attention = None
                 if args.command == 'watch' and args.source:
-                    refreshed_attention = await attention.step(client, config, payload)
-                if refreshed_attention is not None:
-                    payload = refreshed_attention
-                    try:
-                        target = parse_source(payload)
-                    except SourceUnavailable:
-                        target = None
+                    refreshed_attention = await attention.step(client, config, current_payload(), service_state=service_state)
+                await service_state(force=refreshed_attention is not None)
                 if bulk_due and args.command == 'watch' and args.source:
-                    refreshed = await catalogue.step(client, config, payload)
+                    refreshed = await catalogue.step(client, config, current_payload(), service_state=service_state)
                     if refreshed is not None:
                         # A focus ACK is not a UI snapshot. Send one even when
                         # identity/state matches the previous bridge target.
                         relay.previous = None
-                        try:
-                            target = parse_source(refreshed)
-                        except SourceUnavailable:
-                            target = None
-                        await relay.step(client, config, target)
+                    await service_state(force=refreshed is not None)
                 if bulk_due:
-                    await summaries.step(client, config, payload)
-                    await pets.step(client, config, payload, read_info)
-                await power.step(client, config, read_info, payload, target)
+                    await summaries.step(client, config, current_payload(), service_state=service_state)
+                    await service_state()
+                    await pets.step(client, config, current_payload(), read_info)
+                    await service_state()
+                await power.step(client, config, read_info, current_payload(), current_target())
+                await service_state()
                 try:
-                    await speech.step(client, config, payload)
+                    await speech.step(client, config, current_payload())
                 except Exception as error:
                     print(f'Speech transport failed: {type(error).__name__}; ATT={getattr(error,"code",None)}',flush=True)
                     raise
+                await service_state()
                 if args.command=='watch':
                     try:
-                        await idle_heartbeat.step(client,config,read_info,payload)
+                        await idle_heartbeat.step(client,config,read_info,current_payload())
+                        await service_state()
                         await ota.step(client,config,read_info,ota_service_live,ota_should_stop)
                     except Exception as error:
                         # Maintenance must not take down normal task status.
                         if ota.notice!='maintenance_unavailable':
                             print(f'OTA maintenance unavailable: {type(error).__name__}',flush=True)
                         ota.notice='maintenance_unavailable'
+                await service_state()
                 await asyncio.sleep(.03 if speech.transferring else .2)
     finally:
         if ota is not None:ota.close()

@@ -46,10 +46,11 @@ class Scheduling(unittest.IsolatedAsyncioTestCase):
                                ('pet_sync.PetRelay',pets),('power_telemetry.PowerRelay',power)]:
                 stack.enter_context(patch(name,return_value=value))
             stack.enter_context(patch('speech_relay.SpeechRelay',return_value=Speech()))
-            stack.enter_context(patch('network_provision.NetworkProvision',return_value=Mock(step=AsyncMock(return_value=False))))
+            stack.enter_context(patch('network_provision.NetworkProvision',return_value=Mock(quiescent=False,step=AsyncMock(return_value=False))))
             await bridge.connected_session(args,{'device':'test'})
             self.assertEqual([p['marker'] for p in calls],['live']*3)
-            self.assertEqual([c.args[2].state for c in status.step.call_args_list],['running']*3)
+            self.assertGreaterEqual(status.step.await_count,3)
+            self.assertTrue(all(c.args[2].state=='running' for c in status.step.call_args_list))
             self.assertEqual(attention.step.await_count,3)
             self.assertEqual(catalog.step.await_count,1)
             self.assertEqual(summaries.step.await_count,1)

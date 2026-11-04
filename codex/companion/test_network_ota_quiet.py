@@ -214,7 +214,9 @@ class QuietMode(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.info_reads, 4)  # Initial auth + t=10,12,14 metadata.
         self.assertEqual(client.reads, [np.NETWORK] * 3)
         self.assertEqual(client.writes, [])
-        for relay in relays:
+        # Status is rechecked between bulk operations on the same writer.
+        self.assertGreaterEqual(relays[0].step.await_count, 1)
+        for relay in relays[1:]:
             relay.step.assert_awaited_once()
         speech.step.assert_awaited_once()
 
