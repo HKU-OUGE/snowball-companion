@@ -294,7 +294,9 @@ class CodexDesktop:
                             sid = opaque(thread)
                             if sid in wanted and isinstance(path,str):
                                 resolved = Path(path).resolve()
-                                if resolved.is_relative_to(self.root/'sessions'):
+                                # Windows may expand an 8.3 profile/temp path
+                                # during resolve(); compare two canonical roots.
+                                if resolved.is_relative_to((self.root/'sessions').resolve()):
                                     self.paths[sid] = resolved
                 except (sqlite3.Error,OSError): pass
         lifecycles = {}

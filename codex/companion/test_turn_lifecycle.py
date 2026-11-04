@@ -140,6 +140,18 @@ class LifecycleProjection(unittest.TestCase):
 
 
 class DesktopIntegration(SidebarDirectory):
+    def test_canonical_home_alias_keeps_owned_rollouts_and_rejects_external_files(self):
+        path=self.root/'sessions'/'1.jsonl';path.parent.mkdir()
+        append(path,'task_started',time.time())
+        outside=self.home/'external.jsonl';append(outside,'task_started',time.time())
+        self.add(1,rollout_path=str(path));self.add(2,rollout_path=str(outside))
+        alias=self.home/'home-alias'
+        try:alias.symlink_to(self.home,target_is_directory=True)
+        except OSError:self.skipTest('Symlink unavailable; native Windows integration covers resolved temp paths')
+        desktop=CodexDesktop(alias);desktop.directory.refresh();desktop.refresh({})
+        self.assertIn('codex-hooks/'+opaque('thread-1'),desktop.lifecycles)
+        self.assertNotIn('codex-hooks/'+opaque('thread-2'),desktop.lifecycles)
+
     def test_real_indexed_metadata_updates_hub_without_hooks(self):
         path=self.root/'sessions'/'1.jsonl';path.parent.mkdir()
         self.add(1,rollout_path=str(path))
