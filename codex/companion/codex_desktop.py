@@ -105,20 +105,28 @@ def reply_envelope(route, answer):
 
 
 class VisibleSummary:
-    """Incremental bounded JSONL reader; no reasoning, user input or tool output."""
+    """Bounded visible text plus explicit root-turn lifecycle metadata.
+
+    A delivered instruction can start a turn without UserPromptSubmit hooks.
+    Only task_started/task_complete/turn_aborted establish lifecycle state;
+    message text, reasoning and tool output never establish it.
+    """
     def __init__(self):
         self.offset = 0
         self.identity = None
         self.turn = None
         self.value = {}
         self.partial = b''
+        self.lifecycle = {}
 
     def read(self, path):
         path = Path(path)
         info = path.stat()
-        if self.identity != info.st_ino or info.st_size < self.offset:
-            self.identity, self.offset = info.st_ino, max(0, info.st_size-2*1024*1024)
+        identity = (str(path), info.st_dev, info.st_ino)
+        if self.identity != identity or info.st_size < self.offset:
+            self.identity, self.offset = identity, max(0, info.st_size-2*1024*1024)
             self.value, self.partial, self.turn = {}, b'', None
+            self.lifecycle = {}
             skip = bool(self.offset)
         else:
             skip = False
@@ -126,6 +134,8 @@ class VisibleSummary:
         with path.open('rb') as stream:
             if info.st_size-self.offset > 2*1024*1024:
                 self.offset, self.partial, skip = info.st_size-2*1024*1024, b'', True
+                # A skipped terminal event must not leave an old active claim.
+                self.lifecycle = {}
             stream.seek(self.offset)
             if skip: stream.readline()
             data = self.partial + stream.read(2*1024*1024)
@@ -138,10 +148,26 @@ class VisibleSummary:
             except (ValueError, UnicodeError): continue
             p = event.get('payload', {})
             if not isinstance(p, dict): continue
+            if event.get('type') == 'event_msg' and p.get('type') in ('task_started', 'task_complete', 'turn_aborted'):
+                turn, root = p.get('turn_id'), p.get('root_turn_id')
+                if not isinstance(turn, str) or not turn or len(turn) > 128 or (root is not None and root != turn):
+                    continue
+                try: stamp = datetime.fromisoformat(event['timestamp'].replace('Z', '+00:00')).timestamp()
+                except (KeyError, ValueError, TypeError, OverflowError): continue
+                if not 0 < stamp <= time.time()+5 or stamp < self.lifecycle.get('at', 0): continue
+                if p['type'] == 'task_started':
+                    self.turn, self.value = turn, {}
+                    phase = 'thinking'
+                else:
+                    if self.turn is not None and self.turn != turn: continue
+                    self.turn = turn
+                    phase = 'completed' if p['type'] == 'task_complete' else 'idle'
+                self.lifecycle = {'phase': phase, 'at': stamp, 'turn': opaque(turn)}
             if event.get('type') == 'turn_context':
                 turn = p.get('turn_id')
                 if turn and turn != self.turn:
                     self.turn, self.value = turn, {}
+                    self.lifecycle = {}
             if event.get('type') != 'response_item' or p.get('type') != 'message' or p.get('role') != 'assistant': continue
             if p.get('phase') not in ('commentary', 'final') or p.get('channel') == 'analysis': continue
             text = ' '.join(c.get('text', '') for c in p.get('content', []) if isinstance(c, dict) and c.get('type') == 'output_text')
@@ -161,6 +187,7 @@ class CodexDesktop:
         self.socket_path = self.root/'ipc/ipc.sock'
         self.ipc_factory = ipc_factory
         self.summaries, self.readers, self.paths = {}, {}, {}
+        self.lifecycles = {}
         self.last_index = 0
         self.directory=DesktopDirectory(self.home)
         self.app_tools=AppTools(self.home)
@@ -270,12 +297,19 @@ class CodexDesktop:
                                 if resolved.is_relative_to(self.root/'sessions'):
                                     self.paths[sid] = resolved
                 except (sqlite3.Error,OSError): pass
+        lifecycles = {}
         for sid in wanted:
             if sid not in self.paths: continue
             try:
-                value = self.readers.setdefault(sid, VisibleSummary()).read(self.paths[sid])
+                reader = self.readers.setdefault(sid, VisibleSummary())
+                value = reader.read(self.paths[sid])
                 self.summaries['codex-hooks/'+sid] = dict(value)
+                if reader.lifecycle:
+                    lifecycles['codex-hooks/'+sid] = dict(reader.lifecycle, observed_at=time.time())
             except (OSError, ValueError): pass
+        # Publish a complete pass atomically; unreadable/removed files lose
+        # their display evidence. Re-reading never changes the event timestamp.
+        self.lifecycles = lifecycles
 
     def deliver(self, session, question, answer, request_id):
         route = self.route(session, question)

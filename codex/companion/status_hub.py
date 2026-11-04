@@ -242,7 +242,8 @@ class StatusHub:
         """
         if sum(not r.get('catalog_only',False) for r in self.records.values()) < MAX_SESSIONS:
             return
-        candidates = [(record['updated_at'], key) for key, record in self.records.items()
+        candidates = [(record['updated_at'], key) for key, raw in self.records.items()
+            for record in (self.display_record(raw, now),)
             if not record.get('catalog_only') and record['expires_at'] <= now and (record.get('task_expires_at') or 0) <= now
             and record.get('phase') in ('idle', 'completed', None)
             and not record.get('pending_input') and not record.get('questions')
@@ -518,7 +519,7 @@ class StatusHub:
                 key = self.key(request['source'], request['session_id'])
                 if key not in self.records:
                     raise Invalid('unknown_session', 404)
-                record = self.records[key]
+                record = self.display_record(self.records[key], self.clock())
                 phase, pending, _, _ = self.project_questions(record, self.clock())
                 if not pending and (
                         phase not in ('thinking', 'running', 'waiting', 'failed', 'compacting') or
@@ -536,7 +537,33 @@ class StatusHub:
             return {}
         return receipt
 
+    def display_record(self, record, now):
+        """Overlay newer explicit lifecycle evidence, preserving raw hook state.
+
+        Delivery acceptance alone and directory timestamps cannot activate a
+        session. A real root-turn event can; later detailed hooks take over.
+        Pending questions/reminders remain authoritative and are never cleared.
+        """
+        directory = getattr(self.desktop, 'directory', None)
+        states = getattr(self.desktop, 'lifecycles', None)
+        if (record.get('source') != 'codex-hooks' or not isinstance(states, dict) or
+                not isinstance(getattr(directory, 'rows', None), dict) or directory.fresh() is not True):
+            return record
+        key = self.key(record['source'], record['session_id'])
+        event = states.get(key)
+        if key not in directory.rows or not isinstance(event, dict): return record
+        at, observed = event.get('at'), event.get('observed_at')
+        if (event.get('phase') not in ('thinking', 'completed', 'idle') or
+                type(at) not in (int, float) or not math.isfinite(at) or not 0 < at <= now+FUTURE_SKEW or
+                type(observed) not in (int, float) or not math.isfinite(observed) or not now-5 < observed <= now+FUTURE_SKEW or
+                at <= (record.get('phase_at') or 0)):
+            return record
+        return dict(record, phase=event['phase'], activity_phase=event['phase'], phase_at=at,
+                    task_event_at=at, updated_at=at, ttl_seconds=300, expires_at=at+300,
+                    task_expires_at=at+300, catalog_only=False, state_evidence='codex_turn_lifecycle')
+
     def project_questions(self, record, now):
+        record = self.display_record(record, now)
         key = self.key(record['source'], record['session_id'])
         settled = {q['id'] for q in record.get('questions', [])
                    if (receipt := self.question_receipt(key, q)).get('status') == 'accepted'
@@ -552,6 +579,7 @@ class StatusHub:
             record = self.records.get(key)
             if record is None:
                 continue
+            record = self.display_record(record, now)
             directory=getattr(self.desktop,'directory',None)
             if isinstance(getattr(directory,'rows',None),dict) and directory.fresh() is True and record['source']=='codex-hooks' and key not in directory.rows:continue
             if record.get('catalog_only') or record['task_event_at'] is None or (self.focus_provider is not None and record['provider'] != self.focus_provider):
@@ -574,6 +602,7 @@ class StatusHub:
             released = False
             if self.pinned:
                 target = self.records.get(self.focus)
+                if target: target = self.display_record(target, now)
                 phase, pending, _, _ = self.project_questions(target, now) if target else (None, 0, 0, [])
                 actionable = target and (pending > 0 or (
                     phase in ('thinking', 'running', 'waiting', 'failed', 'compacting') and
@@ -599,11 +628,13 @@ class StatusHub:
             result['can_create']=bool(directory_rows and self.desktop.available() and self.desktop.app_tools.available())
             for key, record in self.records.items():
                 if record['source']=='codex-hooks' and directory_rows is not None and key not in directory_rows:continue
+                record = self.display_record(record, now)
                 fresh = now < record['expires_at'] and now >= record['updated_at'] - FUTURE_SKEW
                 entry = {field: record[field] for field in (
                     'provider', 'source', 'session_id', 'phase', 'phase_at', 'updated_at',
                     'ttl_seconds', 'expires_at', 'seq')}
                 entry['priority'] = self.priority_order.index(key)
+                entry['state_evidence'] = record.get('state_evidence', 'hook')
                 entry['phase'], entry['pending_input'], entry['pending_total'], entry['questions'] = self.project_questions(record, now)
                 entry['summary'] = dict(self.desktop.summaries.get(key, {})) if self.desktop else {}
                 for q in entry['questions']:
@@ -627,7 +658,7 @@ class StatusHub:
                 if key == self.focus:
                     result.update({k: entry[k] for k in ('provider', 'source', 'session_id',
                         'updated_at', 'ttl_seconds', 'expires_at', 'seq', 'source_fresh',
-                        'task_updated_at', 'source_last_seen', 'task_fresh', 'task_expires_at', 'display_name', 'pending_input', 'pending_total', 'questions')})
+                        'task_updated_at', 'source_last_seen', 'task_fresh', 'task_expires_at', 'display_name', 'pending_input', 'pending_total', 'questions', 'state_evidence')})
                     result['last_state'] = entry['phase']
                     result['phase_at'] = record['phase_at']
                     result['terminal'] = entry['phase'] in ('completed', 'failed')

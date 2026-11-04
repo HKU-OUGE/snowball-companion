@@ -14,8 +14,8 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = '0.6.1'
-VERSIONS = {'codex': '0.6.1', 'claude': '0.2.5', 'cursor': '0.2.5'}
+RELEASE = '0.6.2'
+VERSIONS = {'codex': '0.6.2', 'claude': '0.2.5', 'cursor': '0.2.5'}
 LABELS = {'codex': 'Codex', 'claude': 'Claude', 'cursor': 'Cursor'}
 FIXED_TIME = (2026, 11, 1, 0, 0, 0)
 CORE_LIMIT = 8_000_000

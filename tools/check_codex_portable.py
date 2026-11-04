@@ -7,7 +7,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 COMPANION = [
     'test_answers', 'test_attention', 'test_bridge_source', 'test_catalog',
-    'test_info_transport', 'test_status_latency', 'test_network_ota_quiet', 'test_pet_hub', 'test_pet_sync', 'test_power_telemetry',
+    'test_info_transport', 'test_status_latency', 'test_turn_lifecycle', 'test_network_ota_quiet', 'test_pet_hub', 'test_pet_sync', 'test_power_telemetry',
     'test_priority_queue', 'test_private_files', 'test_protocol', 'test_reconnect',
     'test_session_capacity', 'test_sidebar_tasks', 'test_speech',
     'test_speech_relay', 'test_speech_offline', 'test_resource_fetch', 'test_speech_scheduling', 'test_status_hub',
