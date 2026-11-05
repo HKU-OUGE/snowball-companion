@@ -10,6 +10,15 @@ requested path from the user's context: physical Snowball, account Pet, or a
 specific repair. Do not make a device owner complete Pet activation first. A
 Pet-only request needs no hardware. Preserve existing authorization and progress.
 
+## Standalone installer users
+
+Users can install from the v0.7.0 native installer without this skill. The installer
+opens `/install`, lets the user select features, and reports progress in the same
+local console. Do not start the agent's automatic plan in parallel with an active
+installer plan or silently re-enable unchecked speech/autostart options. Respect
+its saved choices. Account Pet operations still require the authenticated host.
+System privileges are requested by UAC/polkit, never a webpage password field.
+
 ## First use: configure everything in the webpage
 
 Read [automatic setup](references/automatic-setup.md). For a Setup/configuration
@@ -35,8 +44,11 @@ For read-only diagnosis or only opening an existing settings page, omit `--setup
 Use [console entry](references/local-console.md) for a missing launcher and
 [first-use flow](references/first-use.md) for the device handoff. On firmware0.27.0 and later, first-use pairing is opened by the installer
 through USB while the device is at its connection tutorial; the user only connects
-the cable. Reuse valid bindings. Older/configured devices retain the real 开启配对
-confirmation, followed by binding in the webpage. Device tutorial is a gesture exercise, not another configuration
+the cable. Reuse valid bindings. Always attempt the real USB binding before asking
+for a device tap. Only `usb_pairing_confirmation_required` (firmware
+`open_connection_page`) warrants the real 开启配对 confirmation on older/configured
+devices; no response, startup delay, or serial access failures do not. Do not
+preemptively follow an older README that asks for a tap. Device tutorial is a gesture exercise, not another configuration
 wizard. Never send Wi-Fi passwords to chat or use a developer-only localhost URL.
 
 ## Repair only the missing capability

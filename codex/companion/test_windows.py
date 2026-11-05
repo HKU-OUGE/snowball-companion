@@ -69,6 +69,31 @@ class WindowsReconnect(unittest.IsolatedAsyncioTestCase):
             self.assertFalse(target.exists())
         serial.close.assert_called_once()
 
+    async def test_usb_not_ready_never_asks_for_pairing_or_saves_credentials(self):
+        from unittest.mock import Mock
+        serial = Mock()
+        serial.readline.return_value = b'XQPAIR_ERROR not_ready\r\n'
+        ticks = iter([0, 5, 6, 7])
+        with tempfile.TemporaryDirectory() as folder, patch.dict(sys.modules, {'serial': types.SimpleNamespace(Serial=lambda: serial)}), patch('bridge.time.monotonic', side_effect=lambda: next(ticks)):
+            target = Path(folder) / 'pair.json'
+            with self.assertRaises(bridge.USBPairingError) as caught:
+                bridge.pair_usb('TEST-PORT', target)
+            self.assertEqual(caught.exception.code, 'usb_device_not_ready')
+            self.assertNotIn('Start pairing', str(caught.exception))
+            self.assertFalse(target.exists())
+        serial.close.assert_called_once()
+
+    async def test_usb_silence_reports_connection_problem_not_pairing_confirmation(self):
+        from unittest.mock import Mock
+        serial = Mock()
+        ticks = iter([0, 5, 6, 15])
+        with tempfile.TemporaryDirectory() as folder, patch.dict(sys.modules, {'serial': types.SimpleNamespace(Serial=lambda: serial)}), patch('bridge.time.monotonic', side_effect=lambda: next(ticks)):
+            with self.assertRaises(bridge.USBPairingError) as caught:
+                bridge.pair_usb('TEST-PORT', Path(folder) / 'pair.json')
+            self.assertEqual(caught.exception.code, 'usb_no_response')
+            self.assertNotIn('Start pairing', str(caught.exception))
+        serial.close.assert_called_once()
+
 class SupervisorTests(unittest.TestCase):
     def test_bridge_always_uses_real_expiring_hub_source(self):
         args=child_arguments('bridge',Path('private-state'))

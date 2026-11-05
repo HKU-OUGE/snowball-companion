@@ -4,9 +4,10 @@
     "AGENTS.md",
     "docs/CONSOLE.md",
     "docs/INSTALLATION.md",
+    "docs/OTA-UPDATES.md",
     "docs/START-HERE.md",
     "docs/UPDATES.md",
-    "docs/OTA-UPDATES.md"
+    "installer/README.md"
   ],
   "platforms": {
     "codex": [
@@ -34,8 +35,12 @@
       "codex/companion/console_assets/console.css",
       "codex/companion/console_assets/console.js",
       "codex/companion/console_assets/index.html",
+      "codex/companion/console_assets/install.css",
+      "codex/companion/console_assets/install.html",
+      "codex/companion/console_assets/install.js",
       "codex/companion/console_assets/snowball.png",
       "codex/companion/console_backend.py",
+      "codex/companion/console_installer.py",
       "codex/companion/console_launcher.py",
       "codex/companion/console_login.py",
       "codex/companion/console_server.py",
@@ -54,8 +59,8 @@
       "codex/companion/ota_ble_gatt.py",
       "codex/companion/ota_ble_sender.py",
       "codex/companion/ota_ble_status.py",
-      "codex/companion/ota_download.py",
       "codex/companion/ota_delta.py",
+      "codex/companion/ota_download.py",
       "codex/companion/ota_idle.py",
       "codex/companion/ota_idle_heartbeat.py",
       "codex/companion/ota_relay.py",
@@ -77,6 +82,7 @@
       "codex/companion/speech_service.py",
       "codex/companion/status-schema.json",
       "codex/companion/status_hub.py",
+      "codex/companion/test_installer.py",
       "codex/companion/user_services.py",
       "codex/companion/windows-console-control.ps1",
       "codex/companion/windows-lan-access.ps1",

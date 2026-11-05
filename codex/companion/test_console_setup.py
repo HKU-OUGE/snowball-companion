@@ -165,7 +165,7 @@ class ResourcePolicyUpgrade(unittest.TestCase):
         private_write(self.root/'server.json',json.dumps({'port':12345,'token':'fixture-'+'x'*32,'runtime':str(self.runtime)}).encode())
 
     def test_current_policy_reuses_existing_console(self):
-        with patch.object(self.module,'rpc',return_value={'automatic_setup':True,'resource_source_policy':'sd-small-network-large-v1'}),patch.object(self.module,'stop_owned') as stop:
+        with patch.object(self.module,'rpc',return_value={'app':'snowball-console','automatic_setup':True,'resource_source_policy':'sd-small-network-large-v1','usb_pairing_flow':'auto-first-classified-v1'}),patch.object(self.module,'stop_owned') as stop:
             self.module.ensure_setup_console(self.root,self.runtime)
         stop.assert_not_called()
 
@@ -173,12 +173,22 @@ class ResourcePolicyUpgrade(unittest.TestCase):
         from unittest.mock import Mock
         connection=Mock();response=Mock(status=200)
         response.read.return_value=b'{"session":"fixture"}';connection.getresponse.return_value=response
-        replies=[{'app':'snowball-console','version':'0.5.7','automatic_setup':True},{'ticket':'fixture'},
+        replies=[{'app':'snowball-console','version':'0.5.8','automatic_setup':True,'resource_source_policy':'sd-small-network-large-v1'},{'ticket':'fixture'},
                  {'setup':{'local_running':True},'job':None}]
         with patch.object(self.module,'rpc',side_effect=replies),patch.object(self.module.http.client,'HTTPConnection',return_value=connection),patch.object(self.module,'stop_owned') as stop:
             with self.assertRaisesRegex(RuntimeError,'console_busy_wait_for_current_action'):
                 self.module.ensure_setup_console(self.root,self.runtime)
         stop.assert_not_called()
+
+    def test_idle_old_pairing_console_is_replaced_even_with_current_resource_policy(self):
+        from unittest.mock import Mock
+        connection=Mock();response=Mock(status=200)
+        response.read.return_value=b'{"session":"fixture"}';connection.getresponse.return_value=response
+        replies=[{'app':'snowball-console','version':'0.5.8','automatic_setup':True,'resource_source_policy':'sd-small-network-large-v1'},
+                 {'ticket':'fixture'},{'setup':{'local_running':False},'job':None}]
+        with patch.object(self.module,'rpc',side_effect=replies),patch.object(self.module.http.client,'HTTPConnection',return_value=connection),patch.object(self.module,'stop_owned') as stop,patch('console_launcher.active_url',return_value=None):
+            self.module.ensure_setup_console(self.root,self.runtime)
+        stop.assert_called_once_with(self.runtime,self.runtime)
 
     def test_unknown_newer_console_is_not_downgraded(self):
         with patch.object(self.module,'rpc',return_value={'app':'snowball-console','version':'0.9.0','automatic_setup':True}),patch.object(self.module,'stop_owned') as stop:

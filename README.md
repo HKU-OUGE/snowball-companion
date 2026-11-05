@@ -9,18 +9,19 @@
 
 **第一次使用，请从 [新手指南](docs/START-HERE.md) 开始。** 已安装用户请先看 [升级与卸载](docs/INSTALLATION.md)，保留已有配对与共享服务。
 
-当前安装包为 **v0.5.5**，下载与校验文件见 [Releases 页面](https://github.com/HKU-OUGE/snowball-companion/releases)。Windows 用户请使用这版 Codex 包，避免旧离线包缺少原生 Windows 修复。
+当前版本 **v0.7.0** 提供无需 Skill 的安装程序，已内置 Python 与连接依赖。打开后在网页勾选软件、蓝牙绑定、登录自启动和语音模型，再按提示连接设备。个人信息只在本机填写；系统提权由操作系统弹窗授权。
 
-| 软件 | 下载 | 说明 |
-| --- | --- | --- |
-| Codex Desktop / CLI，完整角色库 | [Snowball-Codex.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Codex.zip) | [Codex 0.5.5](codex/README.md) |
-| Codex，轻量 Core | [Snowball-Codex-Core.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Codex-Core.zip) | 只包含雪球基础 Pet，安装方式相同 |
-| Claude Code Desktop / CLI | [Snowball-Claude.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Claude.zip) | [Claude 0.2.2](claude/README.md) |
-| Cursor | [Snowball-Cursor.zip](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.5.5/Snowball-Cursor.zip) | [Cursor 0.2.2](cursor/README.md) |
+| 系统 | 安装程序 |
+| --- | --- |
+| Windows 10/11 x64 | [下载安装 EXE](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-windows-x64.exe) |
+| Linux x64（glibc 2.34+ 桌面环境） | [下载安装包](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-linux-x64.tar.gz) |
+| macOS 12+ Apple Silicon | [下载安装 DMG](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-macos-arm64.dmg) |
+| macOS 12+ Intel | [下载安装 DMG](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-macos-x64.dmg) |
 
-每个 ZIP 有配套 `.sha256` 文件，Release 同时提供 `SHA256SUMS`。解压后保留完整目录，不要只复制单个 Hook。Core 构建时强制小于 8,000,000 字节。若要从设备 USB 安装盘复制这些包，需要相应设备固件；本仓库不声称已经部署该固件。
+[安装程序详细说明](installer/README.md) · [全部文件与 SHA-256](https://github.com/HKU-OUGE/snowball-companion/releases/tag/v0.7.0)。
+Windows 本版开放 Codex 适配器；Claude Code / Cursor 原生 Windows 暂不可选。账号 Pet 仍需宿主账号授权，实体设备安装不依赖该步骤。
 
-新固件的手动蓝牙更新需要新版电脑插件：Codex 0.5.1、Claude／Cursor 0.2.2。新版兼容老设备的 v1 协议。设备 SD 安装盘中的旧离线包没有被本次源码更新替换；从离线包安装后，请联网按 [升级说明](docs/INSTALLATION.md) 更新插件。
+传统插件 ZIP 仍在同一个 Release 提供：**Snowball-Codex.zip / Snowball-Codex-Core.zip / Snowball-Claude.zip / Snowball-Cursor.zip**，适合已有 Python 环境或从 SD 复制安装。Codex 插件 0.7.0，Claude / Cursor 插件 0.2.7。SD 卡旧包不会随 GitHub 发布自动更新。
 
 ## 能力与验证边界
 

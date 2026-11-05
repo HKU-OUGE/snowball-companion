@@ -50,11 +50,11 @@ def register(root=ROOT, python=None):
                                       'python': str(Path(python or sys.executable).resolve())}).encode())
 
 
-def open_console(browser=True, root=ROOT, setup=False, adapter='codex'):
+def open_console(browser=True, root=ROOT, setup=False, adapter='codex', installer=False):
     url = active_url()
-    if setup and url:
+    if (setup or installer) and url:
         from console_upgrade import ensure_setup_console
-        ensure_setup_console(STATE, root)
+        ensure_setup_console(STATE, root, installer=installer)
         url = active_url()
     if not url:
         from console_backend import interpreter
@@ -90,7 +90,7 @@ def open_console(browser=True, root=ROOT, setup=False, adapter='codex'):
         ticket = json.loads(data)['ticket']
         if not isinstance(ticket, str) or not 32 <= len(ticket) <= 128:
             raise RuntimeError('Invalid console launch response.')
-        url += '#setup=' + ticket
+        url += ('install' if installer else '') + '#setup=' + ticket
     finally:
         connection.close()
     if browser:
@@ -106,6 +106,7 @@ def main():
     parser.add_argument('command', nargs='?', choices=['open', 'register'], default='open')
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--setup', action='store_true')
+    parser.add_argument('--installer', action='store_true', help='Open feature selection without an agent or automatic changes')
     parser.add_argument('--adapter', choices=('codex', 'claude', 'cursor', 'device'), default='codex')
     args = parser.parse_args()
     if os.name == 'nt':
@@ -116,7 +117,7 @@ def main():
         print('Snowball console entry registered.')
     else:
         register()
-        url = open_console(not args.no_browser, setup=args.setup, adapter=args.adapter)
+        url = open_console(not args.no_browser, setup=args.setup, adapter=args.adapter, installer=args.installer)
         print(url if args.no_browser else url.split('#', 1)[0])
 
 

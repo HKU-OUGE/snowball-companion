@@ -18,6 +18,8 @@ CODES = {'pending', 'checking', 'ready', 'interrupted', 'operation_failed',
          'speech_sd_imported', 'speech_failed', 'speech_not_ready', 'speech_worker_upgrade_required', 'agent_required', 'pet_working', 'pet_verified',
          'pet_auth_required', 'pet_failed', 'pet_unsupported', 'user_skipped'}
 CODES |= RESOURCE_STAGES
+CODES |= {'usb_pairing_confirmation_required', 'usb_device_not_ready',
+          'usb_no_response', 'usb_binding_rejected', 'usb_permission_required'}
 
 
 class SetupPlan:
@@ -76,6 +78,8 @@ class SetupPlan:
         if adapter not in ('codex', 'claude', 'cursor', 'device'):
             raise SetupError('invalid_request')
         with self.lock:
+            if getattr(self.backend, 'installer', None) and self.backend.installer.public()['running']:
+                raise SetupError('job_busy')
             if self.backend.job and self.backend.job.get('state') == 'running':
                 raise SetupError('job_busy')
             # Reopening while work is in flight joins it, instead of installing twice.

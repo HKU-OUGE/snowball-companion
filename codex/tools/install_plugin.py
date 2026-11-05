@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Install only Snowball through Codex, preserving missing old hook cache files."""
 import argparse
+import base64
 import datetime
 try:
     import fcntl
@@ -14,13 +15,40 @@ except ImportError:
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import signal
+import shlex
 import subprocess
 import sys
 import tempfile
 
 PLUGIN = 'xueqiu-status@xueqiu-local'
+
+
+def host_command(args):
+    if sys.platform == 'win32' and Path(args[0]).suffix.lower() in ('.cmd', '.bat', '.ps1'):
+        # npm command shims need a shell. Encode fixed argument values instead
+        # of concatenating unescaped paths into cmd.exe / PowerShell syntax.
+        script = '& ' + ' '.join("'" + str(x).replace("'", "''") + "'" for x in args) + '; exit $LASTEXITCODE'
+        return ['powershell.exe', '-NoProfile', '-NonInteractive', '-EncodedCommand',
+                base64.b64encode(script.encode('utf-16le')).decode('ascii')]
+    return args
+
+
+def configure_posix(root, python):
+    path = Path(root) / 'hooks/hooks.json'
+    if path.is_symlink():
+        raise RuntimeError('Refusing symlink Hooks')
+    data = json.loads(path.read_text())
+    for groups in data['hooks'].values():
+        for group in groups:
+            for hook in group['hooks']:
+                command = hook.get('command', '')
+                if hook.get('type') != 'command' or not command.endswith('/scripts/codex_hook.py" hook'):
+                    raise RuntimeError('Unexpected Snowball Hooks')
+                hook['command'] = shlex.quote(str(python)) + ' -X utf8 ' + command[command.index('"'):]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
 
 
 def private_dir(path):
@@ -104,13 +132,23 @@ def restore_missing(cache_root, backup, records):
 
 
 def interrupted(signum, _frame):
-    raise InterruptedError(f'Installer interrupted by signal {signum}')
+    # subprocess.communicate/selectors retry InterruptedError as EINTR. A real
+    # user cancellation must escape that retry and still restore old Hooks.
+    raise RuntimeError(f'Installer interrupted by signal {signum}')
 
 
 def install(codex, market):
     os.umask(0o077)
     codex_home = Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))).expanduser()
     cache_root = codex_home / 'plugins/cache/xueqiu-local/xueqiu-status'
+    manifest = market / 'plugins/xueqiu-status/.codex-plugin/plugin.json'
+    offered = json.loads(manifest.read_text())['version']
+    def version(v):
+        return tuple(map(int, v.split('.'))) if isinstance(v, str) and re.fullmatch(r'\d+\.\d+\.\d+', v) else ()
+    if cache_root.is_dir():
+        for existing in cache_root.glob('*/.codex-plugin/plugin.json'):
+            if version(json.loads(existing.read_text()).get('version')) > version(offered):
+                raise RuntimeError('A newer Snowball plugin is present; it has been preserved. Download a newer installer.')
     state_home = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))).expanduser()
     backup_root = state_home / 'xueqiu/plugin-upgrade-backups'
     private_dir(backup_root)
@@ -120,9 +158,9 @@ def install(codex, market):
         print(f'Old hook files preserved privately: {backup}', flush=True)
         handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGINT, signal.SIGTERM)}
         try:
-            subprocess.run([codex, 'plugin', 'marketplace', 'add', str(market), '--json'], check=True)
+            subprocess.run(host_command([codex, 'plugin', 'marketplace', 'add', str(market), '--json']), check=True)
             if sys.platform == 'win32':
-                installed = subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'],
+                installed = subprocess.run(host_command([codex, 'plugin', 'add', PLUGIN, '--json']),
                     check=True, capture_output=True, text=True, encoding='utf-8')
                 result = json.loads(installed.stdout)
                 if result.get('pluginId') != PLUGIN or not result.get('installedPath'):
@@ -131,7 +169,12 @@ def install(codex, market):
                 count = configure(result['installedPath'], sys.executable)
                 print(f'Configured {count} Windows Hooks; review changed commands in the host.', flush=True)
             else:
-                subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True)
+                installed = subprocess.run([codex, 'plugin', 'add', PLUGIN, '--json'], check=True,
+                    capture_output=True, text=True, encoding='utf-8')
+                result = json.loads(installed.stdout)
+                if result.get('pluginId') != PLUGIN or not result.get('installedPath'):
+                    raise RuntimeError('Unexpected Snowball installation result')
+                configure_posix(result['installedPath'], sys.executable)
         finally:
             # Run in this same outer process: missing PreToolUse hooks must not prevent repair.
             for sig in handlers:

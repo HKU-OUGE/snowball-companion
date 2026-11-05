@@ -9,6 +9,7 @@ import os
 import shutil
 from pathlib import Path
 import socket
+import stat
 import subprocess
 import sys
 import threading
@@ -34,6 +35,13 @@ def environment(root=ROOT):
 
 
 def interpreter(root=ROOT):
+    # Native installers carry an independently versioned portable interpreter.
+    # Do not accidentally launch an older global console venv after an upgrade.
+    bundled = Path(root).parents[1] / 'INSTALLER.json'
+    if bundled.is_file():
+        portable = bundled.parent / 'python' / ('python.exe' if os.name == 'nt' else 'bin/python3')
+        if portable.is_file():
+            return str(portable)
     candidate = environment(root) / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
     return str(candidate if candidate.is_file() else Path(sys.executable))
 
@@ -124,6 +132,8 @@ class Backend:
             pass
         from console_setup import SetupPlan
         self.setup = SetupPlan(self)
+        from console_installer import Installer
+        self.installer = Installer(self)
 
     def dependencies(self):
         at, cached = self.dependency_cache
@@ -158,9 +168,10 @@ class Backend:
                 'telemetry': self.telemetry(bound),
                 'capabilities': self.capabilities(),
                 'setup': self.setup.public(), 'pet_catalog': self.pet_catalog(),
+                'installer': self.installer.public(),
                 'speech': self.speech_status(),
                 'addresses': lan_addresses(), 'job': job,
-                'autostart_supported': os.name == 'nt' or sys.platform == 'linux',
+                'autostart_supported': os.name == 'nt' or sys.platform in ('linux', 'darwin'),
                 'gateway_configured': (self.config / 'network/gateway.json').is_file()}
 
     def pet_catalog(self):
@@ -186,7 +197,7 @@ class Backend:
             pass
         return value
 
-    def configure_feature(self, feature, progress):
+    def configure_feature(self, feature, progress, *, speech_model=None):
         if feature == 'environment':
             if not all(self.dependencies().get(k) for k in ('bleak', 'serial', 'cryptography')):
                 self.execute('prepare', {}, progress=progress)
@@ -205,7 +216,7 @@ class Backend:
             if not (hub_health(self.config) and self.telemetry()['connected']):
                 self.execute('services', {})
         elif feature == 'speech':
-            model = self.setup.value.get('speech_model', 'auto')
+            model = speech_model or (self.setup.value or {}).get('speech_model', 'auto')
             status = self.speech_status()
             if status['ready'] and (model == 'auto' or status['profile'] == model):
                 return
@@ -343,7 +354,7 @@ class Backend:
 
     def maintenance(self):
         # Called only after an explicit Start services action, never by opening a page.
-        if self.setup.public().get('local_running'):
+        if self.setup.public().get('local_running') or self.installer.public()['running']:
             return
         if self.enabled:
             self.enable_services()
@@ -391,10 +402,24 @@ class Backend:
             port = data.get('port')
             if not isinstance(port, str) or port not in [p['port'] for p in self.ports()]:
                 raise SetupError('usb_port_missing')
+            if sys.platform == 'linux' and Path(port).exists() and not os.access(port, os.R_OK | os.W_OK):
+                raise SetupError('usb_permission_required')
             result = subprocess.run([interpreter(self.root), '-X', 'utf8', str(self.root / 'bridge.py'),
                                      '--config', str(self.config / 'ble-pairing.json'), 'pair-usb', '--port', port],
                                     capture_output=True, timeout=25, **child_options())
             if result.returncode:
+                # Only a firmware rejection may ask for physical confirmation.
+                # Never copy arbitrary serial output (which may contain keys).
+                allowed = {'usb_pairing_confirmation_required', 'usb_device_not_ready',
+                           'usb_no_response', 'usb_binding_rejected'}
+                for line in (result.stderr or b'').decode('utf-8', errors='replace').splitlines():
+                    if line.startswith('XQUSB_ERROR '):
+                        try:
+                            code = json.loads(line[len('XQUSB_ERROR '):]).get('code')
+                        except (ValueError, AttributeError):
+                            continue
+                        if isinstance(code, str) and code in allowed:
+                            raise SetupError(code)
                 raise SetupError('usb_binding_failed')
             pairing(self.config)
             self.enable_services()
@@ -436,12 +461,33 @@ class Backend:
             if result.returncode:
                 raise SetupError('firewall_not_enabled')
             return 'firewall_enabled'
+        if action == 'usb_access':
+            # polkit owns the password dialog. The webpage never sees a password.
+            # Only grant this user access to one currently enumerated Espressif tty.
+            if sys.platform != 'linux':
+                raise SetupError('authorization_unavailable')
+            ports = self.ports()
+            if len(ports) != 1:
+                raise SetupError('usb_port_missing' if not ports else 'usb_port_ambiguous')
+            port = Path(ports[0]['port']).resolve()
+            if port.parent != Path('/dev') or not port.name.startswith(('ttyACM', 'ttyUSB')) or not stat.S_ISCHR(port.stat().st_mode):
+                raise SetupError('usb_port_missing')
+            pkexec, acl = Path('/usr/bin/pkexec'), Path('/usr/bin/setfacl')
+            if not pkexec.is_file() or not acl.is_file():
+                raise SetupError('authorization_unavailable')
+            result = subprocess.run([str(pkexec), str(acl), '-m', f'u:{os.getuid()}:rw', str(port)],
+                                    capture_output=True, timeout=120)
+            if result.returncode or not os.access(port, os.R_OK | os.W_OK):
+                raise SetupError('authorization_cancelled')
+            return 'usb_access_granted'
         raise SetupError('unknown_action')
 
     def submit(self, action, data):
-        if action not in {'prepare', 'bind', 'services', 'network', 'autostart', 'firewall'}:
+        if action not in {'prepare', 'bind', 'services', 'network', 'autostart', 'firewall', 'usb_access'}:
             raise SetupError('unknown_action')
         with self.lock:
+            if self.installer.public()['running']:
+                raise SetupError('job_busy')
             if self.job and self.job['state'] == 'running':
                 raise SetupError('job_busy')
             plan = self.setup.public()

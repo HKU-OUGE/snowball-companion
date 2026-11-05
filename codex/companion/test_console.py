@@ -170,6 +170,18 @@ class ConsoleBackend(unittest.TestCase):
         self.assertNotIn('must-not-display', json.dumps(value))
         self.assertTrue(value['network']['network']['sealed'])
 
+    def test_usb_failure_preserves_only_fixed_actionable_error_codes(self):
+        cases = [(b'XQUSB_ERROR {"code":"usb_pairing_confirmation_required"}', 'usb_pairing_confirmation_required'),
+                 (b'XQUSB_ERROR {"code":"usb_device_not_ready"}', 'usb_device_not_ready'),
+                 (b'XQUSB_ERROR {"code":"usb_no_response"}', 'usb_no_response'),
+                 (b'PermissionError: private-device-path', 'usb_binding_failed'),
+                 (b'XQUSB_ERROR {"code":"private-key-must-not-leak"}', 'usb_binding_failed')]
+        for stderr, expected in cases:
+            with self.subTest(expected=expected), patch.object(self.backend, 'ports', return_value=[{'port': 'COM9'}]), patch('subprocess.run', return_value=subprocess.CompletedProcess([], 2, stdout=b'', stderr=stderr)):
+                with self.assertRaisesRegex(backend.SetupError, '^' + expected + '$'):
+                    self.backend.execute('bind', {'port': 'COM9'})
+                self.assertFalse((self.config / 'ble-pairing.json').exists())
+
     def test_stale_or_other_device_telemetry_cannot_claim_connected(self):
         self.pair()
         directory = self.state / 'device'

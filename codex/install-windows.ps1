@@ -30,9 +30,9 @@ if ($Device -or $AutoReconnect) {
     if ($LASTEXITCODE -ne 0) { throw 'Cannot restrict credential directory access.' }
     $pairing = Join-Path $private 'ble-pairing.json'
     if ($Device -and -not (Test-Path $pairing)) {
-        if (-not $Port) { throw 'Connect a USB data cable, verify the device port, enable Start pairing on its connection page, then pass -Port COMx.' }
+        if (-not $Port) { throw 'Connect a USB data cable, exit USB storage mode if active, verify the device port, then pass -Port COMx.' }
         & $bridgePython -X utf8 (Join-Path $PSScriptRoot 'companion/bridge.py') pair-usb --port $Port
-        if ($LASTEXITCODE -ne 0) { throw 'USB binding failed. Enable Start pairing under Settings > Connect computer and retry within two minutes.' }
+        if ($LASTEXITCODE -ne 0) { throw 'USB binding did not finish. Follow the specific reason above; only usb_pairing_confirmation_required needs a tap on the device.' }
     }
     if ($AutoReconnect) {
         if (-not (Test-Path $pairing)) { throw 'Bind your device first with -Device -Port COMx.' }

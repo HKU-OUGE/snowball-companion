@@ -1,6 +1,6 @@
 {
   "name": "snowball-companion",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "description": "Local observational Cursor Agent status for Snowball Companion.",
   "author": {
     "name": "Snowball Companion"

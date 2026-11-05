@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>安装雪球 · Snowball Companion</title><link rel="icon" href="/snowball.png"><link rel="stylesheet" href="/console.css"><link rel="stylesheet" href="/install.css"><script src="/install.js" defer></script></head>
+<body><header><a class="brand" href="/install"><img src="/snowball.png" alt="雪球"><span>Snowball <small>COMPANION</small></span></a><span class="local-badge"><i></i>本机安装向导</span></header>
+<main><aside><p class="eyebrow">A LITTLE COMPANY</p><h1>从这里，<br>认识雪球。</h1><p class="intro">选好你需要的功能，<br>其余交给安装向导。</p><ol class="journey"><li class="current">选择功能</li><li>安装与配置</li><li>连接你的雪球</li></ol><div class="mentor"><img src="/snowball.png" alt=""><p>不用输入命令。<br>我会陪你一步一步完成。</p></div><p class="version" id="version">正在检查安装环境…</p></aside>
+<section class="workspace"><div id="notice" role="status" hidden></div><article><p class="eyebrow">MAKE YOURSELF AT HOME</p><h2>让雪球怎样陪着你？</h2><p class="lead">安装到当前用户目录，保留已有配对和个人设置。取消勾选的功能不会安装，也不会删除原有配置。</p>
+<form id="install-form"><fieldset id="choices"><legend>选择要连接的软件</legend><div class="app-choices">
+<label class="option"><input type="checkbox" name="adapter" value="codex" checked><span><b>Codex</b><small>Desktop / CLI · 会话、待答与语音指令</small></span></label>
+<label class="option" id="claude-option"><input type="checkbox" name="adapter" value="claude"><span><b>Claude Code</b><small>本地 Code 会话的工作状态</small></span></label>
+<label class="option" id="cursor-option"><input type="checkbox" name="adapter" value="cursor"><span><b>Cursor</b><small>Agent 会话的工作状态</small></span></label></div><p class="quiet" id="platform-note">请先安装并登录你选择的 AI 软件。安装器不会代替你登录。</p>
+<h3>按需添加功能</h3><label class="option"><input id="connection" type="checkbox" checked><span><b>连接实体雪球</b><small>插上 USB 数据线后自动尝试绑定，以后通过蓝牙连接。</small></span></label>
+<label class="option"><input id="autostart" type="checkbox" checked><span><b>登录电脑时自动连接</b><small>安装当前用户的后台启动项，无需每次打开安装器。</small></span></label>
+<label class="option"><input id="speech" type="checkbox"><span><b>本地语音识别</b><small>在雪球上说话，由这台电脑转成文字。按所选模型下载资源。</small></span></label>
+<div id="speech-options" hidden><label>语音模型<select id="speech-model"><option value="base">Base · 约 148 MB · 推荐</option><option value="tiny">Tiny · 约 78 MB · 更小</option><option value="small">Small · 约 486 MB · 更大</option></select></label><p class="quiet">体积仅为模型，不含依赖。优先复用本地缓存；联网下载失败可使用 SD 离线资源。</p></div>
+<details><summary>没有找到软件？手动指定程序位置</summary><label>Codex 程序路径<input id="codex-path" maxlength="2048" placeholder="留空自动检测" spellcheck="false"></label><label>Claude Code 程序路径<input id="claude-path" maxlength="2048" placeholder="留空自动检测" spellcheck="false"></label><p class="quiet">只填写程序文件的位置，不要输入命令参数、密码或密钥。</p></details>
+<div class="soft-card"><b>宠物与网络，连接后再选</b><p>设备上的宠物可直接在雪球设置中切换；Wi-Fi 名称、密码在下一步的控制台里填写并加密传送。</p><p>ChatGPT 账号桌宠属于宿主账号功能，需要在宿主中授权 Pets；本向导不会假装已安装账号桌宠，也不会因此阻塞设备配置。</p></div>
+</fieldset><div class="submit-row"><button type="submit" class="primary" id="install">安装所选功能</button><span id="install-hint">无需 Skill · 已内置 Python 环境</span></div></form>
+<section id="progress" hidden aria-live="polite"><h3 id="progress-title">正在配置</h3><div class="checks" id="install-checks"></div><p class="quiet" id="finish-hint"></p></section>
+<div class="actions" id="after-actions" hidden><a class="primary link-button" href="/">打开连接与网络设置 →</a><button class="secondary" id="usb-authorize" type="button" hidden>授权 USB 访问…</button></div>
+<p class="quiet">需要系统权限时会弹出操作系统的授权窗口。不会在网页收集系统密码，不会自动信任 AI 软件的 Hooks，也不会烧录或重置雪球。</p>
+</article></section></main><footer><span>Snowball Companion · 在你的电脑上运行</span><span>配置留在本机 · 不需要 API Key</span></footer></body></html>

@@ -533,6 +533,13 @@ def verify_info(info, config):
     return info
 
 
+class USBPairingError(RuntimeError):
+    """A fixed, credential-free reason for the console and setup agent."""
+    def __init__(self, code, message):
+        super().__init__(message)
+        self.code = code
+
+
 def pair_usb(port, config_path):
     import serial
     s = serial.Serial()
@@ -554,8 +561,13 @@ def pair_usb(port, config_path):
                 # Report the action needed, never arbitrary serial payloads.
                 reason = raw[error + len(b'XQPAIR_ERROR '):].strip()
                 if reason == b'open_connection_page':
-                    raise RuntimeError('Enable Start pairing on the device connection page, then retry USB binding within two minutes.')
-                raise RuntimeError('Device rejected USB binding. Enable Start pairing on its connection page and retry.')
+                    raise USBPairingError('usb_pairing_confirmation_required',
+                        'This device requires local confirmation. Enable Start pairing on its connection page, then retry USB binding within two minutes.')
+                if reason == b'not_ready':
+                    raise USBPairingError('usb_device_not_ready',
+                        'Device is still starting. Keep USB connected, wait for startup, then retry.')
+                raise USBPairingError('usb_binding_rejected',
+                    'Device rejected USB binding. Check the device state before retrying.')
             idx = raw.find(b'XQPAIR ')
             if idx < 0:
                 continue
@@ -566,7 +578,8 @@ def pair_usb(port, config_path):
             private_write(config_path,(json.dumps(config)+'\n').encode('utf-8'))
             print(f'USB identity bound: {config["device"]}; private pairing file saved.', flush=True)
             return
-        raise TimeoutError('No pairing response. Check the USB data cable and port, enable Start pairing on the device connection page, then retry.')
+        raise USBPairingError('usb_no_response',
+            'No pairing response. Check the USB data cable, serial port and storage mode, then retry.')
     finally:
         s.close()
 
@@ -1029,7 +1042,12 @@ def main():
         if owned('bridge'):control('bridge','stop')
         else:manage.stop(quiet=True)
     if args.command == 'pair-usb':
-        pair_usb(args.port, args.config)
+        try:
+            pair_usb(args.port, args.config)
+        except USBPairingError as error:
+            print('XQUSB_ERROR ' + json.dumps({'code': error.code}), file=sys.stderr)
+            print(str(error), file=sys.stderr)
+            raise SystemExit(2)
     else:
         handle = None
         if args.command == 'watch':

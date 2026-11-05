@@ -10,7 +10,7 @@ import unittest
 
 INSTALLER = Path(__file__).resolve().parents[1] / 'install.sh'
 FAKE = r'''#!/usr/bin/env python3
-import os, pathlib, shutil, signal, sys
+import os, pathlib, shutil, signal, sys, json, time
 root = pathlib.Path(os.environ['CODEX_HOME'])
 cache = root / 'plugins/cache/xueqiu-local/xueqiu-status'
 if sys.argv[1:4] == ['plugin', 'marketplace', 'add']:
@@ -21,6 +21,9 @@ shutil.rmtree(cache)
 new = cache / '0.2.0/scripts/codex_hook.py'
 new.parent.mkdir(parents=True)
 new.write_bytes(b'new version\n')
+hooks = new.parent.parent / 'hooks/hooks.json'
+hooks.parent.mkdir()
+hooks.write_text(json.dumps({'hooks':{'SessionStart':[{'hooks':[{'type':'command','command':'python3 "${PLUGIN_ROOT}/scripts/codex_hook.py" hook'}]}]}}))
 mode = os.environ.get('FAKE_MODE', '')
 if mode == 'existing':
     old = cache / '0.1.0/scripts/codex_hook.py'
@@ -28,8 +31,10 @@ if mode == 'existing':
     old.write_bytes(b'created by installer\n')
 if mode == 'signal':
     os.kill(os.getppid(), signal.SIGTERM)
+    time.sleep(.3)
 if mode == 'failure':
     sys.exit(23)
+print(json.dumps({'pluginId':'xueqiu-status@xueqiu-local','installedPath':str(new.parent.parent)}))
 '''
 
 

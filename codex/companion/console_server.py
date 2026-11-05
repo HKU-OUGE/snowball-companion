@@ -12,8 +12,11 @@ import time
 from console_backend import Backend, SetupError, ROOT, STATE
 from private_files import private_dir, private_file, private_write
 
-VERSION = '0.5.8'
+VERSION = '0.7.0'
 ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
+          '/install': ('install.html', 'text/html; charset=utf-8'),
+          '/install.js': ('install.js', 'text/javascript; charset=utf-8'),
+          '/install.css': ('install.css', 'text/css; charset=utf-8'),
           '/console.css': ('console.css', 'text/css; charset=utf-8'),
           '/console.js': ('console.js', 'text/javascript; charset=utf-8'),
           '/snowball.png': ('snowball.png', 'image/png'),
@@ -145,7 +148,8 @@ class Handler(BaseHTTPRequestHandler):
             if self.path == '/health':
                 self.launcher_auth()
                 return self.reply(200, {'app': 'snowball-console', 'protocol': 1, 'version': VERSION,
-                    'automatic_setup': True, 'resource_source_policy': 'sd-small-network-large-v1'})
+                    'automatic_setup': True, 'resource_source_policy': 'sd-small-network-large-v1',
+                    'usb_pairing_flow': 'auto-first-classified-v1', 'interactive_installer': 1})
             if self.path in ASSETS:
                 name, content_type = ASSETS[self.path]
                 return self.reply(200, (self.server.assets / name).read_bytes(), content_type)
@@ -202,6 +206,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, {'ok': True, 'session': self.server.consume_ticket(data['ticket'])})
             if self.path == '/api/provision':
                 return self.reply(200, self.server.backend.provision(data))
+            if self.path == '/api/installer':
+                return self.reply(202, self.server.backend.installer.start(data))
             if self.path == '/api/setup':
                 operation = data.get('operation')
                 if operation == 'start' and set(data) == {'operation', 'adapter'}:
@@ -213,8 +219,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise SetupError('invalid_request')
             if self.path == '/api/action':
                 action = data.pop('action', None)
-                schemas = {'prepare': set(), 'services': set(), 'bind': {'port', 'pairing_open'},
-                           'network': {'bind'}, 'autostart': set(), 'firewall': set()}
+                schemas = {'prepare': set(), 'services': set(), 'bind': {'port'},
+                           'network': {'bind'}, 'autostart': set(), 'firewall': set(), 'usb_access': set()}
                 if not isinstance(action, str) or action not in schemas or set(data) != schemas[action]:
                     raise SetupError('invalid_request')
                 return self.reply(202, self.server.backend.submit(action, data))

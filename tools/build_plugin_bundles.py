@@ -14,13 +14,13 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = '0.6.2'
-VERSIONS = {'codex': '0.6.2', 'claude': '0.2.5', 'cursor': '0.2.5'}
+RELEASE = '0.7.0'
+VERSIONS = {'codex': '0.7.0', 'claude': '0.2.7', 'cursor': '0.2.7'}
 LABELS = {'codex': 'Codex', 'claude': 'Claude', 'cursor': 'Cursor'}
 FIXED_TIME = (2026, 11, 1, 0, 0, 0)
 CORE_LIMIT = 8_000_000
 MANIFEST = 'tools/plugin_bundle_files.json'
-COMMON = {'AGENTS.md', 'docs/INSTALLATION.md', 'docs/START-HERE.md', 'docs/UPDATES.md', 'docs/CONSOLE.md', 'docs/OTA-UPDATES.md'}
+COMMON = {'installer/README.md', 'AGENTS.md', 'docs/INSTALLATION.md', 'docs/START-HERE.md', 'docs/UPDATES.md', 'docs/CONSOLE.md', 'docs/OTA-UPDATES.md'}
 PRIVATE_NAMES = {'hub-token', 'ble-pairing.json', 'gateway.json', 'cloud.json', 'credentials.json', 'snapshot.json', 'codex-app-endpoint.json', 'setup-plan.json', 'setup-agent.json', 'server.json', '.env'}
 BLOCKED_PARTS = {'.git', 'node_modules', '__pycache__', '.pytest_cache', 'qa', 'work', 'logs', 'firmware', 'web', 'cloud', 'dist', 'build'}
 BLOCKED_SUFFIXES = {'.key', '.pem', '.aesgcm', '.sqlite', '.sqlite3', '.db', '.log', '.jsonl', '.pyc', '.bin', '.zip'}
@@ -124,7 +124,7 @@ def bundle_inputs(root, platform, core=False):
             raise ValueError('Missing default Snowball character')
         files[name] = encoded(catalog)
         files['codex/README.md'] = (
-            '# Snowball Companion · Codex Core 0.6.0\n\n'
+            '# Snowball Companion · Codex Core 0.7.0\n\n'
             '本包仅含雪球基础 Pet、Codex Hooks 和电脑伴随运行时，不含其他角色或角色音频；包含设备控制台网页。\n\n'
             'Linux 执行 `./install.sh`，Windows 执行 `install-windows.ps1`；新开聊天后运行插件 Setup，账号 Pet 仍需宿主 Pets 服务验证。\n\n'
             '[新手指南](../docs/START-HERE.md) · [安装与卸载](../docs/INSTALLATION.md) · [设备更新](../docs/UPDATES.md)\n\n'

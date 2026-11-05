@@ -113,3 +113,6 @@ login task and uses exact script paths and owner checks. Do not silently remove
 that shared service when removing just the Codex adapter. Retain pairing files
 and Pet receipts. Complete Windows instructions and supported/unsupported
 capabilities are in `docs/INSTALLATION.md` in the full package.
+
+
+Standalone installers (v0.7.0+) open the feature-selection webpage without an agent. Check the saved installer plan first: do not start a second setup plan while it runs, or enable speech/autostart the user left unchecked. Native installers include Python; traditional ZIP/source instructions still require it. System privilege prompts belong to UAC/polkit, never the chat or webpage. See the public installer guide: https://github.com/HKU-OUGE/snowball-companion/blob/main/installer/README.md

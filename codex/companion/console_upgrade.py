@@ -54,15 +54,18 @@ def stop_owned(runtime, helper_root):
     else:raise RuntimeError('console_restart_required')
 
 
-def ensure_setup_console(state,helper_root):
+def ensure_setup_console(state,helper_root,installer=False):
     record=json.loads(read_text(state/'server.json'))
     if (not isinstance(record,dict) or type(record.get('port')) is not int or
         not 1024<=record['port']<=65535 or not isinstance(record.get('token'),str) or
         not 32<=len(record['token'])<=128 or not isinstance(record.get('runtime'),str)):
         raise RuntimeError('console_owner_unverified')
     health=rpc(record,'/health')
-    if health.get('automatic_setup') is True and health.get('resource_source_policy')=='sd-small-network-large-v1':return
-    if health.get('app')!='snowball-console' or health.get('version') not in ('0.5.4','0.5.5','0.5.6','0.5.7'):
+    if (health.get('app')=='snowball-console' and health.get('automatic_setup') is True
+        and health.get('resource_source_policy')=='sd-small-network-large-v1'
+        and health.get('usb_pairing_flow')=='auto-first-classified-v1'
+        and (not installer or health.get('interactive_installer')==1)):return
+    if health.get('app')!='snowball-console' or health.get('version') not in ('0.5.4','0.5.5','0.5.6','0.5.7','0.5.8','0.6.0','0.6.1','0.6.2','0.6.3'):
         raise RuntimeError('console_restart_required')
     runtime=Path(record['runtime'])
     if not runtime.is_absolute() or not checked_path(runtime/'console_server.py').is_file():
@@ -80,6 +83,8 @@ def ensure_setup_console(state,helper_root):
     if status.get('job',{} ) and status['job'].get('state')=='running':
         raise RuntimeError('console_busy_wait_for_current_action')
     if status.get('setup',{}).get('local_running'):
+        raise RuntimeError('console_busy_wait_for_current_action')
+    if status.get('installer',{}).get('running'):
         raise RuntimeError('console_busy_wait_for_current_action')
     stop_owned(runtime,helper_root)
     from console_launcher import active_url
