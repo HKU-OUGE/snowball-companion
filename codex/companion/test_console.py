@@ -268,7 +268,8 @@ class Launcher(unittest.TestCase):
             env = dict(os.environ, HOME=folder, USERPROFILE=folder, CODEX_HOME=str(home / '.codex'), PYTHONUTF8='1')
             env.pop('CODEX_APP_TOOLS_PIPE_PATH', None)
             root = Path(launcher.__file__).parent
-            process = subprocess.Popen([sys.executable, '-X', 'utf8', str(root / 'console_server.py')],
+            diagnostic = 'import faulthandler,runpy,sys;faulthandler.dump_traceback_later(6);runpy.run_path(sys.argv[1],run_name="__main__")'
+            process = subprocess.Popen([sys.executable, '-X', 'utf8', '-c', diagnostic, str(root / 'console_server.py')],
                                        env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             try:
                 record_path = home / '.local/state/xueqiu/console/server.json'

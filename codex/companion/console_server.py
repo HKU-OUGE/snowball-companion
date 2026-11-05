@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import secrets
 import sys
+from socketserver import TCPServer
 import threading
 import time
 
@@ -26,6 +27,13 @@ ASSETS = {'/': ('index.html', 'text/html; charset=utf-8'),
 class Server(ThreadingHTTPServer):
     daemon_threads = True
     request_queue_size = 12
+
+    def server_bind(self):
+        # HTTPServer performs reverse DNS in server_bind. A numeric loopback
+        # console must not wait for the machine's DNS/network to open its UI.
+        TCPServer.server_bind(self)
+        self.server_name = '127.0.0.1'
+        self.server_port = self.server_address[1]
 
     def __init__(self, port, backend, token, assets=None):
         self.backend, self.token = backend, token

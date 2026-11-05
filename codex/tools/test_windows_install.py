@@ -24,7 +24,7 @@ class WindowsInstall(unittest.TestCase):
         path.write_bytes(b'fixture');return path
     def fixture(self, root):
         (root/'.codex-plugin').mkdir(parents=True)
-        (root/'.codex-plugin/plugin.json').write_text(json.dumps({'name':'xueqiu-status'}))
+        (root/'.codex-plugin/plugin.json').write_text(json.dumps({'name':'xueqiu-status','version':'0.7.0'}))
         (root/'hooks').mkdir()
         hook={'type':'command','command':'python3 "${PLUGIN_ROOT}/scripts/codex_hook.py" hook','timeout':2}
         (root/'hooks/hooks.json').write_text(json.dumps({'hooks':{'SessionStart':[{'hooks':[hook]}]}}))
@@ -53,6 +53,7 @@ class WindowsInstall(unittest.TestCase):
             home=Path(folder);cache=home/'.codex/plugins/cache/xueqiu-local/xueqiu-status'
             old=cache/'old/scripts/codex_hook.py';old.parent.mkdir(parents=True);old.write_bytes(b'old hook')
             new=cache/'new'
+            self.fixture(home/'market/plugins/xueqiu-status')
             def fake_run(args,**kwargs):
                 if args[1:3]==['plugin','add']:
                     shutil.rmtree(cache);self.fixture(new)
@@ -72,6 +73,7 @@ class WindowsInstall(unittest.TestCase):
             old=cache/'old/scripts/codex_hook.py';old.parent.mkdir(parents=True);old.write_bytes(b'old hook')
             other=cache/'old/hooks/hooks.json';other.parent.mkdir();other.write_bytes(b'original hooks')
             trust=home/'trust';trust.write_bytes(b'untouched')
+            self.fixture(home/'market/plugins/xueqiu-status')
             def fake_run(args,**kwargs):
                 if args[1:3]==['plugin','add']:
                     shutil.rmtree(cache);old.parent.mkdir(parents=True);old.write_bytes(b'new existing file')

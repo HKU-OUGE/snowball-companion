@@ -77,7 +77,7 @@ class SetupPlan:
     def start(self, adapter, agent=False):
         if adapter not in ('codex', 'claude', 'cursor', 'device'):
             raise SetupError('invalid_request')
-        with self.lock:
+        with self.backend.lock, self.lock:
             if getattr(self.backend, 'installer', None) and self.backend.installer.public()['running']:
                 raise SetupError('job_busy')
             if self.backend.job and self.backend.job.get('state') == 'running':
@@ -131,7 +131,9 @@ class SetupPlan:
                 self.set_step(name, 'failed', 'operation_failed')
 
     def edit(self, action, name=None, character=None):
-        with self.lock:
+        with self.backend.lock, self.lock:
+            if getattr(self.backend, 'installer', None) and self.backend.installer.public()['running']:
+                raise SetupError('job_busy')
             if self.value is None:
                 raise SetupError('setup_not_started')
             if action not in ('character', 'speech_model') and name != 'pet' and self.worker and self.worker.is_alive():

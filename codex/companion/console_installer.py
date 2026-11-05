@@ -132,7 +132,7 @@ class Installer:
 
     def start(self, data):
         choices = validate_choices(data)
-        with self.lock:
+        with self.backend.lock, self.lock:
             if (self.worker and self.worker.is_alive() or self.backend.setup.public().get('local_running')
                     or self.backend.job and self.backend.job.get('state') == 'running'):
                 raise SetupError('job_busy')
