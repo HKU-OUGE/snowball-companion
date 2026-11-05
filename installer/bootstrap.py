@@ -77,19 +77,9 @@ def shortcut(root):
                         '-File', str(root / 'installer/shortcut.ps1'), '-Python', str(python),
                         '-Launcher', str(launcher)], check=True, timeout=30)
     elif sys.platform == 'darwin':
-        import plistlib
-        import shlex
-        app = Path.home() / 'Applications/Snowball Console.app'
-        if app.exists() and not (app / 'Contents/snowball-owned').is_file():
-            raise RuntimeError('An unrelated Snowball Console application already exists.')
-        folder = app / 'Contents/MacOS';folder.mkdir(parents=True, exist_ok=True)
-        start = folder / 'Snowball'
-        start.write_text('#!/bin/sh\nexec ' + shlex.join([str(python), '-X', 'utf8', str(launcher), '--installer']) + '\n')
-        start.chmod(0o755)
-        (app / 'Contents/Info.plist').write_bytes(plistlib.dumps({'CFBundleName':'Snowball Console',
-            'CFBundleIdentifier':'pet.snowball.console.launcher','CFBundleVersion':VERSION,
-            'CFBundleExecutable':'Snowball','CFBundlePackageType':'APPL'}))
-        (app / 'Contents/snowball-owned').write_text('snowball-companion\n')
+        sys.path.insert(0, str(root / 'codex/companion'))
+        from console_login import mac_app
+        mac_app(root / 'codex/companion')
     else:
         apps = Path.home() / '.local/share/applications';apps.mkdir(parents=True, exist_ok=True)
         target = apps / 'snowball-console.desktop'
@@ -122,6 +112,10 @@ def main():
         return
     root = stage(source, args.destination)
     shortcut(root)
+    if sys.platform == 'darwin' and not args.no_browser:
+        # Keep the app as the responsible process for macOS privacy dialogs.
+        subprocess.run(['/usr/bin/open', '-a', str(Path.home() / 'Applications/Snowball Console.app')],check=True)
+        return
     launch = [str(python_at(root)), '-X', 'utf8', str(root / 'codex/companion/console_launcher.py'), '--installer']
     if args.no_browser:
         launch.append('--no-browser')

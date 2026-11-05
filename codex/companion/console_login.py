@@ -2,6 +2,7 @@
 import json
 import os
 import plistlib
+import shlex
 from pathlib import Path
 import subprocess
 import sys
@@ -10,6 +11,33 @@ from console_backend import SetupError, child_options, interpreter
 from private_files import checked_path
 
 MAC_LABEL = 'pet.snowball.console'
+
+
+def mac_app(root):
+    """An identifiable app owns Bluetooth privacy prompts, including at login."""
+    app = Path.home() / 'Applications/Snowball Console.app'
+    marker = app / 'Contents/snowball-owned'
+    if app.is_symlink() or (app.exists() and (not marker.is_file() or marker.read_text().strip() != 'snowball-companion')):
+        raise SetupError('autostart_conflict')
+    folder = app / 'Contents/MacOS';folder.mkdir(parents=True, exist_ok=True)
+    start = folder / 'Snowball'
+    prefix = [interpreter(root), '-X', 'utf8']
+    start.write_text('#!/bin/sh\nif [ "${1-}" = "--background" ]; then\n  exec ' +
+        shlex.join(prefix + [str(root / 'console_server.py')]) + '\nfi\nexec ' +
+        shlex.join(prefix + [str(root / 'console_launcher.py'), '--installer']) + '\n')
+    start.chmod(0o755)
+    info = {'CFBundleName':'Snowball Console','CFBundleIdentifier':'pet.snowball.console.launcher',
+            'CFBundleVersion':'0.7.0','CFBundleExecutable':'Snowball','CFBundlePackageType':'APPL',
+            'LSUIElement':True,
+            'NSBluetoothAlwaysUsageDescription':'Snowball uses Bluetooth to sync your AI session status with your companion device.',
+            'NSLocalNetworkUsageDescription':'Snowball syncs with your companion device on your local network.'}
+    (app / 'Contents/Info.plist').write_bytes(plistlib.dumps(info))
+    marker.write_text('snowball-companion\n')
+    return app
+
+
+def mac_arguments():
+    return ['/usr/bin/open', '-g', '-a', str(Path.home() / 'Applications/Snowball Console.app'), '--args', '--background']
 
 
 def mac_status(root):
@@ -21,7 +49,7 @@ def mac_status(root):
         value = plistlib.loads(path.read_bytes())
         args = value.get('ProgramArguments', [])
         if (value.get('Label') != MAC_LABEL or value.get('SnowballOwner') != str(root)
-                or args != [interpreter(root), '-X', 'utf8', str(root / 'console_server.py')]):
+                or args != mac_arguments()):
             return {'state': 'conflict'}
         result = subprocess.run(['launchctl', 'print', f'gui/{os.getuid()}/{MAC_LABEL}'],
                                 capture_output=True, timeout=8)
@@ -35,8 +63,9 @@ def mac_enable(root):
     path = Path.home() / 'Library/LaunchAgents' / (MAC_LABEL + '.plist')
     private_dir(path.parent)
     logs = private_dir(Path.home() / '.local/state/xueqiu/console')
+    mac_app(root)
     value = {'Label': MAC_LABEL, 'SnowballOwner': str(root),
-             'ProgramArguments': [interpreter(root), '-X', 'utf8', str(root / 'console_server.py')],
+             'ProgramArguments': mac_arguments(),
              'RunAtLoad': True, 'WorkingDirectory': str(root), 'Umask': 0o077,
              'StandardOutPath': str(logs / 'login.log'), 'StandardErrorPath': str(logs / 'login.log')}
     private_write(path, plistlib.dumps(value))

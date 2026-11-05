@@ -136,5 +136,17 @@ class InstallerTests(unittest.TestCase):
             try:self.assertGreater(s.server_port,0)
             finally:s.server_close()
 
+    def test_mac_login_uses_app_with_bluetooth_privacy_description(self):
+        import plistlib
+        from console_login import mac_app, mac_arguments
+        with patch('pathlib.Path.home',return_value=Path(self.tmp.name)):
+            app=mac_app(self.backend.root)
+            value=plistlib.loads((app/'Contents/Info.plist').read_bytes())
+            self.assertTrue(value['NSBluetoothAlwaysUsageDescription'])
+            self.assertTrue(value['NSLocalNetworkUsageDescription'])
+            self.assertIn(str(app),mac_arguments())
+            self.assertIn('--background',mac_arguments())
+            self.assertEqual(mac_app(self.backend.root),app)
+
 
 if __name__=='__main__':unittest.main()
