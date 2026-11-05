@@ -18,11 +18,12 @@ import tempfile
 import threading
 import time
 import unicodedata
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
+from numeric_http import ThreadingHTTPServer
 
 from attention_model import projection, question_rows, valid_questions, SNOOZE_SECONDS, QID, clean_question, question_digest
 from codex_desktop import CodexDesktop, DeliveryError
-from private_files import private_dir as secure_private_dir, private_file
+from private_files import private_dir as secure_private_dir, private_file, read_text as private_read_text
 
 VERSION = 1
 PROVIDERS = ('Codex', 'Claude', 'Cursor')
@@ -777,6 +778,16 @@ class HubHandler(BaseHTTPRequestHandler):
             self.close_connection = True
 
 
+def codex_observation_enabled(path=None):
+    path = path or Path.home() / '.config/xueqiu/companion-hosts.json'
+    if not path.exists():
+        return True  # Existing installations retain their previous behavior.
+    value = json.loads(private_read_text(path))
+    if value.get('schema') != 1 or not isinstance(value.get('adapters'), list) or any(a not in ('codex','claude','cursor') for a in value['adapters']):
+        raise ValueError('Invalid installed host selection')
+    return 'codex' in value['adapters']
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=4190)
@@ -790,14 +801,15 @@ def main():
     except BlockingIOError:
         os.close(lock_fd)
         parser.error('Another hub owns this state directory')
-    desktop = CodexDesktop()
+    desktop = CodexDesktop() if codex_observation_enabled() else None
     hub = StatusHub(args.state_dir, desktop=desktop)
     server = HubServer(('127.0.0.1', args.port), hub, load_token(args.token_file))
     stop = threading.Event()
     def ticker():
         while not stop.wait(1):
             with hub.lock: records = {k:dict(v) for k,v in hub.records.items()}
-            desktop.refresh(records)
+            if desktop:
+                desktop.refresh(records)
             hub.sync_directory()
             hub.publish()
     worker = threading.Thread(target=ticker, daemon=True)
@@ -808,8 +820,9 @@ def main():
         while not stop.wait(1):
             with hub.lock: records={k:dict(v) for k,v in hub.records.items()}
             desktop.activity.refresh(desktop.directory,records)
-    activity_worker=threading.Thread(target=activity_ticker,daemon=True)
-    activity_worker.start()
+    if desktop:
+        activity_worker=threading.Thread(target=activity_ticker,daemon=True)
+        activity_worker.start()
     print(f'Snowball status hub listening on 127.0.0.1:{server.server_port}', flush=True)
     print(f'Private snapshot: {hub.snapshot_path}', flush=True)
     def terminate(*_):

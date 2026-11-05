@@ -8,7 +8,7 @@
 | Windows 10/11 x64 | `Snowball-Setup-0.7.0-windows-x64.exe` | 双击后打开功能选择网页 |
 | Linux x64，glibc 2.34+ 桌面环境 | `Snowball-Setup-0.7.0-linux-x64.tar.gz` | 解压后运行 `Install-Snowball.sh`；文件管理器不支持执行时，在终端执行 `sh Install-Snowball.sh` |
 | macOS 12+，Apple Silicon | `Snowball-Setup-0.7.0-macos-arm64.dmg` | 打开磁盘映像，打开 `Install Snowball.app` |
-| macOS 12+，Intel | `Snowball-Setup-0.7.0-macos-x64.dmg` | 打开磁盘映像，打开 `Install Snowball.app` |
+| macOS 15+，Intel | `Snowball-Setup-0.7.0-macos-x64.dmg` | 打开磁盘映像，打开 `Install Snowball.app` |
 
 本版尚未配置 Windows 代码签名和 Apple Developer ID 公证。系统可能显示未知发布者；
 先核对来自本仓库的 Release 和 SHA-256，再按系统提供的打开／安全设置流程确认。

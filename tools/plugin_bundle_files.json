@@ -53,6 +53,7 @@
       "codex/companion/network_gateway.py",
       "codex/companion/network_provision.py",
       "codex/companion/network_security.py",
+      "codex/companion/numeric_http.py",
       "codex/companion/offline-resources.json",
       "codex/companion/offline_resources.py",
       "codex/companion/ota_ble_frames.py",

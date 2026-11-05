@@ -114,6 +114,10 @@ def main():
         verify(source)
         sys.path.insert(0, str(source / 'codex/companion'))
         import bleak, serial, cryptography, console_server, console_installer
+        from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+        key = AESGCM.generate_key(bit_length=256);nonce = os.urandom(12)
+        cipher = AESGCM(key)
+        assert cipher.decrypt(nonce,cipher.encrypt(nonce,b'installer smoke',b'local'),b'local') == b'installer smoke'
         print(json.dumps({'ok':True,'version':VERSION,'platform':sys.platform,'bundled_python':sys.version.split()[0]}))
         return
     root = stage(source, args.destination)

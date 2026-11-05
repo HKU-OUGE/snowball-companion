@@ -13,7 +13,7 @@ import sys
 import threading
 import time
 
-from console_backend import SetupError, child_options, interpreter
+from console_backend import SetupError, child_options, interpreter, hub_health
 from private_files import private_dir, private_file, private_write, read_text
 
 ADAPTERS = ('codex', 'claude', 'cursor')
@@ -200,6 +200,17 @@ class Installer:
                 continue
             self.step(name, 'running', 'checking')
             try:
+                if name == 'environment':
+                    path = self.backend.config / 'companion-hosts.json'
+                    if path.exists():
+                        hosts = json.loads(read_text(path))['adapters']
+                        if not isinstance(hosts, list) or any(h not in ADAPTERS for h in hosts):
+                            raise SetupError('existing_adapter_preserved')
+                    else:
+                        # Preserve a pre-existing shared Hub's Codex observation.
+                        # On a fresh Claude/Cursor-only setup, don't probe Codex.
+                        hosts = ['codex'] if hub_health(self.backend.config) else []
+                    private_write(path, (json.dumps({'schema':1,'adapters':sorted(set(hosts + choices['adapters']))})+'\n').encode())
                 if name in ADAPTERS:
                     self.install_adapter(name, choices)
                 else:

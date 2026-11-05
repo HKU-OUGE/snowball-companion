@@ -16,7 +16,7 @@
 | Windows 10/11 x64 | [下载安装 EXE](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-windows-x64.exe) |
 | Linux x64（glibc 2.34+ 桌面环境） | [下载安装包](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-linux-x64.tar.gz) |
 | macOS 12+ Apple Silicon | [下载安装 DMG](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-macos-arm64.dmg) |
-| macOS 12+ Intel | [下载安装 DMG](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-macos-x64.dmg) |
+| macOS 15+ Intel | [下载安装 DMG](https://github.com/HKU-OUGE/snowball-companion/releases/download/v0.7.0/Snowball-Setup-0.7.0-macos-x64.dmg) |
 
 [安装程序详细说明](installer/README.md) · [全部文件与 SHA-256](https://github.com/HKU-OUGE/snowball-companion/releases/tag/v0.7.0)。
 Windows 本版开放 Codex 适配器；Claude Code / Cursor 原生 Windows 暂不可选。账号 Pet 仍需宿主账号授权，实体设备安装不依赖该步骤。

@@ -118,5 +118,23 @@ class InstallerTests(unittest.TestCase):
         python.parent.mkdir(parents=True);python.touch()
         self.assertEqual(interpreter(root),str(python))
 
+    def test_fresh_device_only_install_does_not_enable_codex_observation(self):
+        from status_hub import codex_observation_enabled
+        data=choices();data['adapters']=[];data['features']['connection']=True
+        self.backend.installer.start(data);self.finish()
+        self.assertFalse(codex_observation_enabled(self.backend.config/'companion-hosts.json'))
+        data['adapters']=['codex'];self.backend.installer.start(data);self.finish()
+        self.assertTrue(codex_observation_enabled(self.backend.config/'companion-hosts.json'))
+        data['adapters']=[];self.backend.installer.start(data);self.finish()
+        self.assertTrue(codex_observation_enabled(self.backend.config/'companion-hosts.json'))
+
+    def test_loopback_services_never_resolve_dns(self):
+        from numeric_http import ThreadingHTTPServer
+        from http.server import BaseHTTPRequestHandler
+        with patch('socket.getfqdn',side_effect=AssertionError('unexpected DNS')):
+            s=ThreadingHTTPServer(('127.0.0.1',0),BaseHTTPRequestHandler)
+            try:self.assertGreater(s.server_port,0)
+            finally:s.server_close()
+
 
 if __name__=='__main__':unittest.main()

@@ -58,8 +58,23 @@ def build(output, cache):
         path = payload / name;path.parent.mkdir(parents=True, exist_ok=True);path.write_bytes(data)
         path.chmod(0o755 if path.suffix == '.sh' else 0o644)
         hashes[name] = hashlib.sha256(data).hexdigest()
-    subprocess.run([str(python), '-m', 'pip', 'install', '--only-binary=:all:', '--disable-pip-version-check',
+    extra = []
+    if target == 'macos-x64':
+        # Upstream no longer ships this Intel wheel. Build on the release runner,
+        # link OpenSSL statically, and ship the result; recipients need no Rust/Homebrew.
+        wheels = output / 'intel-wheels';wheels.mkdir()
+        env = dict(os.environ, OPENSSL_STATIC='1', MACOSX_DEPLOYMENT_TARGET='15.0', CARGO_BUILD_JOBS='2')
+        env['OPENSSL_DIR'] = subprocess.check_output(['brew','--prefix','openssl@3'],text=True).strip()
+        subprocess.run([str(python), '-m', 'pip', 'wheel', '--no-cache-dir', '--no-deps',
+                        '--no-binary=cryptography', 'cryptography==50.0.2', '--wheel-dir', str(wheels)], env=env, check=True)
+        extra = ['--find-links', str(wheels)]
+    subprocess.run([str(python), '-m', 'pip', 'install', '--only-binary=:all:', '--disable-pip-version-check', *extra,
                     'bleak==3.0.2', 'pyserial==3.5', 'cryptography==50.0.2'], check=True)
+    if target == 'macos-x64':
+        for so in (payload / 'python/lib').glob('python*/site-packages/cryptography/**/*.so'):
+            linkage = subprocess.check_output(['otool', '-L', str(so)], text=True)
+            if any(x in linkage for x in ('libssl.', 'libcrypto.', '/opt/homebrew/', '/usr/local/')):
+                raise RuntimeError('Intel cryptography must not require external OpenSSL')
     packages = subprocess.check_output([str(python), '-m', 'pip', 'freeze'], text=True)
     info = {'product':'snowball-companion','version':RELEASE,'platform':target,
             'python_archive':spec['asset'],'python_sha256':spec['sha256'],
@@ -82,7 +97,7 @@ def build(output, cache):
         executable.chmod(0o755)
         (app / 'Contents/Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier':'pet.snowball.installer',
             'CFBundleName':'Install Snowball','CFBundleExecutable':'Snowball','CFBundlePackageType':'APPL',
-            'CFBundleVersion':RELEASE,'CFBundleShortVersionString':RELEASE,'LSMinimumSystemVersion':'12.0',
+            'CFBundleVersion':RELEASE,'CFBundleShortVersionString':RELEASE,'LSMinimumSystemVersion':'15.0' if target=='macos-x64' else '12.0',
             'NSBluetoothAlwaysUsageDescription':'Snowball connects to your companion device to show AI session status.'}))
         shutil.copyfile(ROOT / 'installer/README.md', volume / 'READ-ME.txt')
         asset = output / (stem + '.dmg')

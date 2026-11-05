@@ -13,7 +13,8 @@ import concurrent.futures
 import errno
 import hashlib
 import hmac
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
+from numeric_http import ThreadingHTTPServer
 import json
 import os
 from pathlib import Path

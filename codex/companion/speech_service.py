@@ -1,7 +1,8 @@
 """Optional local-only speech worker. No cloud uploads, recording or message sends."""
 import argparse,base64,hmac,io,json,os,threading,time,wave
 from array import array
-from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
+from numeric_http import ThreadingHTTPServer
 from pathlib import Path
 import numpy as np
 from speech_profiles import profile_for
