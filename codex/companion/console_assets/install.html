@@ -12,7 +12,7 @@
 <label class="option"><input id="speech" type="checkbox"><span><b>本地语音识别</b><small>在雪球上说话，由这台电脑转成文字。按所选模型下载资源。</small></span></label>
 <div id="speech-options" hidden><label>语音模型<select id="speech-model"><option value="base">Base · 约 148 MB · 推荐</option><option value="tiny">Tiny · 约 78 MB · 更小</option><option value="small">Small · 约 486 MB · 更大</option></select></label><p class="quiet">体积仅为模型，不含依赖。优先复用本地缓存；联网下载失败可使用 SD 离线资源。</p></div>
 <details><summary>没有找到软件？手动指定程序位置</summary><label>Codex 程序路径<input id="codex-path" maxlength="2048" placeholder="留空自动检测" spellcheck="false"></label><label>Claude Code 程序路径<input id="claude-path" maxlength="2048" placeholder="留空自动检测" spellcheck="false"></label><p class="quiet">只填写程序文件的位置，不要输入命令参数、密码或密钥。</p></details>
-<div class="soft-card"><b>宠物与网络，连接后再选</b><p>设备上的宠物可直接在雪球设置中切换；Wi-Fi 名称、密码在下一步的控制台里填写并加密传送。</p><p>ChatGPT 账号桌宠属于宿主账号功能，需要在宿主中授权 Pets；本向导不会假装已安装账号桌宠，也不会因此阻塞设备配置。</p></div>
+<div class="soft-card"><b>宠物与网络，连接后再选</b><p>设备上的宠物可直接在雪球设置中切换；Wi-Fi 名称、密码在下一步的控制台里填写并加密传送。</p><p>ChatGPT 账号桌宠需要在宿主中单独授权 Pets；可以先完成实体设备配置。</p></div>
 </fieldset><div class="submit-row"><button type="submit" class="primary" id="install">安装所选功能</button><span id="install-hint">无需 Skill · 已内置 Python 环境</span></div></form>
 <section id="progress" hidden aria-live="polite"><h3 id="progress-title">正在配置</h3><div class="checks" id="install-checks"></div><p class="quiet" id="finish-hint"></p></section>
 <div class="actions" id="after-actions" hidden><a class="primary link-button" href="/">打开连接与网络设置 →</a><button class="secondary" id="usb-authorize" type="button" hidden>授权 USB 访问…</button></div>
