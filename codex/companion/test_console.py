@@ -275,7 +275,10 @@ class Launcher(unittest.TestCase):
                 until = time.monotonic() + 10
                 while not record_path.exists() and time.monotonic() < until and process.poll() is None:
                     time.sleep(.05)
-                self.assertTrue(record_path.exists(), 'Actual console server did not create discovery state')
+                if not record_path.exists():
+                    process.terminate()
+                    out, err = process.communicate(timeout=5)
+                    self.fail('Actual console server did not create discovery state: ' + err.decode('utf-8', 'replace'))
                 record = json.loads(record_path.read_text(encoding='utf-8'))
                 duplicate = subprocess.run([sys.executable, '-X', 'utf8', str(root / 'console_server.py')],
                                            env=env, capture_output=True, timeout=5)
